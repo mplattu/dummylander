@@ -23,6 +23,11 @@ class ShowPage {
       $google_font_tag = '<link href="https://fonts.googleapis.com/css?family='.$page->get_page_value('fonts-google').'&display=swap" rel="stylesheet">';
     }
 
+    $favicon_tag = "";
+    if (!is_null($page->get_page_value('favicon'))) {
+      $favicon_tag = '<link rel="icon" href="'.$page->get_page_value('favicon').'">';
+    }
+
     ?>
     <DOCTYPE html>
     <html>
@@ -33,6 +38,7 @@ class ShowPage {
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title><?php echo($page->get_page_value('title')); ?></title>
       <?php echo($google_font_tag); ?>
+      <?php echo($favicon_tag); ?>
       <style>
         table { margin: 0 auto; }
       </style>

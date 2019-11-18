@@ -20,12 +20,12 @@ class ShowPage {
   function render_header($page) {
     $google_font_tag = "";
     if (!is_null($page->get_page_value('fonts-google'))) {
-      $google_font_tag = '<link href="https://fonts.googleapis.com/css?family='.$page->get_page_value('fonts-google').'&display=swap" rel="stylesheet">';
+      $google_font_tag = '<link href="https://fonts.googleapis.com/css?family='.$page->get_page_value('fonts-google').'&display=swap" rel="stylesheet" />';
     }
 
     $favicon_tag = "";
     if (!is_null($page->get_page_value('favicon'))) {
-      $favicon_tag = '<link rel="icon" href="'.$page->get_page_value('favicon').'">';
+      $favicon_tag = '<link rel="icon" href="'.$page->get_page_value('favicon').'" />';
     }
 
     ?>

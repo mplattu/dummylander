@@ -82,35 +82,25 @@ class ShowPage {
   function render_part($page, $index) {
     $parsedown = new Parsedown();
 
-    $background_tag = "";
-    if (!is_null($page->get_part($index, 'background-image'))) {
-      $background_tag =
-        'background-image:url('.$page->get_part($index, 'background-image').');'.
-        'background-position: center center;';
-    }
+    $style_tags = Array();
 
-    $height_tag = "";
-    if (!is_null($page->get_part($index, 'height'))) {
-      $height_tag = 'height:'.$page->get_part($index, 'height').';';
-    }
+    array_push($style_tags, $this->get_html_tag(
+      "background-image:url('###'); background-position: center center;",
+      $page->get_part($index, 'background-image')
+    ));
+    array_push($style_tags, $this->get_html_tag("height:###;", $page->get_part($index, 'height')));
+    array_push($style_tags, $this->get_html_tag("font-family:###, cursive;", $page->get_part($index, 'font-family-google')));
 
-    $font_family_google_tag = "";
-    if (!is_null($page->get_part($index, 'font-family-google'))) {
-      $font_family_google_tag = 'font-family: \''.$page->get_part($index, 'font-family-google').'\', cursive;';
-    }
+    array_push($style_tags, $this->get_html_tag("margin:###;", $page->get_part($index, 'margin', '10px')));
+    array_push($style_tags, $this->get_html_tag("padding:###;", $page->get_part($index, 'padding', '0')));
+    array_push($style_tags, $this->get_html_tag("color:###;", $page->get_part($index, 'color', '#000000')));
+    array_push($style_tags, $this->get_html_tag("text-align:###;", $page->get_part($index, 'text-align', 'center')));
 
     ?>
       <section
         id="sec<?php echo($index); ?>"
         style="
-          margin:<?php echo($page->get_part($index, 'margin', '10px')); ?>;
-          padding:<?php echo($page->get_part($index, 'padding', '0')); ?>;
-          <?php echo($height_tag); ?>
-          background: <?php echo($page->get_part($index, 'background', '#ffffff')); ?>;
-          <?php echo($background_tag); ?>
-          color: <?php echo($page->get_part($index, 'color', '#000000')); ?>;
-          text-align: <?php echo($page->get_part($index, 'text-align', 'center')); ?>;
-          <?php echo($font_family_google_tag); ?>
+          <?php echo(join("\n", $style_tags)."\n"); ?>
           "
       >
 

@@ -36,7 +36,7 @@ class ShowPage {
     array_push($head_tags, '<meta charset="UTF-8"><meta http-equiv="content-type" content="text/html; charset=utf-8" />');
     array_push($head_tags, '<meta name="viewport" content="width=device-width, initial-scale=1.0" />');
     array_push($head_tags, $this->get_html_tag('<title>###</title>', $page->get_page_value('title')));
-    array_push($head_tags, $this->get_html_tag('<link href="https://fonts.googleapis.com/css?family=###&display=swap" rel="stylesheet" />', $page->get_page_value('fonts-google')));
+    array_push($head_tags, $this->get_html_tag('<link href="https://fonts.googleapis.com/css?family=###&display=swap" rel="stylesheet" />', $page->get_page_google_fonts_value()));
     array_push($head_tags, $this->get_html_tag('<link rel="icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
     array_push($head_tags, $this->get_html_tag('<link rel="shortcut icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
     array_push($head_tags, $this->get_html_tag('<meta name="description" content="###" />', $page->get_page_value('description')));

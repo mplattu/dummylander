@@ -18,6 +18,26 @@ class PageContent {
     return $this->page_data['page_values'][$field];
   }
 
+  // Returns value you can give to Google Fonts CSS tag, e.g. "Playfair+Display|Tomorrow"
+  // <link href="https://fonts.googleapis.com/css?family=Playfair+Display|Tomorrow&display=swap" rel="stylesheet" />
+  // In case no Google Fonts are used returns null
+
+  public function get_page_google_fonts_value() {
+    $fonts_used = Array();
+
+    for ($n=0; $n < $this->get_parts_count(); $n++) {
+      if (!is_null($this->get_part($n, 'font-family-google'))) {
+        array_push($fonts_used, urlencode($this->get_part($n, 'font-family-google')));
+      }
+    }
+
+    if (count($fonts_used) > 0) {
+      return join('|', $fonts_used);
+    }
+
+    return null;
+  }
+
   public function get_parts_count() {
     if (is_null($this->page_data) or !array_key_exists('parts', $this->page_data)) {
       return null;
@@ -44,6 +64,7 @@ class PageContent {
 
     return $this->page_data['parts'][$index][$field];
   }
+
 }
 
 ?>

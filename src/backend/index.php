@@ -2,10 +2,17 @@
 
 $VERSION = "Dummylander 0.1";
 $DATAFILE = "data/content.json";
+$ADMIN_PASSWORD = "secret";
 
-if (@$_SERVER['QUERY_STRING'] != "") {
-  log_message($_SERVER['QUERY_STRING'], 1);
-} else {
+log_message(@$_SERVER['QUERY_STRING']);
+if (@$_SERVER['QUERY_STRING'] == "admin") {
+  $admin_ui = new ShowAdminUI();
+}
+elseif (@$_POST['password'] != "" and $_POST['password'] == $ADMIN_PASSWORD) {
+  $admin_api = new AdminAPI($DATAFILE, @$_POST['function'], @$_POST['data']);
+  echo($admin_api->execute());
+}
+else {
   $show_page = new ShowPage($VERSION, $DATAFILE);
 }
 

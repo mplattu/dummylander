@@ -2,7 +2,8 @@
   "page_values": {
     "title": "Page Title",
     "fonts-google": "Playfair+Display|Tomorrow",
-    "favicon": "data/favicon.ico"
+    "favicon-ico": "data/favicon.ico",
+    "description": "Description text which may appear in search engines etc."
   },
   "parts": [
     {

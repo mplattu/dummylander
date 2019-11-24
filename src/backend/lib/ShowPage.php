@@ -17,28 +17,39 @@ class ShowPage {
     }
   }
 
-  function render_header($page) {
-    $google_font_tag = "";
-    if (!is_null($page->get_page_value('fonts-google'))) {
-      $google_font_tag = '<link href="https://fonts.googleapis.com/css?family='.$page->get_page_value('fonts-google').'&display=swap" rel="stylesheet" />';
+  private function get_html_tag($html, $value) {
+    $tag = "";
+
+    if (!is_null($value)) {
+      $tag = preg_replace('/###/', $value, $html);
+      log_message('Adding tag: '.$tag);
     }
 
-    $favicon_tag = "";
-    if (!is_null($page->get_page_value('favicon'))) {
-      $favicon_tag = '<link rel="icon" href="'.$page->get_page_value('favicon').'" />';
-    }
+    return $tag;
+  }
+
+  function render_header($page) {
+    $head_tags = Array();
+
+    array_push($head_tags, $this->get_html_tag('<!-- This landing page has been created with ### -->', $this->version));
+
+    array_push($head_tags, '<meta charset="UTF-8"><meta http-equiv="content-type" content="text/html; charset=utf-8" />');
+    array_push($head_tags, '<meta name="viewport" content="width=device-width, initial-scale=1.0" />');
+    array_push($head_tags, $this->get_html_tag('<title>###</title>', $page->get_page_value('title')));
+    array_push($head_tags, $this->get_html_tag('<link href="https://fonts.googleapis.com/css?family=###&display=swap" rel="stylesheet" />', $page->get_page_value('fonts-google')));
+    array_push($head_tags, $this->get_html_tag('<link rel="icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
+    array_push($head_tags, $this->get_html_tag('<link rel="shortcut icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
+    array_push($head_tags, $this->get_html_tag('<meta name="description" content="###" />', $page->get_page_value('description')));
+
+    array_push($head_tags, $this->get_html_tag('<meta property="og:site_name" content="###" />', $page->get_page_value('title')));
+    array_push($head_tags, $this->get_html_tag('<meta property="og:title" content="###" />', $page->get_page_value('title')));
+    array_push($head_tags, $this->get_html_tag('<meta property="og:description" content="###" />', $page->get_page_value('description')));
 
     ?>
-    <DOCTYPE html>
+    <!DOCTYPE html>
     <html>
     <head>
-      <?php echo("<!-- This landing page has been created with ".$this->version." -->\n"); ?>
-      <meta charset="UTF-8">
-      <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title><?php echo($page->get_page_value('title')); ?></title>
-      <?php echo($google_font_tag); ?>
-      <?php echo($favicon_tag); ?>
+      <?php echo(join("\n", $head_tags)."\n"); ?>
       <style>
         table { margin: 0 auto; }
       </style>

@@ -11,17 +11,35 @@ class AdminAPI {
     $this->data = $data;
   }
 
+  private function get_return_data($success, $data = null) {
+    $return_data = Array(
+      'success' => $success
+    );
+
+    if (!is_null($data)) {
+      $return_data['data'] = $data;
+    }
+
+    return json_encode($return_data);
+  }
+
   function execute() {
     if ($this->function == "get") {
-      return $this->page_storage->get_data_json();
+      $data = $this->page_storage->get_data_json();
+
+      if (!$data) {
+        return $this->get_return_data(false);
+      }
+
+      return $this->get_return_data(true, json_decode($data, true));
     }
 
     if ($this->function == "set") {
-      if ($this->page_storage->set_data_json($this->data)) {
-        return true;
+      if (!$this->page_storage->set_data_json($this->data)) {
+        return $this->get_return_data(false);
       }
 
-      return false;
+      return $this->get_return_data(true);
     }
   }
 }

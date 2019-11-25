@@ -2040,17 +2040,35 @@ class AdminAPI {
     $this->data = $data;
   }
 
+  private function get_return_data($success, $data = null) {
+    $return_data = Array(
+      'success' => $success
+    );
+
+    if (!is_null($data)) {
+      $return_data['data'] = $data;
+    }
+
+    return json_encode($return_data);
+  }
+
   function execute() {
     if ($this->function == "get") {
-      return $this->page_storage->get_data_json();
+      $data = $this->page_storage->get_data_json();
+
+      if (!$data) {
+        return $this->get_return_data(false);
+      }
+
+      return $this->get_return_data(true, json_decode($data, true));
     }
 
     if ($this->function == "set") {
-      if ($this->page_storage->set_data_json($this->data)) {
-        return true;
+      if (!$this->page_storage->set_data_json($this->data)) {
+        return $this->get_return_data(false);
       }
 
-      return false;
+      return $this->get_return_data(true);
     }
   }
 }
@@ -2175,8 +2193,15 @@ function get_data() {
 
   var jqxhr = $.post(post_data)
     .done(function(data) {
-      console.log(data);
-      $("#page_content").val(data);
+      var data_obj = JSON.parse(data);
+
+      if (data_obj.success) {
+        $("#page_content").val(JSON.stringify(data_obj.data));
+      }
+      else {
+        alert("get_data() failed. See console");
+        console.error("get_data() failed. Retrieved data:", data_obj);
+      }
     })
     .fail(function(data) {
       alert("get_data() failed. See console");
@@ -2197,8 +2222,15 @@ function set_data() {
 
   var jqxhr = $.post(post_data)
     .done(function(data) {
-      alert("Page data was saved");
-      console.log(data);
+      var data_obj = JSON.parse(data);
+
+      if (data_obj.success) {
+        alert("Page data was saved");
+      }
+      else {
+        alert("set_data() failed. See console");
+        console.error("set_data() failed. Data:", data_obj);
+      }
     })
     .fail(function(data) {
       alert("set_data() failed. See console");

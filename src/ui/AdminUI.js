@@ -12,8 +12,15 @@ function get_data() {
 
   var jqxhr = $.post(post_data)
     .done(function(data) {
-      console.log(data);
-      $("#page_content").val(data);
+      var data_obj = JSON.parse(data);
+
+      if (data_obj.success) {
+        $("#page_content").val(JSON.stringify(data_obj.data));
+      }
+      else {
+        alert("get_data() failed. See console");
+        console.error("get_data() failed. Retrieved data:", data_obj);
+      }
     })
     .fail(function(data) {
       alert("get_data() failed. See console");
@@ -34,8 +41,15 @@ function set_data() {
 
   var jqxhr = $.post(post_data)
     .done(function(data) {
-      alert("Page data was saved");
-      console.log(data);
+      var data_obj = JSON.parse(data);
+
+      if (data_obj.success) {
+        alert("Page data was saved");
+      }
+      else {
+        alert("set_data() failed. See console");
+        console.error("set_data() failed. Data:", data_obj);
+      }
     })
     .fail(function(data) {
       alert("set_data() failed. See console");

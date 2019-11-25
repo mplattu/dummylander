@@ -21,10 +21,36 @@ function get_data() {
     });
 }
 
+function set_data() {
+  var post_data = {
+    type: "POST",
+    url: SERVER_URL,
+    data: {
+      password: $("#password").val(),
+      function: "set",
+      data: $("#page_content").val()
+    }
+  };
+
+  var jqxhr = $.post(post_data)
+    .done(function(data) {
+      alert("Page data was saved");
+      console.log(data);
+    })
+    .fail(function(data) {
+      alert("set_data() failed. See console");
+      console.error("set_data() failed. Data:", data);
+    });
+}
+
 $(document).ready(function () {
   console.log("AdminUI.js is ready!");
 
-  $("#button_download").click(function () {
+  $("#button_get").click(function () {
     get_data();
+  });
+
+  $("#button_set").click(function () {
+    set_data();
   });
 });

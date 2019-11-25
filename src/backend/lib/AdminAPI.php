@@ -15,6 +15,14 @@ class AdminAPI {
     if ($this->function == "get") {
       return $this->page_storage->get_data_json();
     }
+
+    if ($this->function == "set") {
+      if ($this->page_storage->set_data_json($this->data)) {
+        return true;
+      }
+
+      return false;
+    }
   }
 }
 

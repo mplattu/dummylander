@@ -10,6 +10,10 @@ class PageStorage {
   public function get_data_json() {
     return file_get_contents($this->data_file);
   }
+
+  public function set_data_json($json) {
+    return file_put_contents($this->data_file, $json, LOCK_EX);
+  }
 }
 
 ?>

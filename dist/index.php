@@ -2044,6 +2044,14 @@ class AdminAPI {
     if ($this->function == "get") {
       return $this->page_storage->get_data_json();
     }
+
+    if ($this->function == "set") {
+      if ($this->page_storage->set_data_json($this->data)) {
+        return true;
+      }
+
+      return false;
+    }
   }
 }
 
@@ -2130,6 +2138,10 @@ class PageStorage {
   public function get_data_json() {
     return file_get_contents($this->data_file);
   }
+
+  public function set_data_json($json) {
+    return file_put_contents($this->data_file, $json, LOCK_EX);
+  }
 }
 
 ?>
@@ -2172,11 +2184,37 @@ function get_data() {
     });
 }
 
+function set_data() {
+  var post_data = {
+    type: "POST",
+    url: SERVER_URL,
+    data: {
+      password: $("#password").val(),
+      function: "set",
+      data: $("#page_content").val()
+    }
+  };
+
+  var jqxhr = $.post(post_data)
+    .done(function(data) {
+      alert("Page data was saved");
+      console.log(data);
+    })
+    .fail(function(data) {
+      alert("set_data() failed. See console");
+      console.error("set_data() failed. Data:", data);
+    });
+}
+
 $(document).ready(function () {
   console.log("AdminUI.js is ready!");
 
-  $("#button_download").click(function () {
+  $("#button_get").click(function () {
     get_data();
+  });
+
+  $("#button_set").click(function () {
+    set_data();
   });
 });
 
@@ -2192,7 +2230,8 @@ $(document).ready(function () {
     </p>
 
     <p>
-      <input type="button" id="button_download" value="Load Data">
+      <input type="button" id="button_get" value="Load Data">
+      <input type="button" id="button_set" value="Save Data">
     </p>
 
     <p>

@@ -32,6 +32,7 @@ function log_message ($message, $exit_level = null) {
 
 
 ?>
+
 <?php
 
 #
@@ -2026,6 +2027,7 @@ class Parsedown
                    'wbr', 'time',
     );
 }
+
 ?>
 <?php
 
@@ -2074,6 +2076,7 @@ class AdminAPI {
 }
 
 ?>
+
 <?php
 
 class PageContent {
@@ -2144,6 +2147,7 @@ class PageContent {
 }
 
 ?>
+
 <?php
 
 class PageStorage {
@@ -2163,6 +2167,7 @@ class PageStorage {
 }
 
 ?>
+
 <?php
 
 class ShowAdminUI {
@@ -2278,6 +2283,7 @@ $(document).ready(function () {
 }
 
 ?>
+
 <?php
 
 class ShowPage {
@@ -2394,3 +2400,4 @@ class ShowPage {
 }
 
 ?>
+

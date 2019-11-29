@@ -39,6 +39,19 @@ class PageContent {
     return this.page_data.parts.length;
   }
 
+  render_editor_input(field, name) {
+    if (field == "color") {
+      return '<input class="page_field color_field form-control" type="text" name="'+name+'" id="'+name+'">';
+    }
+
+    if (field == "text") {
+      return '<textarea class="section_field form-control" name="'+name+'" id="'+name+'" rows="5"></textarea>';
+    }
+
+    // Fallback: single-line text
+    return '<input class="page_field form-control" type="text" name="'+name+'" id="'+name+'">';
+  }
+
   render_editor_fields_page() {
     var html = [];
 
@@ -49,7 +62,7 @@ class PageContent {
 
       html.push('<div class="row">'
         +'<div class="col-4">'+this.fields.page_values[field]+'</div>'
-        +'<div class="col-8"><input class="page_field form-control" type="text" name="'+name+'" id="'+name+'"></div>'
+        +'<div class="col-8">'+this.render_editor_input(field, name)+'</div>'
         +'</div>');
     }
     html.push('</div>');
@@ -66,13 +79,13 @@ class PageContent {
 
       html.push('<div class="row">'
         +'<div class="col-4">'+this.fields.section_values[field]+'</div>'
-        +'<div class="col-8"><input class="section_field form-control" type="text" name="'+name+'" id="'+name+'"></div>'
+        +'<div class="col-8">'+this.render_editor_input(field, name)+'</div>'
         +'</div>');
     }
 
     var name='section_'+n+'_text';
 
-    html.push('<div class="row"><div class="col-12"><label for="'+name+'">Text</label><textarea class="section_field form-control" name="'+name+'" id="'+name+'" rows="5"></textarea></div></div>');
+    html.push('<div class="row"><div class="col-12"><label for="'+name+'">Text</label>'+this.render_editor_input('text', name)+'</div></div>');
     html.push('</div>');
 
     return html.join("\n");
@@ -102,8 +115,9 @@ class PageContent {
 
     $(this.page_content_id).html(html.join("\n"));
 
-    $(".page_field").on('keyup', {obj: this}, this.update_object_value);
-    $(".section_field").on("keyup", {obj: this}, this.update_object_value);
+    $(".page_field").on('keyup change', {obj: this}, this.update_object_value);
+    $(".section_field").on("keyup change", {obj: this}, this.update_object_value);
+    $(".color_field").colorpicker();
   }
 
   update_object_value(event) {

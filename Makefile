@@ -3,6 +3,12 @@
 update-libs:
 	wget -O src/backend/ext/Parsedown.php https://raw.githubusercontent.com/erusev/parsedown/master/Parsedown.php
 	wget -O src/ui/ext/jquery.min.js https://code.jquery.com/jquery-3.4.1.min.js
+	mkdir temp
+	wget -O temp/bootstrap-colorpicker.zip https://github.com/itsjavi/bootstrap-colorpicker/releases/download/3.1.2/bootstrap-colorpicker-v3.1.2-dist.zip
+	cd temp; unzip bootstrap-colorpicker.zip
+	cp temp/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js src/ui/ext/
+	cp temp/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css src/ui/ext/
+	rm -fR temp/
 
 lint:
 	php -l src/backend/lib/AdminAPI.php

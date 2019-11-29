@@ -2,7 +2,7 @@
 
 update-libs:
 	wget -O src/backend/ext/Parsedown.php https://raw.githubusercontent.com/erusev/parsedown/master/Parsedown.php
-	wget -O src/backend/html/ext/jquery.min.js https://code.jquery.com/jquery-3.4.1.min.js
+	wget -O src/ui/ext/jquery.min.js https://code.jquery.com/jquery-3.4.1.min.js
 
 lint:
 	php -l src/backend/lib/AdminAPI.php

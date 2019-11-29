@@ -39,7 +39,7 @@ class PageContent {
     return this.page_data.parts.length;
   }
 
-  render_editor() {
+  render_editor_fields_page() {
     var html = [];
 
     // Fields for page attributes
@@ -47,38 +47,61 @@ class PageContent {
     for (var field in this.fields.page_values) {
       var name = 'page_'+field;
 
-      html.push('<p>'
-        +this.fields.page_values[field]
-        +': <input class="page_field" type="text" name="'+name+'" id="'+name+'">'
-        +'</p>');
+      html.push('<div class="row">'
+        +'<div class="col-4">'+this.fields.page_values[field]+'</div>'
+        +'<div class="col-8"><input class="page_field form-control" type="text" name="'+name+'" id="'+name+'"></div>'
+        +'</div>');
     }
     html.push('</div>');
 
-    // Fields for each existing section
-    for (var n=0; n < this.get_parts_count(); n++) {
-      html.push('<div class="section_group">');
-      for (var field in this.fields.section_values) {
-        var name = 'section_'+n+'_'+field;
+    return html.join("\n");
+  }
 
-        html.push('<p>'
-          +this.fields.section_values[field]
-          +': <input class="section_field" type="text" name="'+name+'" id="'+name+'">'
-          +'</p>');
-      }
+  render_editor_fields_section(n) {
+    var html = [];
 
-      var name='section_'+n+'_text';
+    html.push('<div class="section_group">');
+    for (var field in this.fields.section_values) {
+      var name = 'section_'+n+'_'+field;
 
-      html.push('<p><textarea class="section_field" name="'+name+'" id="'+name+'"></textarea></p>');
-      html.push('</div>');
+      html.push('<div class="row">'
+        +'<div class="col-4">'+this.fields.section_values[field]+'</div>'
+        +'<div class="col-8"><input class="section_field form-control" type="text" name="'+name+'" id="'+name+'"></div>'
+        +'</div>');
     }
+
+    var name='section_'+n+'_text';
+
+    html.push('<div class="row"><div class="col-12"><label for="'+name+'">Text</label><textarea class="section_field form-control" name="'+name+'" id="'+name+'" rows="5"></textarea></div></div>');
+    html.push('</div>');
+
+    return html.join("\n");
+  }
+
+  render_editor_sectionborder() {
+    return '<div class="row"><div class="col-12"><hr></div></div>';
+  }
+
+  render_editor() {
+    var html = [];
+
+    // Page-level fields
+    html.push(this.render_editor_fields_page());
+    html.push(this.render_editor_sectionborder());
+
+    // Fields for each existing section
+    var html_section = [];
+    for (var n=0; n < this.get_parts_count(); n++) {
+      html_section.push(this.render_editor_fields_section(n))
+    }
+
+    html.push(html_section.join(this.render_editor_sectionborder()));
 
     $(".page_field").off();
     $(".section_field").off();
 
     $(this.page_content_id).html(html.join("\n"));
 
-    //$(".page_field").on('keyup', this.update_object_value);
-    //$(".section_field").on("keyup", this.update_object_value);
     $(".page_field").on('keyup', {obj: this}, this.update_object_value);
     $(".section_field").on("keyup", {obj: this}, this.update_object_value);
   }

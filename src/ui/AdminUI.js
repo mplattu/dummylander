@@ -1,5 +1,9 @@
 var SERVER_URL="index.php";
 
+<!-- include:src/ui/lib/PageContent.js -->
+
+var page_content = new PageContent("#page_content");
+
 function get_data() {
   var post_data = {
     type:"POST",
@@ -15,7 +19,7 @@ function get_data() {
       var data_obj = JSON.parse(data);
 
       if (data_obj.success) {
-        $("#page_content").val(JSON.stringify(data_obj.data));
+        page_content.set_data(data_obj.data);
       }
       else {
         alert("get_data() failed. See console");
@@ -35,7 +39,7 @@ function set_data() {
     data: {
       password: $("#password").val(),
       function: "set",
-      data: $("#page_content").val()
+      data: JSON.stringify(page_content.get_data())
     }
   };
 

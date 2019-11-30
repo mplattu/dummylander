@@ -23,7 +23,9 @@ function get_data() {
         page_content.set_data(data_obj.data);
       }
       else {
-        alert("get_data() failed. See console");
+        $("#message_loginfailed").show();
+        $("#password").val('');
+        setTimeout(function () { $("#password").focus(); }, 1);
         console.error("get_data() failed. Retrieved data:", data_obj);
       }
     })
@@ -87,7 +89,17 @@ $(document).ready(function () {
     set_data();
   });
 
+  // Login when enter pressed
+  $("#password").on("keypress", function (e) {
+    if (e.which == 13) {
+      get_data();
+    }
+    $("#message_loginfailed").hide();
+  });
+
   page_content.on_change(function () {
     update_header_publish();
   });
+
+  setTimeout(function () { $("#password").focus(); }, 1);
 });

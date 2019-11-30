@@ -12,6 +12,10 @@ elseif (@$_POST['password'] != "" and $_POST['password'] == $ADMIN_PASSWORD) {
   $admin_api = new AdminAPI($DATAFILE, @$_POST['function'], @$_POST['data']);
   echo($admin_api->execute());
 }
+elseif (@$_POST['password'] != "") {
+  $admin_api = new AdminAPI($DATAFILE, 'loginfailed', null);
+  echo($admin_api->execute());
+}
 else {
   $show_page = new ShowPage($VERSION, $DATAFILE);
 }

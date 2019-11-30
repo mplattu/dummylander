@@ -41,6 +41,10 @@ class AdminAPI {
 
       return $this->get_return_data(true);
     }
+
+    if ($this->function == "loginfailed") {
+      return $this->get_return_data(false);
+    }
   }
 }
 

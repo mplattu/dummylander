@@ -12,6 +12,10 @@ elseif (@$_POST['password'] != "" and $_POST['password'] == $ADMIN_PASSWORD) {
   $admin_api = new AdminAPI($DATAFILE, @$_POST['function'], @$_POST['data']);
   echo($admin_api->execute());
 }
+elseif (@$_POST['password'] != "") {
+  $admin_api = new AdminAPI($DATAFILE, 'loginfailed', null);
+  echo($admin_api->execute());
+}
 else {
   $show_page = new ShowPage($VERSION, $DATAFILE);
 }
@@ -2072,6 +2076,10 @@ class AdminAPI {
 
       return $this->get_return_data(true);
     }
+
+    if ($this->function == "loginfailed") {
+      return $this->get_return_data(false);
+    }
   }
 }
 
@@ -2195,6 +2203,7 @@ class ShowAdminUI {
 
 
     .container { padding-top: 50px; }
+    #message_loginfailed { display: none; }
     #button_publish { margin: auto; }
   </style>
   <script type="text/javascript">
@@ -2482,7 +2491,9 @@ function get_data() {
         page_content.set_data(data_obj.data);
       }
       else {
-        alert("get_data() failed. See console");
+        $("#message_loginfailed").show();
+        $("#password").val('');
+        setTimeout(function () { $("#password").focus(); }, 1);
         console.error("get_data() failed. Retrieved data:", data_obj);
       }
     })
@@ -2546,9 +2557,19 @@ $(document).ready(function () {
     set_data();
   });
 
+  // Login when enter pressed
+  $("#password").on("keypress", function (e) {
+    if (e.which == 13) {
+      get_data();
+    }
+    $("#message_loginfailed").hide();
+  });
+
   page_content.on_change(function () {
     update_header_publish();
   });
+
+  setTimeout(function () { $("#password").focus(); }, 1);
 });
 
   </script>
@@ -2563,7 +2584,7 @@ $(document).ready(function () {
   <div class="container">
     <h1>AdminUI</h1>
 
-    <form>
+    <form onsubmit="return false">
       <div id="login_content">
         <div class="form-group">
           <label for="password">Password</label>
@@ -2573,6 +2594,11 @@ $(document).ready(function () {
         <div class="form-group">
           <input type="button" id="button_login" value="Log In" class="btn btn-primary">
         </div>
+
+        <div class="form-group">
+          <div id="message_loginfailed" class="alert alert-warning" role="alert">Please check your password</div>
+        </div>
+
       </div>
 
       <div id="page_content">

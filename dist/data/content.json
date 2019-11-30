@@ -15,6 +15,7 @@
       "text": "# My Site"
     },
     {
+      "color": "#F90000",
       "font-family-google": "Playfair Display",
       "text": "## Welcome!\n\nWelcome to My Site! This part uses *Playfair Display* font."
     },

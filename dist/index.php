@@ -2478,6 +2478,7 @@ function get_data() {
       var data_obj = JSON.parse(data);
 
       if (data_obj.success) {
+        $("#login_content").hide();
         page_content.set_data(data_obj.data);
       }
       else {
@@ -2537,7 +2538,7 @@ $(document).ready(function () {
 
   page_content = new PageContent("#page_content");
 
-  $("#button_get").click(function () {
+  $("#button_login").click(function () {
     get_data();
   });
 
@@ -2563,13 +2564,15 @@ $(document).ready(function () {
     <h1>AdminUI</h1>
 
     <form>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password" class="form-control" />
-      </div>
+      <div id="login_content">
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" class="form-control" />
+        </div>
 
-      <div class="form-group">
-        <input type="button" id="button_get" value="Load Data" class="btn btn-primary">
+        <div class="form-group">
+          <input type="button" id="button_login" value="Log In" class="btn btn-primary">
+        </div>
       </div>
 
       <div id="page_content">

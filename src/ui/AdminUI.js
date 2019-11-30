@@ -19,6 +19,7 @@ function get_data() {
       var data_obj = JSON.parse(data);
 
       if (data_obj.success) {
+        $("#login_content").hide();
         page_content.set_data(data_obj.data);
       }
       else {
@@ -78,7 +79,7 @@ $(document).ready(function () {
 
   page_content = new PageContent("#page_content");
 
-  $("#button_get").click(function () {
+  $("#button_login").click(function () {
     get_data();
   });
 

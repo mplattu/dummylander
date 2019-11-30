@@ -2,6 +2,8 @@ class PageContent {
   constructor(page_content_id) {
     this.page_data = null;
     this.page_content_id = page_content_id;
+    this.on_change_func = null;
+    this.page_data_has_changed = false;
 
     if ($(this.page_content_id).length != 1) {
       console.error("PageContent: Given "+this.page_content_id+" points to "+$(this.page_content_id).length+" objects");
@@ -116,8 +118,8 @@ class PageContent {
 
     $(this.page_content_id).html(html.join("\n"));
 
-    $(".page_field").on('keyup change', {obj: this}, this.update_object_value);
-    $(".section_field").on("keyup change", {obj: this}, this.update_object_value);
+    $(".page_field").on('keyup', {obj: this}, this.update_object_value);
+    $(".section_field").on('keyup', {obj: this}, this.update_object_value);
   }
 
   get_luma(hex_color) {
@@ -152,17 +154,31 @@ class PageContent {
 
   update_object_value(event) {
     var target_attrs = event.target.id.split("_");
+    var changed = false;
 
-    if (target_attrs[0] == "page") {
-      event.data.obj.page_data.page_values[target_attrs[1]] = event.target.value;
+    if (target_attrs[0] == "page"
+      && event.data.obj.page_data.page_values[target_attrs[1]] != undefined
+      && event.data.obj.page_data.page_values[target_attrs[1]] != event.target.value) {
+        changed = true;
+        event.data.obj.page_data.page_values[target_attrs[1]] = event.target.value;
     }
 
-    if (target_attrs[0] == "section") {
-      event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]] = event.target.value;
+    if (target_attrs[0] == "section"
+      && event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]] != undefined
+      && event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]] != event.target.value) {
+        changed = true;
+        event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]] = event.target.value;
     }
 
     if (target_attrs[2] == "color") {
       event.data.obj.update_color_field(event);
+    }
+
+    if (changed) {
+      event.data.obj.page_data_has_changed = true;
+      if (event.data.obj.on_change_func != null) {
+        event.data.obj.on_change_func();
+      }
     }
   }
 
@@ -197,10 +213,16 @@ class PageContent {
       fallbackColor:"#ffffff"
     });
 
+    $(".color_field").on("colorpickerChange", {obj: this}, this.update_object_value);
+
     // Reset color backgrounds
     $(".color_field").each(function () {
-      $(this).trigger("change", {obj: this});
+      $(this).trigger("keyup", {obj: this});
     });
+  }
+
+  on_change(func) {
+    this.on_change_func = func;
   }
 
   set_data(data) {
@@ -209,9 +231,12 @@ class PageContent {
     this.render_editor();
     this.update_editor_values();
     this.activate_colorpicker();
+
+    this.page_data_has_changed = false;
   }
 
   get_data() {
+    this.page_data_has_changed = false;
     return this.page_data;
   }
 }

@@ -2,7 +2,7 @@ var SERVER_URL="index.php";
 
 <!-- include:src/ui/lib/PageContent.js -->
 
-var page_content = new PageContent("#page_content");
+var page_content = null;
 
 function get_data() {
   var post_data = {
@@ -48,7 +48,9 @@ function set_data() {
       var data_obj = JSON.parse(data);
 
       if (data_obj.success) {
-        alert("Page data was saved");
+        $("#button_publish").removeClass("btn-danger").addClass("btn-success");
+        setTimeout(function() { $("#header_publish").hide(500); }, 2000)
+        setTimeout(function() { $("#button_publish").addClass("btn-danger").removeClass("btn-success")}, 2600);
       }
       else {
         alert("set_data() failed. See console");
@@ -61,14 +63,30 @@ function set_data() {
     });
 }
 
+function update_header_publish() {
+  if (page_content.page_data_has_changed) {
+    $("#header_publish").show();
+  }
+  else {
+    $("#header_publish").hide();
+  }
+}
+
 $(document).ready(function () {
   console.log("AdminUI.js is ready!");
+  $("#header_publish").hide();
+
+  page_content = new PageContent("#page_content");
 
   $("#button_get").click(function () {
     get_data();
   });
 
-  $("#button_set").click(function () {
+  $("#button_publish").click(function () {
     set_data();
+  });
+
+  page_content.on_change(function () {
+    update_header_publish();
   });
 });

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DummyLander AdminUI</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <style>
+    <!-- include:src/ui/ext/bootstrap-colorpicker.min.css -->
+
+    .container { padding-top: 50px; }
+    #message_loginfailed { display: none; }
+    #button_publish { margin: auto; }
+  </style>
+  <script type="text/javascript">
+    <!-- include:src/ui/ext/jquery.min.js -->
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <script type="text/javascript">
+    <!-- include:src/ui/ext/bootstrap-colorpicker.min.js -->
+    <!-- include:src/ui/AdminUI.js -->
+  </script>
+</head>
+<body>
+  <header id="header_publish">
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <input type="button" value="Publish changes" id="button_publish" class="btn btn-primary btn-danger">
+    </nav>
+  </header>
+
+  <div class="container">
+    <h1>AdminUI</h1>
+
+    <form onsubmit="return false">
+      <div id="login_content">
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" class="form-control" />
+        </div>
+
+        <div class="form-group">
+          <input type="button" id="button_login" value="Log In" class="btn btn-primary">
+        </div>
+
+        <div class="form-group">
+          <div id="message_loginfailed" class="alert alert-warning" role="alert">Please check your password</div>
+        </div>
+
+      </div>
+
+      <div id="page_content">
+      </div>
+    </form>
+  </div>
+</body>
+</html>

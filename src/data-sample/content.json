@@ -1,19 +1,21 @@
 {
   "page_values": {
     "title": "Page Title",
-    "fonts-google": "Playfair+Display|Tomorrow",
-    "favicon": "data/favicon.ico"
+    "favicon-ico": "data/favicon.ico",
+    "description": "Description text which may appear in search engines etc."
   },
   "parts": [
     {
       "margin": "0",
       "padding": "40px",
       "height": "400px",
-      "color": "#ffffff",
+      "color": "#FFFFFF",
       "background-image": "data/sample.jpg",
+      "font-family-google": "Montserrat",
       "text": "# My Site"
     },
     {
+      "color": "#F90000",
       "font-family-google": "Playfair Display",
       "text": "## Welcome!\n\nWelcome to My Site! This part uses *Playfair Display* font."
     },

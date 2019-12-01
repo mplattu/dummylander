@@ -155,19 +155,28 @@ class PageContent {
   update_object_value(event) {
     var target_attrs = event.target.id.split("_");
     var changed = false;
+    var new_value = event.target.value;
 
-    if (target_attrs[0] == "page"
-      && event.data.obj.page_data.page_values[target_attrs[1]] != undefined
-      && event.data.obj.page_data.page_values[target_attrs[1]] != event.target.value) {
-        changed = true;
-        event.data.obj.page_data.page_values[target_attrs[1]] = event.target.value;
+    if (target_attrs[0] == "page") {
+      var old_value = event.data.obj.page_data.page_values[target_attrs[1]];
+
+      if (old_value != new_value) {
+        if (old_value != undefined || (new_value != "")) {
+          changed = true;
+          event.data.obj.page_data.page_values[target_attrs[1]] = new_value;
+        }
+      }
     }
 
-    if (target_attrs[0] == "section"
-      && event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]] != undefined
-      && event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]] != event.target.value) {
-        changed = true;
-        event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]] = event.target.value;
+    if (target_attrs[0] == "section") {
+      var old_value = event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]];
+
+      if (old_value != new_value) {
+        if (old_value != undefined || (new_value != "")) {
+          changed = true;
+          event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]] = new_value;
+        }
+      }
     }
 
     if (target_attrs[2] == "color") {

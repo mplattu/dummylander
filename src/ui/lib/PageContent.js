@@ -16,7 +16,8 @@ class PageContent {
     this.fields.page_values = {
       'title': 'Title',
       'favicon-ico': 'Favicon (URL)',
-      'description': 'Description'
+      'description': 'Description',
+      'style-css': 'Custom CSS'
     };
 
     this.fields.section_values = {

@@ -40,6 +40,7 @@ class ShowPage {
     array_push($head_tags, $this->get_html_tag('<link rel="icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
     array_push($head_tags, $this->get_html_tag('<link rel="shortcut icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
     array_push($head_tags, $this->get_html_tag('<meta name="description" content="###" />', $page->get_page_value('description')));
+    array_push($head_tags, $this->get_html_tag('<style>###</style>', $page->get_page_value('style-css')));
 
     array_push($head_tags, $this->get_html_tag('<meta property="og:site_name" content="###" />', $page->get_page_value('title')));
     array_push($head_tags, $this->get_html_tag('<meta property="og:title" content="###" />', $page->get_page_value('title')));

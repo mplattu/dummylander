@@ -26,7 +26,8 @@ class PageContent {
     $fonts_used = Array();
 
     for ($n=0; $n < $this->get_parts_count(); $n++) {
-      if (!is_null($this->get_part($n, 'font-family-google'))) {
+      $this_font = $this->get_part($n, 'font-family-google');
+      if (!is_null($this_font) and $this_font != "") {
         array_push($fonts_used, urlencode($this->get_part($n, 'font-family-google')));
       }
     }

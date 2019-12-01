@@ -89,7 +89,7 @@ class ShowPage {
       $page->get_part($index, 'background-image')
     ));
     array_push($style_tags, $this->get_html_tag("height:###;", $page->get_part($index, 'height')));
-    array_push($style_tags, $this->get_html_tag("font-family:###, cursive;", $page->get_part($index, 'font-family-google')));
+    array_push($style_tags, $this->get_html_tag("font-family:'###', cursive;", $page->get_part($index, 'font-family-google')));
 
     array_push($style_tags, $this->get_html_tag("margin:###;", $page->get_part($index, 'margin', '10px')));
     array_push($style_tags, $this->get_html_tag("padding:###;", $page->get_part($index, 'padding', '0')));

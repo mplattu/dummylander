@@ -76,26 +76,31 @@ class PageContent {
   render_editor_fields_section(n) {
     var html = [];
 
+    var name_advanced = "section_advanced section_advanced_"+n;
+
     html.push('<div class="section_group">');
+
+    var name='section_'+n+'_text';
+    html.push('<div class="row"><div class="col-12"><label for="'+name+'" class="label_text">Text</label>'+this.render_editor_input('text', name)+'</div></div>');
+    html.push('<div class="row"><div class="col-12"><button type="button" class="btn btn-secondary btn-sm button_advanced" data-groupnumber="'+n+'">Show more</a></div></div>')
+
     for (var field in this.fields.section_values) {
       var name = 'section_'+n+'_'+field;
 
-      html.push('<div class="row">'
+      html.push('<div class="row '+name_advanced+'">'
         +'<div class="col-4">'+this.fields.section_values[field]+'</div>'
         +'<div class="col-8">'+this.render_editor_input(field, name)+'</div>'
         +'</div>');
     }
 
-    var name='section_'+n+'_text';
-
-    html.push('<div class="row"><div class="col-12"><label for="'+name+'">Text</label>'+this.render_editor_input('text', name)+'</div></div>');
     html.push('</div>');
 
     return html.join("\n");
   }
 
   render_editor_sectionborder() {
-    return '<div class="row"><div class="col-12"><hr></div></div>';
+    // Currently there is no constantly visible section border
+    return '';
   }
 
   render_editor() {
@@ -119,8 +124,28 @@ class PageContent {
 
     $(this.page_content_id).html(html.join("\n"));
 
+    this.advanced_hide();
+
     $(".page_field").on('keyup', {obj: this}, this.update_object_value);
     $(".section_field").on('keyup', {obj: this}, this.update_object_value);
+
+    $(".button_advanced").on("click", {obj: this}, this.advanced_toggle);
+  }
+
+  advanced_hide() {
+    $(".section_advanced").css('display', 'none');
+  }
+
+  advanced_toggle(event) {
+    var group = $(this).attr('data-groupnumber');
+
+    if ($(".section_advanced_"+group).css('display') == 'none') {
+      event.data.obj.advanced_hide();
+      $(".section_advanced_"+group).css('display', 'flex');
+    }
+    else {
+      $(".section_advanced_"+group).css('display', 'none');
+    }
   }
 
   get_luma(hex_color) {

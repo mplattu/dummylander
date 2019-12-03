@@ -256,6 +256,17 @@ class PageContent {
     });
   }
 
+  activate_textarea_autoheight() {
+    $('textarea').off('input');
+
+    $('textarea').each(function () {
+      this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
+    }).on('input', function () {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+    });
+  }
+
   on_change(func) {
     this.on_change_func = func;
   }
@@ -266,6 +277,7 @@ class PageContent {
     this.render_editor();
     this.update_editor_values();
     this.activate_colorpicker();
+    this.activate_textarea_autoheight();
 
     this.page_data_has_changed = false;
   }

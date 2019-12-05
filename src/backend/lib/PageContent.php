@@ -26,7 +26,8 @@ class PageContent {
     $fonts_used = Array();
 
     for ($n=0; $n < $this->get_parts_count(); $n++) {
-      if (!is_null($this->get_part($n, 'font-family-google'))) {
+      $this_font = $this->get_part($n, 'font-family-google');
+      if (!is_null($this_font) and $this_font != "") {
         array_push($fonts_used, urlencode($this->get_part($n, 'font-family-google')));
       }
     }
@@ -48,17 +49,17 @@ class PageContent {
 
   public function get_part($index, $field, $default=null) {
     if (!array_key_exists('parts', $this->page_data)) {
-      log_message("The page content has no field 'parts'");
+      log_message("The page content has no field 'parts'", null, 2);
       return $default;
     }
 
     if (!array_key_exists($index, $this->page_data['parts'])) {
-      log_message("The page content has not field 'parts'->$index");
+      log_message("The page content has not field 'parts'->$index", null, 2);
       return $default;
     }
 
     if (!array_key_exists($field, $this->page_data['parts'][$index])) {
-      log_message("The page content has no field 'parts'->$index->$field");
+      log_message("The page content has no field 'parts'->$index->$field", null, 2);
       return $default;
     }
 

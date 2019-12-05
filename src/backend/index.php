@@ -1,10 +1,16 @@
 <?php
 
-$VERSION = "Dummylander 0.1";
+$VERSION = "Dummylander 0.2";
 $DATAFILE = "data/content.json";
 $ADMIN_PASSWORD = "secret";
 
-log_message(@$_SERVER['QUERY_STRING']);
+// Log levels:
+// 0 - fatal errors
+// 1 - some messages
+// 2 - everything
+$LOG_LEVEL = 1;
+
+log_message("QUERY_STRING:".@$_SERVER['QUERY_STRING'], null, 2);
 if (@$_SERVER['QUERY_STRING'] == "admin") {
   $admin_ui = new ShowAdminUI();
 }
@@ -24,9 +30,13 @@ else {
 exit(0);
 
 
-function log_message ($message, $exit_level = null) {
+function log_message ($message, $exit_level = null, $log_level=null) {
+  global $LOG_LEVEL;
+
   // Write log message to server log
-  error_log($message, 4);
+  if ($log_level <= $LOG_LEVEL) {
+    error_log($message, 4);
+  }
 
   if (!is_null($exit_level)) {
     exit($exit_level);

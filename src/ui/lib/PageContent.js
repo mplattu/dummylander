@@ -16,7 +16,9 @@ class PageContent {
     this.fields.page_values = {
       'title': 'Title',
       'favicon-ico': 'Favicon (URL)',
-      'description': 'Description'
+      'description': 'Description',
+      'keywords': 'Keywords',
+      'style-css': 'Custom CSS'
     };
 
     this.fields.section_values = {
@@ -75,26 +77,31 @@ class PageContent {
   render_editor_fields_section(n) {
     var html = [];
 
+    var name_advanced = "section_advanced section_advanced_"+n;
+
     html.push('<div class="section_group">');
+
+    var name='section_'+n+'_text';
+    html.push('<div class="row"><div class="col-12"><label for="'+name+'" class="label_text">Text</label>'+this.render_editor_input('text', name)+'</div></div>');
+    html.push('<div class="row"><div class="col-12"><button type="button" class="btn btn-secondary btn-sm button_advanced" data-groupnumber="'+n+'">Show more</a></div></div>')
+
     for (var field in this.fields.section_values) {
       var name = 'section_'+n+'_'+field;
 
-      html.push('<div class="row">'
+      html.push('<div class="row '+name_advanced+'">'
         +'<div class="col-4">'+this.fields.section_values[field]+'</div>'
         +'<div class="col-8">'+this.render_editor_input(field, name)+'</div>'
         +'</div>');
     }
 
-    var name='section_'+n+'_text';
-
-    html.push('<div class="row"><div class="col-12"><label for="'+name+'">Text</label>'+this.render_editor_input('text', name)+'</div></div>');
     html.push('</div>');
 
     return html.join("\n");
   }
 
   render_editor_sectionborder() {
-    return '<div class="row"><div class="col-12"><hr></div></div>';
+    // Currently there is no constantly visible section border
+    return '';
   }
 
   render_editor() {
@@ -118,8 +125,28 @@ class PageContent {
 
     $(this.page_content_id).html(html.join("\n"));
 
+    this.advanced_hide();
+
     $(".page_field").on('keyup', {obj: this}, this.update_object_value);
     $(".section_field").on('keyup', {obj: this}, this.update_object_value);
+
+    $(".button_advanced").on("click", {obj: this}, this.advanced_toggle);
+  }
+
+  advanced_hide() {
+    $(".section_advanced").css('display', 'none');
+  }
+
+  advanced_toggle(event) {
+    var group = $(this).attr('data-groupnumber');
+
+    if ($(".section_advanced_"+group).css('display') == 'none') {
+      event.data.obj.advanced_hide();
+      $(".section_advanced_"+group).css('display', 'flex');
+    }
+    else {
+      $(".section_advanced_"+group).css('display', 'none');
+    }
   }
 
   get_luma(hex_color) {
@@ -155,19 +182,28 @@ class PageContent {
   update_object_value(event) {
     var target_attrs = event.target.id.split("_");
     var changed = false;
+    var new_value = event.target.value;
 
-    if (target_attrs[0] == "page"
-      && event.data.obj.page_data.page_values[target_attrs[1]] != undefined
-      && event.data.obj.page_data.page_values[target_attrs[1]] != event.target.value) {
-        changed = true;
-        event.data.obj.page_data.page_values[target_attrs[1]] = event.target.value;
+    if (target_attrs[0] == "page") {
+      var old_value = event.data.obj.page_data.page_values[target_attrs[1]];
+
+      if (old_value != new_value) {
+        if (old_value != undefined || (new_value != "")) {
+          changed = true;
+          event.data.obj.page_data.page_values[target_attrs[1]] = new_value;
+        }
+      }
     }
 
-    if (target_attrs[0] == "section"
-      && event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]] != undefined
-      && event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]] != event.target.value) {
-        changed = true;
-        event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]] = event.target.value;
+    if (target_attrs[0] == "section") {
+      var old_value = event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]];
+
+      if (old_value != new_value) {
+        if (old_value != undefined || (new_value != "")) {
+          changed = true;
+          event.data.obj.page_data.parts[target_attrs[1]][target_attrs[2]] = new_value;
+        }
+      }
     }
 
     if (target_attrs[2] == "color") {

@@ -13,37 +13,42 @@ class ShowPage {
       $this->render_content($page);
       $this->render_footer($page);
     } else {
-      log_message("Data file $datafile is not readable", 1);
+      log_message("Data file $datafile is not readable", 1, 0);
     }
   }
 
   private function get_html_tag($html, $value) {
-    $tag = "";
-
-    if (!is_null($value)) {
-      $tag = preg_replace('/###/', $value, $html);
-      log_message('Adding tag: '.$tag);
+    if (!is_null($value) and $value != "") {
+      return preg_replace('/###/', $value, $html);
     }
 
-    return $tag;
+    return null;
+  }
+
+  private function array_push_if_set(&$array, $element) {
+    if (!is_null($element) and $element != "") {
+      array_push($array, $element);
+    }
   }
 
   function render_header($page) {
     $head_tags = Array();
 
-    array_push($head_tags, $this->get_html_tag('<!-- This landing page has been created with ### -->', $this->version));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<!-- This landing page has been created with ### -->', $this->version));
 
-    array_push($head_tags, '<meta charset="UTF-8"><meta http-equiv="content-type" content="text/html; charset=utf-8" />');
-    array_push($head_tags, '<meta name="viewport" content="width=device-width, initial-scale=1.0" />');
-    array_push($head_tags, $this->get_html_tag('<title>###</title>', $page->get_page_value('title')));
-    array_push($head_tags, $this->get_html_tag('<link href="https://fonts.googleapis.com/css?family=###&display=swap" rel="stylesheet" />', $page->get_page_google_fonts_value()));
-    array_push($head_tags, $this->get_html_tag('<link rel="icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
-    array_push($head_tags, $this->get_html_tag('<link rel="shortcut icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
-    array_push($head_tags, $this->get_html_tag('<meta name="description" content="###" />', $page->get_page_value('description')));
+    $this->array_push_if_set($head_tags, '<meta charset="UTF-8"><meta http-equiv="content-type" content="text/html; charset=utf-8" />');
+    $this->array_push_if_set($head_tags, '<meta name="viewport" content="width=device-width, initial-scale=1.0" />');
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<title>###</title>', $page->get_page_value('title')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<link href="https://fonts.googleapis.com/css?family=###&display=swap" rel="stylesheet" />', $page->get_page_google_fonts_value()));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<link rel="icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<link rel="shortcut icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta name="description" content="###" />', $page->get_page_value('description')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta name="keywords" content="###" />', $page->get_page_value('keywords')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<style>###</style>', $page->get_page_value('style-css')));
 
-    array_push($head_tags, $this->get_html_tag('<meta property="og:site_name" content="###" />', $page->get_page_value('title')));
-    array_push($head_tags, $this->get_html_tag('<meta property="og:title" content="###" />', $page->get_page_value('title')));
-    array_push($head_tags, $this->get_html_tag('<meta property="og:description" content="###" />', $page->get_page_value('description')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:site_name" content="###" />', $page->get_page_value('title')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:title" content="###" />', $page->get_page_value('title')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:description" content="###" />', $page->get_page_value('description')));
 
     ?>
     <!DOCTYPE html>
@@ -71,7 +76,7 @@ class ShowPage {
     $part_count = $page->get_parts_count();
 
     if (is_null($part_count)) {
-      log_message("Page does not contain any parts");
+      log_message("Page does not contain any parts", null, 1);
     } else {
       for ($n=0; $n < $part_count; $n++) {
         $this->render_part($page, $n);
@@ -84,17 +89,17 @@ class ShowPage {
 
     $style_tags = Array();
 
-    array_push($style_tags, $this->get_html_tag(
-      "background-image:url('###'); background-position: center center;",
+    $this->array_push_if_set($style_tags, $this->get_html_tag(
+      "background-image:url('###'); background-position: center; background-repeat: no-repeat; background-size: cover; ",
       $page->get_part($index, 'background-image')
     ));
-    array_push($style_tags, $this->get_html_tag("height:###;", $page->get_part($index, 'height')));
-    array_push($style_tags, $this->get_html_tag("font-family:###, cursive;", $page->get_part($index, 'font-family-google')));
+    $this->array_push_if_set($style_tags, $this->get_html_tag("height:###;", $page->get_part($index, 'height')));
+    $this->array_push_if_set($style_tags, $this->get_html_tag("font-family:'###', cursive;", $page->get_part($index, 'font-family-google')));
 
-    array_push($style_tags, $this->get_html_tag("margin:###;", $page->get_part($index, 'margin', '10px')));
-    array_push($style_tags, $this->get_html_tag("padding:###;", $page->get_part($index, 'padding', '0')));
-    array_push($style_tags, $this->get_html_tag("color:###;", $page->get_part($index, 'color', '#000000')));
-    array_push($style_tags, $this->get_html_tag("text-align:###;", $page->get_part($index, 'text-align', 'center')));
+    $this->array_push_if_set($style_tags, $this->get_html_tag("margin:###;", $page->get_part($index, 'margin', '10px')));
+    $this->array_push_if_set($style_tags, $this->get_html_tag("padding:###;", $page->get_part($index, 'padding', '0')));
+    $this->array_push_if_set($style_tags, $this->get_html_tag("color:###;", $page->get_part($index, 'color', '#000000')));
+    $this->array_push_if_set($style_tags, $this->get_html_tag("text-align:###;", $page->get_part($index, 'text-align', 'center')));
 
     ?>
       <section
@@ -108,7 +113,7 @@ class ShowPage {
 
       </section>
     <?php
-    log_message($page->get_part($index, 'text'));
+    log_message($page->get_part($index, 'text'), null, 2);
   }
 
 }

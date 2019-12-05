@@ -2,7 +2,8 @@
   "page_values": {
     "title": "Page Title",
     "favicon-ico": "data/favicon.ico",
-    "description": "Description text which may appear in search engines etc."
+    "description": "Description text which may appear in search engines etc.",
+    "style-css": "a:link {color:inherit} a:visited {color:inherit} a:hover { text-decoration-color: red }"
   },
   "parts": [
     {
@@ -11,20 +12,25 @@
       "height": "400px",
       "color": "#FFFFFF",
       "background-image": "data/sample.jpg",
-      "font-family-google": "Montserrat",
-      "text": "# My Site"
+      "text": "# Dummylander Sample Page"
+    },
+    {
+      "text": "## Welcome!\n\nWelcome to Dummylander sample page. The page is built on parts which may contain text and images. The flower and a heading above is the first parts while this text is a second part.\n\nThe text fields may contain [markdown-formatted](https://www.markdownguide.org/cheat-sheet) syntax. This allows you to give **structure** to your text."
+    },
+    {
+      "font-family-google": "Shadows Into Light",
+      "text": "## Fonts\n\nEach part may have its own font definition. It is easy to use [open fonts delivered by Google](https://fonts.google.com/).\n\nThis part uses *Shadows Into Light* font."
     },
     {
       "color": "#F90000",
-      "font-family-google": "Playfair Display",
-      "text": "## Welcome!\n\nWelcome to My Site! This part uses *Playfair Display* font."
+      "text": "## Font Color\n\nThe font color can be changed for each part."
     },
     {
-      "font-family-google": "Tomorrow",
-      "text": "## You can use tables!\n\n| Service | Price |\n| ------- | ------- |\n| Some Service | 25 € |\n| Some other service | 35 € |\n| A third service | 55 € | \n"
+      "font-family-google": "Rajdhani",
+      "text": "## Tables\n\nTables are particulary easy to create with markdown syntax:\n\n| Service | Price |\n| ------- | ------- |\n| Some Service | 25 € |\n| Some other service | 35 € |\n| A third service | 55 € | \n"
     },
     {
-      "text": "You can embed HTML according to the MD syntax:\n\n[<img src='data/DuckDuckGo-DaxSolo.svg' width=\"50px\" height=\"50px\">](https://duckduckgo.com/)"
+      "text": "## HTML\n\nYou are not limited to the quick and easy markdown syntax. [The syntax](https://www.markdownguide.org/cheat-sheet) allows you to embed HTML tags. Here we have a clickable image:\n\n[<img src='data/DuckDuckGo-DaxSolo.svg' width=\"50px\" height=\"50px\">](https://duckduckgo.com/)"
     }
   ]
 }

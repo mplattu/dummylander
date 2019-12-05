@@ -2,6 +2,7 @@
 
 update-libs:
 	wget -O src/backend/ext/Parsedown.php https://raw.githubusercontent.com/erusev/parsedown/master/Parsedown.php
+	mkdir -p src/ui/ext/
 	wget -O src/ui/ext/jquery.min.js https://code.jquery.com/jquery-3.4.1.min.js
 	mkdir temp
 	wget -O temp/bootstrap-colorpicker.zip https://github.com/itsjavi/bootstrap-colorpicker/releases/download/3.1.2/bootstrap-colorpicker-v3.1.2-dist.zip

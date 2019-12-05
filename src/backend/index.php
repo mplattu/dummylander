@@ -1,6 +1,6 @@
 <?php
 
-$VERSION = "Dummylander 0.1";
+$VERSION = "Dummylander 0.2";
 $DATAFILE = "data/content.json";
 $ADMIN_PASSWORD = "secret";
 

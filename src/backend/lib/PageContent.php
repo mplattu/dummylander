@@ -49,17 +49,17 @@ class PageContent {
 
   public function get_part($index, $field, $default=null) {
     if (!array_key_exists('parts', $this->page_data)) {
-      log_message("The page content has no field 'parts'");
+      log_message("The page content has no field 'parts'", null, 2);
       return $default;
     }
 
     if (!array_key_exists($index, $this->page_data['parts'])) {
-      log_message("The page content has not field 'parts'->$index");
+      log_message("The page content has not field 'parts'->$index", null, 2);
       return $default;
     }
 
     if (!array_key_exists($field, $this->page_data['parts'][$index])) {
-      log_message("The page content has no field 'parts'->$index->$field");
+      log_message("The page content has no field 'parts'->$index->$field", null, 2);
       return $default;
     }
 

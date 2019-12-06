@@ -85,6 +85,12 @@ $(document).ready(function () {
     get_data();
   });
 
+  $("#button_cancel").click(function () {
+    if (confirm("Are you sure you want to discard your changes?")) {
+      get_data();
+    }
+  });
+
   $("#button_publish").click(function () {
     set_data();
   });

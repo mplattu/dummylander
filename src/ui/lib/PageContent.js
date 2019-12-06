@@ -211,9 +211,7 @@ class PageContent {
 
     if (changed) {
       event.data.obj.page_data_has_changed = true;
-      if (event.data.obj.on_change_func != null) {
-        event.data.obj.on_change_func();
-      }
+      event.data.obj.on_change_call();
     }
   }
 
@@ -271,6 +269,12 @@ class PageContent {
     this.on_change_func = func;
   }
 
+  on_change_call() {
+    if (this.on_change_func != null) {
+      this.on_change_func();
+    }
+  }
+
   set_data(data) {
     this.page_data = data;
 
@@ -280,6 +284,7 @@ class PageContent {
     this.activate_textarea_autoheight();
 
     this.page_data_has_changed = false;
+    this.on_change_call();
   }
 
   get_data() {

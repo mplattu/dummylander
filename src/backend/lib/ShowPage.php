@@ -13,7 +13,7 @@ class ShowPage {
       $this->render_content($page);
       $this->render_footer($page);
     } else {
-      log_message("Data file $datafile is not readable", 1);
+      log_message("Data file $datafile is not readable", 1, 0);
     }
   }
 
@@ -43,6 +43,7 @@ class ShowPage {
     $this->array_push_if_set($head_tags, $this->get_html_tag('<link rel="icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
     $this->array_push_if_set($head_tags, $this->get_html_tag('<link rel="shortcut icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
     $this->array_push_if_set($head_tags, $this->get_html_tag('<meta name="description" content="###" />', $page->get_page_value('description')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta name="keywords" content="###" />', $page->get_page_value('keywords')));
     $this->array_push_if_set($head_tags, $this->get_html_tag('<style>###</style>', $page->get_page_value('style-css')));
 
     $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:site_name" content="###" />', $page->get_page_value('title')));
@@ -75,7 +76,7 @@ class ShowPage {
     $part_count = $page->get_parts_count();
 
     if (is_null($part_count)) {
-      log_message("Page does not contain any parts");
+      log_message("Page does not contain any parts", null, 1);
     } else {
       for ($n=0; $n < $part_count; $n++) {
         $this->render_part($page, $n);
@@ -89,7 +90,7 @@ class ShowPage {
     $style_tags = Array();
 
     $this->array_push_if_set($style_tags, $this->get_html_tag(
-      "background-image:url('###'); background-position: center center;",
+      "background-image:url('###'); background-position: center; background-repeat: no-repeat; background-size: cover; ",
       $page->get_part($index, 'background-image')
     ));
     $this->array_push_if_set($style_tags, $this->get_html_tag("height:###;", $page->get_part($index, 'height')));
@@ -112,7 +113,7 @@ class ShowPage {
 
       </section>
     <?php
-    log_message($page->get_part($index, 'text'));
+    log_message($page->get_part($index, 'text'), null, 2);
   }
 
 }

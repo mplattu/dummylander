@@ -58,6 +58,7 @@ class ShowPage {
       <?php echo(join("\n", $head_tags)."\n"); ?>
       <style>
         table { margin: 0 auto; }
+        img { max-width: 100%; }
       </style>
     </head>
     <body style="margin:0; padding: 0;

@@ -1,5 +1,7 @@
 .PHONY: update-libs
 
+PHPUNIT_PARAMS = --include-path src/backend/lib --verbose -d display_errors=On -d error_reporting=E_ALL
+
 update-libs:
 	wget -O src/backend/ext/Parsedown.php https://raw.githubusercontent.com/erusev/parsedown/master/Parsedown.php
 	mkdir -p src/ui/ext/
@@ -19,7 +21,11 @@ lint:
 	php -l src/backend/lib/ShowPage.php
 	php -l src/backend/index.php
 
-build: lint
+test:
+	phpunit $(PHPUNIT_PARAMS) src/backend/test/global_functions_test.php
+	phpunit $(PHPUNIT_PARAMS) src/backend/test/PageContent_test.php
+
+build: lint test
 	if [ ! -d dist/data/ ]; then mkdir -p dist/data/; fi
 	perl include.pl root.php >dist/index.php
 	php -l dist/index.php

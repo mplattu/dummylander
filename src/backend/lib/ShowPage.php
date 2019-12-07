@@ -3,11 +3,12 @@
 class ShowPage {
   private $version = "";
 
-  function __construct($version, $datafile) {
+  function __construct($version, $datapath) {
     $this->version = $version;
+    $datafile = $datapath."/content.json";
 
     if (is_readable($datafile)) {
-      $page = new PageContent($datafile);
+      $page = new PageContent($datafile, $datapath);
 
       $this->render_header($page);
       $this->render_content($page);

@@ -84,7 +84,10 @@ class PageContent {
 
     var name='section_'+n+'_text';
     html.push('<div class="row"><div class="col-12"><label for="'+name+'" class="label_text">Text</label>'+this.render_editor_input('text', name)+'</div></div>');
-    html.push('<div class="row"><div class="col-12"><button type="button" class="btn btn-secondary btn-sm button_advanced" data-groupnumber="'+n+'">Show more</a></div></div>')
+    html.push('<div class="row"><div class="col-12">');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_advanced" data-partnumber="'+n+'">Show more</button>');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_add_part" data-partnumber="'+n+'">Insert new part below</button>')
+    html.push('</div></div>');
 
     for (var field in this.fields.section_values) {
       var name = 'section_'+n+'_'+field;
@@ -131,23 +134,40 @@ class PageContent {
     $(".page_field").on('keyup', {obj: this}, this.update_object_value);
     $(".section_field").on('keyup', {obj: this}, this.update_object_value);
 
-    $(".button_advanced").on("click", {obj: this}, this.advanced_toggle);
+    $(".button_advanced").on("click", {obj: this}, this.button_advanced_toggle);
+    $(".button_add_part").on("click", {obj: this}, this.button_add_part);
   }
 
   advanced_hide() {
     $(".section_advanced").css('display', 'none');
   }
 
-  advanced_toggle(event) {
-    var group = $(this).attr('data-groupnumber');
+  button_advanced_toggle(event) {
+    var part = $(this).attr('data-partnumber');
 
-    if ($(".section_advanced_"+group).css('display') == 'none') {
+    if ($(".section_advanced_"+part).css('display') == 'none') {
       event.data.obj.advanced_hide();
-      $(".section_advanced_"+group).css('display', 'flex');
+      $(".section_advanced_"+part).css('display', 'flex');
     }
     else {
-      $(".section_advanced_"+group).css('display', 'none');
+      $(".section_advanced_"+part).css('display', 'none');
     }
+  }
+
+  button_add_part(event) {
+    var part = parseInt($(this).attr('data-partnumber'));
+
+    event.data.obj.part_insert(part+1);
+  }
+
+  part_insert(part) {
+    var new_page_data = this.page_data;
+
+    new_page_data.parts.splice(part, 0, {});
+
+    console.log("Adding new part "+part);
+
+    this.set_data_internal(new_page_data, true);
   }
 
   get_luma(hex_color) {
@@ -277,7 +297,7 @@ class PageContent {
     }
   }
 
-  set_data(data) {
+  set_data_internal(data, data_has_changed) {
     this.page_data = data;
 
     this.render_editor();
@@ -285,8 +305,12 @@ class PageContent {
     this.activate_colorpicker();
     this.activate_textarea_autoheight();
 
-    this.page_data_has_changed = false;
+    this.page_data_has_changed = data_has_changed;
     this.on_change_call();
+  }
+
+  set_data(data) {
+    this.set_data_internal(data, false);
   }
 
   get_data() {

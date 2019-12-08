@@ -17,6 +17,7 @@ class PageContent {
       'title': 'Title',
       'favicon-ico': 'Favicon (URL)',
       'description': 'Description',
+      'image': 'Sharing Image',
       'keywords': 'Keywords',
       'style-css': 'Custom CSS'
     };

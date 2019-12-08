@@ -17,4 +17,14 @@ function remove_trailing_slash($path) {
   return preg_replace('/[\\\\\/]+$/', '', $path);
 }
 
+function get_my_url($url = null) {
+  if (is_null($url)) {
+    $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]";
+  }
+
+  $url = preg_replace('/[^\/]*?$/', '', $url);
+
+  return $url;
+}
+
 ?>

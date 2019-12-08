@@ -1,5 +1,7 @@
 <?php
 
+include_once("global_functions.php");
+
 class ShowPage {
   private $version = "";
 
@@ -50,6 +52,10 @@ class ShowPage {
     $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:site_name" content="###" />', $page->get_page_value('title')));
     $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:title" content="###" />', $page->get_page_value('title')));
     $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:description" content="###" />', $page->get_page_value('description')));
+
+    if (strlen($page->get_page_value('image')) > 0) {
+      $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:image" content="###" />', get_my_url().$page->get_page_value('image')));
+    }
 
     ?>
     <!DOCTYPE html>

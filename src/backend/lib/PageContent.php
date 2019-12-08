@@ -7,7 +7,8 @@ class PageContent {
   // This field values should possibly be added with $this->data_path prefix
   private $DATA_PATH_FIELD = Array(
     'page' => Array(
-      'favicon-ico'
+      'favicon-ico',
+      'image'
     ),
     'part' => Array(
       'background-image',
@@ -33,7 +34,7 @@ class PageContent {
   private function add_datapath_prefix_text($value) {
     // NB! This does not handle well cases where an image link exists outside and inside backticks
     //     See PageContent_test for more info
-    
+
     $replacement_count = 0;
     $original_value = $value;
 

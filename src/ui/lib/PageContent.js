@@ -86,7 +86,8 @@ class PageContent {
     html.push('<div class="row"><div class="col-12"><label for="'+name+'" class="label_text">Text</label>'+this.render_editor_input('text', name)+'</div></div>');
     html.push('<div class="row"><div class="col-12">');
     html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_advanced" data-partnumber="'+n+'">Show more</button>');
-    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_add_part" data-partnumber="'+n+'">Insert new part below</button>')
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_add_part" data-partnumber="'+n+'">Insert new part below</button>');
+    html.push('<button type="button" class="btn btn-danger btn-sm button_part button_delete_part" data-partnumber="'+n+'">Delete this part</button>');
     html.push('</div></div>');
 
     for (var field in this.fields.section_values) {
@@ -136,6 +137,7 @@ class PageContent {
 
     $(".button_advanced").on("click", {obj: this}, this.button_advanced_toggle);
     $(".button_add_part").on("click", {obj: this}, this.button_add_part);
+    $(".button_delete_part").on("click", {obj: this}, this.button_delete_part);
   }
 
   advanced_hide() {
@@ -156,17 +158,23 @@ class PageContent {
 
   button_add_part(event) {
     var part = parseInt($(this).attr('data-partnumber'));
-
     event.data.obj.part_insert(part+1);
   }
 
   part_insert(part) {
     var new_page_data = this.page_data;
-
     new_page_data.parts.splice(part, 0, {});
+    this.set_data_internal(new_page_data, true);
+  }
 
-    console.log("Adding new part "+part);
+  button_delete_part(event) {
+    var part = parseInt($(this).attr('data-partnumber'));
+    event.data.obj.part_delete(part);
+  }
 
+  part_delete(part) {
+    var new_page_data = this.page_data;
+    new_page_data.parts.splice(part, 1);
     this.set_data_internal(new_page_data, true);
   }
 

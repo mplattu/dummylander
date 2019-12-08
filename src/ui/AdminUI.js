@@ -51,9 +51,9 @@ function set_data() {
       var data_obj = JSON.parse(data);
 
       if (data_obj.success) {
-        $("#button_publish").removeClass("btn-danger").addClass("btn-success");
+        $("#button_publish").addClass("btn-success");
         setTimeout(function() { $("#header_publish").hide(500); }, 2000)
-        setTimeout(function() { $("#button_publish").addClass("btn-danger").removeClass("btn-success")}, 2600);
+        setTimeout(function() { $("#button_publish").removeClass("btn-success")}, 2600);
       }
       else {
         alert("set_data() failed. See console");

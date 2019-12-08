@@ -1,3 +1,5 @@
+<!-- include:src/ui/lib/BootstrapIconWrapper.js -->
+
 class PageContent {
   constructor(page_content_id) {
     this.page_data = null;
@@ -77,6 +79,7 @@ class PageContent {
 
   render_editor_fields_section(n) {
     var html = [];
+    var biw = new BootstrapIconWrapper();
 
     var name_advanced = "section_advanced section_advanced_"+n;
 
@@ -85,9 +88,9 @@ class PageContent {
     var name='section_'+n+'_text';
     html.push('<div class="row"><div class="col-12"><label for="'+name+'" class="label_text">Text</label>'+this.render_editor_input('text', name)+'</div></div>');
     html.push('<div class="row"><div class="col-12">');
-    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_advanced" data-partnumber="'+n+'">Show more</button>');
-    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_add_part" data-partnumber="'+n+'">Insert new part below</button>');
-    html.push('<button type="button" class="btn btn-danger btn-sm button_part button_delete_part" data-partnumber="'+n+'">Delete this part</button>');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_advanced" data-partnumber="'+n+'">'+biw.chevron_down+'</button>');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_add_part" data-partnumber="'+n+'">'+biw.icon_plus+'</button>');
+    html.push('<button type="button" class="btn btn-danger btn-sm button_part button_delete_part" data-partnumber="'+n+'">'+biw.icon_trash+'</button>');
     html.push('</div></div>');
 
     for (var field in this.fields.section_values) {
@@ -141,18 +144,23 @@ class PageContent {
   }
 
   advanced_hide() {
+    var biw = new BootstrapIconWrapper();
     $(".section_advanced").css('display', 'none');
+    $(".button_advanced").html(biw.chevron_down);
   }
 
   button_advanced_toggle(event) {
+    var biw = new BootstrapIconWrapper();
     var part = $(this).attr('data-partnumber');
 
     if ($(".section_advanced_"+part).css('display') == 'none') {
       event.data.obj.advanced_hide();
       $(".section_advanced_"+part).css('display', 'flex');
+      $(this).html(biw.chevron_up);
     }
     else {
       $(".section_advanced_"+part).css('display', 'none');
+      $(this).html(biw.chevron_down);
     }
   }
 

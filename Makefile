@@ -46,7 +46,8 @@ serve:
 update-docs:
 	mkdir temp
 	cd temp; wget --mirror --convert-links http://localhost:8080/
-	rm -fR docs/*
+	rm docs/index.html
+	rm -fR docs/data/
 	mv temp/localhost:8080/* docs/
 	sed -i -- 's/http:\/\/localhost:8080\//http:\/\/dummylander.net\//g' docs/index.html
 	rm -fR temp/

@@ -1,7 +1,7 @@
 <?php
 
-$VERSION = "Dummylander 0.2";
-$DATAFILE = "data/content.json";
+$VERSION = "Dummylander 0.3";
+$DATAPATH = "data/";
 $ADMIN_PASSWORD = "secret";
 
 // Log levels:
@@ -15,35 +15,19 @@ if (@$_SERVER['QUERY_STRING'] == "admin") {
   $admin_ui = new ShowAdminUI();
 }
 elseif (@$_POST['password'] != "" and $_POST['password'] == $ADMIN_PASSWORD) {
-  $admin_api = new AdminAPI($DATAFILE, @$_POST['function'], @$_POST['data']);
+  $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), @$_POST['function'], @$_POST['data']);
   echo($admin_api->execute());
 }
 elseif (@$_POST['password'] != "") {
-  $admin_api = new AdminAPI($DATAFILE, 'loginfailed', null);
+  $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'loginfailed', null);
   echo($admin_api->execute());
 }
 else {
-  $show_page = new ShowPage($VERSION, $DATAFILE);
+  $show_page = new ShowPage($VERSION, remove_trailing_slash($DATAPATH));
 }
 
 // Normal termination
 exit(0);
-
-
-function log_message ($message, $exit_level = null, $log_level=null) {
-  global $LOG_LEVEL;
-
-  // Write log message to server log
-  if ($log_level <= $LOG_LEVEL) {
-    error_log($message, 4);
-  }
-
-  if (!is_null($exit_level)) {
-    exit($exit_level);
-  }
-}
-
-
 
 ?>
 
@@ -2045,13 +2029,44 @@ class Parsedown
 ?>
 <?php
 
+function log_message ($message, $exit_level = null, $log_level=null) {
+  global $LOG_LEVEL;
+
+  // Write log message to server log
+  if ($log_level <= $LOG_LEVEL) {
+    error_log($message, 4);
+  }
+
+  if (!is_null($exit_level)) {
+    exit($exit_level);
+  }
+}
+
+function remove_trailing_slash($path) {
+  return preg_replace('/[\\\\\/]+$/', '', $path);
+}
+
+function get_my_url($url = null) {
+  if (is_null($url)) {
+    $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]";
+  }
+
+  $url = preg_replace('/[^\/]*?$/', '', $url);
+
+  return $url;
+}
+
+?>
+
+<?php
+
 class AdminAPI {
   private $page_storage = null;
   private $function = null;
   private $data = null;
 
-  function __construct($data_file, $function, $data) {
-    $this->page_storage = new PageStorage($data_file);
+  function __construct($data_path, $function, $data) {
+    $this->page_storage = new PageStorage($data_path."/content.json");
     $this->function = $function;
     $this->data = $data;
   }
@@ -2099,10 +2114,68 @@ class AdminAPI {
 
 class PageContent {
   public $page_data = null;
+  private $data_path = "";
 
-  public function __construct($data_file) {
+  // This field values should possibly be added with $this->data_path prefix
+  private $DATA_PATH_FIELD = Array(
+    'page' => Array(
+      'favicon-ico',
+      'image'
+    ),
+    'part' => Array(
+      'background-image',
+      'text'
+    )
+  );
+
+  public function __construct($data_file, $data_path = "") {
     $json = file_get_contents($data_file);
     $this->page_data = json_decode($json, true);
+    $this->data_path = $data_path;
+  }
+
+  private function add_datapath_prefix_one($value) {
+    if (!filter_var($value, FILTER_VALIDATE_URL, Array('flags'=>FILTER_FLAG_SCHEME_REQUIRED)) and !preg_match('/[\/]/', $value)) {
+      log_message("add_datapath_prefix returning value with prefix: ".$this->data_path.'/'.$value, null, 2);
+      return $this->data_path.'/'.$value;
+    }
+
+    return $value;
+  }
+
+  private function add_datapath_prefix_text($value) {
+    // NB! This does not handle well cases where an image link exists outside and inside backticks
+    //     See PageContent_test for more info
+
+    $replacement_count = 0;
+    $original_value = $value;
+
+    do {
+      $value = preg_replace('/^([^`]*)!\[(.*)\]\(([^\/]*)\)([^`]*)$/m', '$1![$2]('.$this->data_path.'/$3)$4', $value, 1, $replacements_made);
+      if ($replacements_made > 0) {
+        $replacement_count++;
+      }
+    } while ($replacements_made > 0);
+
+    if ($replacement_count > 0) {
+      log_message('add_datapath_prefix_text: '.$replacement_count.' changes:', null, 2);
+      log_message('original string: '.$original_value, null, 2);
+      log_message('final string   : '.$value, null, 2);
+    }
+    return $value;
+  }
+
+  public function add_datapath_prefix($scope, $field, $value) {
+    if (in_array($field, $this->DATA_PATH_FIELD[$scope])) {
+      log_message("add_datapath_prefix scope: $scope, field: $field, value: $value", null, 2);
+      if ($scope == "part" and $field == "text") {
+        return $this->add_datapath_prefix_text($value);
+      }
+
+      return $this->add_datapath_prefix_one($value);
+    }
+
+    return $value;
   }
 
   public function get_page_value($field, $default=null) {
@@ -2112,7 +2185,7 @@ class PageContent {
         return $default;
     }
 
-    return $this->page_data['page_values'][$field];
+    return $this->add_datapath_prefix('page', $field, $this->page_data['page_values'][$field]);
   }
 
   // Returns value you can give to Google Fonts CSS tag, e.g. "Playfair+Display|Tomorrow"
@@ -2160,7 +2233,7 @@ class PageContent {
       return $default;
     }
 
-    return $this->page_data['parts'][$index][$field];
+    return $this->add_datapath_prefix('part', $field, $this->page_data['parts'][$index][$field]);
   }
 
 }
@@ -2218,10 +2291,11 @@ class ShowAdminUI {
 
     .container { padding-top: 50px; }
     #message_loginfailed { display: none; }
-    #button_publish { margin: auto; }
+    .navbar-nav-center { margin: auto; }
+    .navbar-nav-center .btn { margin-left: 5px; margin-right: 5px; }
 
     .label_text { margin-top: 20px; font-weight: bold; }
-    .button_advanced {margin-top: 10px; margin-bottom: 20px; }
+    .button_part {margin-top: 10px; margin-bottom: 20px; margin-right: 10px; font-size: 120%; }
   </style>
   <script type="text/javascript">
     /*! jQuery v3.4.1 | (c) JS Foundation and other contributors | jquery.org/license */
@@ -2243,6 +2317,35 @@ class ShowAdminUI {
 //# sourceMappingURL=bootstrap-colorpicker.min.js.map
     var SERVER_URL="index.php";
 
+class BootstrapIconWrapper {
+  constructor() {
+    this.plus = '<svg class="bi bi-plus" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
+  <path fill-rule="evenodd" d="M10 5.5a.5.5 0 01.5.5v4a.5.5 0 01-.5.5H6a.5.5 0 010-1h3.5V6a.5.5 0 01.5-.5z" clip-rule="evenodd"/> \
+  <path fill-rule="evenodd" d="M9.5 10a.5.5 0 01.5-.5h4a.5.5 0 010 1h-3.5V14a.5.5 0 01-1 0v-4z" clip-rule="evenodd"/> \
+</svg>';
+    this.chevron_up = '<svg class="bi bi-chevron-up" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
+  <path fill-rule="evenodd" d="M9.646 6.646a.5.5 0 01.708 0l6 6a.5.5 0 01-.708.708L10 7.707l-5.646 5.647a.5.5 0 01-.708-.708l6-6z" clip-rule="evenodd"/> \
+</svg>';
+    this.chevron_down = '<svg class="bi bi-chevron-down" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
+  <path fill-rule="evenodd" d="M3.646 6.646a.5.5 0 01.708 0L10 12.293l5.646-5.647a.5.5 0 01.708.708l-6 6a.5.5 0 01-.708 0l-6-6a.5.5 0 010-.708z" clip-rule="evenodd"/> \
+</svg>';
+    this.arrow_up = '<svg class="bi bi-arrow-up" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
+  <path fill-rule="evenodd" d="M10 5.5a.5.5 0 01.5.5v9a.5.5 0 01-1 0V6a.5.5 0 01.5-.5z" clip-rule="evenodd"/> \
+  <path fill-rule="evenodd" d="M9.646 4.646a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L10 5.707 7.354 8.354a.5.5 0 11-.708-.708l3-3z" clip-rule="evenodd"/> \
+</svg>';
+    this.arrow_down = '<svg class="bi bi-arrow-down" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
+  <path fill-rule="evenodd" d="M6.646 11.646a.5.5 0 01.708 0L10 14.293l2.646-2.647a.5.5 0 01.708.708l-3 3a.5.5 0 01-.708 0l-3-3a.5.5 0 010-.708z" clip-rule="evenodd"/> \
+  <path fill-rule="evenodd" d="M10 4.5a.5.5 0 01.5.5v9a.5.5 0 01-1 0V5a.5.5 0 01.5-.5z" clip-rule="evenodd"/> \
+</svg>';
+    this.trash = '<svg class="bi bi-trash" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
+  <path fill-rule="evenodd" d="M6 6v8.5c0 .47.124.874.297 1.144.177.275.361.356.489.356h6.428c.127 0 .312-.08.489-.356.173-.27.297-.673.297-1.144V6h1v8.5c0 .634-.164 1.23-.456 1.685-.288.448-.747.815-1.33.815H6.786c-.583 0-1.042-.367-1.33-.815C5.164 15.73 5 15.134 5 14.5V6h1z" clip-rule="evenodd"/> \
+  <path fill-rule="evenodd" d="M7.5 7.5A.5.5 0 018 8v6a.5.5 0 01-1 0V8a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V8a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V8a.5.5 0 01.5-.5zm3-3.5h-11v1h11V4zm-11-1a1 1 0 00-1 1v1a1 1 0 001 1h11a1 1 0 001-1V4a1 1 0 00-1-1h-11z" clip-rule="evenodd"/> \
+  <path d="M8 3a1 1 0 011-1h2a1 1 0 011 1v1H8V3z"/> \
+</svg>';
+  }
+}
+
+
 class PageContent {
   constructor(page_content_id) {
     this.page_data = null;
@@ -2262,6 +2365,7 @@ class PageContent {
       'title': 'Title',
       'favicon-ico': 'Favicon (URL)',
       'description': 'Description',
+      'image': 'Sharing Image',
       'keywords': 'Keywords',
       'style-css': 'Custom CSS'
     };
@@ -2321,6 +2425,7 @@ class PageContent {
 
   render_editor_fields_section(n) {
     var html = [];
+    var biw = new BootstrapIconWrapper();
 
     var name_advanced = "section_advanced section_advanced_"+n;
 
@@ -2328,7 +2433,13 @@ class PageContent {
 
     var name='section_'+n+'_text';
     html.push('<div class="row"><div class="col-12"><label for="'+name+'" class="label_text">Text</label>'+this.render_editor_input('text', name)+'</div></div>');
-    html.push('<div class="row"><div class="col-12"><button type="button" class="btn btn-secondary btn-sm button_advanced" data-groupnumber="'+n+'">Show more</a></div></div>')
+    html.push('<div class="row"><div class="col-12">');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_advanced" data-partnumber="'+n+'">'+biw.chevron_down+'</button>');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_move_down" data-partnumber="'+n+'">'+biw.arrow_down+'</button>');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_move_up" data-partnumber="'+n+'">'+biw.arrow_up+'</button>');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_add_part" data-partnumber="'+n+'">'+biw.plus+'</button>');
+    html.push('<button type="button" class="btn btn-danger btn-sm button_part button_delete_part" data-partnumber="'+n+'">'+biw.trash+'</button>');
+    html.push('</div></div>');
 
     for (var field in this.fields.section_values) {
       var name = 'section_'+n+'_'+field;
@@ -2375,23 +2486,77 @@ class PageContent {
     $(".page_field").on('keyup', {obj: this}, this.update_object_value);
     $(".section_field").on('keyup', {obj: this}, this.update_object_value);
 
-    $(".button_advanced").on("click", {obj: this}, this.advanced_toggle);
+    $(".button_advanced").on("click", {obj: this}, this.button_advanced_toggle);
+    $(".button_move_down").on("click", {obj: this}, this.button_move_down);
+    $(".button_move_up").on("click", {obj: this}, this.button_move_up);
+    $(".button_add_part").on("click", {obj: this}, this.button_add_part);
+    $(".button_delete_part").on("click", {obj: this}, this.button_delete_part);
+
+
+    $(".button_move_up[data-partnumber=0]").attr("disabled", true);
+    $(".button_move_down[data-partnumber="+(this.get_parts_count()-1)+"]").attr("disabled", true);
   }
 
   advanced_hide() {
+    var biw = new BootstrapIconWrapper();
     $(".section_advanced").css('display', 'none');
+    $(".button_advanced").html(biw.chevron_down);
   }
 
-  advanced_toggle(event) {
-    var group = $(this).attr('data-groupnumber');
+  button_advanced_toggle(event) {
+    var biw = new BootstrapIconWrapper();
+    var part = $(this).attr('data-partnumber');
 
-    if ($(".section_advanced_"+group).css('display') == 'none') {
+    if ($(".section_advanced_"+part).css('display') == 'none') {
       event.data.obj.advanced_hide();
-      $(".section_advanced_"+group).css('display', 'flex');
+      $(".section_advanced_"+part).css('display', 'flex');
+      $(this).html(biw.chevron_up);
     }
     else {
-      $(".section_advanced_"+group).css('display', 'none');
+      $(".section_advanced_"+part).css('display', 'none');
+      $(this).html(biw.chevron_down);
     }
+  }
+
+  button_add_part(event) {
+    var part = parseInt($(this).attr('data-partnumber'));
+    event.data.obj.part_insert(part+1);
+  }
+
+  part_insert(part) {
+    var new_page_data = this.page_data;
+    new_page_data.parts.splice(part, 0, {});
+    this.set_data_internal(new_page_data, true);
+  }
+
+  button_move_up(event) {
+    var part = parseInt($(this).attr('data-partnumber'));
+    event.data.obj.part_move(part, part-1);
+  }
+
+  button_move_down(event) {
+    var part = parseInt($(this).attr('data-partnumber'));
+    event.data.obj.part_move(part, part+1);
+  }
+
+  part_move(part_from, part_to) {
+    console.log("move from "+part_from+" to "+part_to);
+    var tmp = this.page_data.parts[part_to];
+    this.page_data.parts[part_to] = this.page_data.parts[part_from];
+    this.page_data.parts[part_from] = tmp;
+    var new_page_data = this.page_data;
+    this.set_data_internal(new_page_data, true);
+  }
+
+  button_delete_part(event) {
+    var part = parseInt($(this).attr('data-partnumber'));
+    event.data.obj.part_delete(part);
+  }
+
+  part_delete(part) {
+    var new_page_data = this.page_data;
+    new_page_data.parts.splice(part, 1);
+    this.set_data_internal(new_page_data, true);
   }
 
   get_luma(hex_color) {
@@ -2457,9 +2622,7 @@ class PageContent {
 
     if (changed) {
       event.data.obj.page_data_has_changed = true;
-      if (event.data.obj.on_change_func != null) {
-        event.data.obj.on_change_func();
-      }
+      event.data.obj.on_change_call();
     }
   }
 
@@ -2502,18 +2665,41 @@ class PageContent {
     });
   }
 
+  activate_textarea_autoheight() {
+    $('textarea').off('input');
+
+    $('textarea').each(function () {
+      this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
+    }).on('input', function () {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+    });
+  }
+
   on_change(func) {
     this.on_change_func = func;
   }
 
-  set_data(data) {
+  on_change_call() {
+    if (this.on_change_func != null) {
+      this.on_change_func();
+    }
+  }
+
+  set_data_internal(data, data_has_changed) {
     this.page_data = data;
 
     this.render_editor();
     this.update_editor_values();
     this.activate_colorpicker();
+    this.activate_textarea_autoheight();
 
-    this.page_data_has_changed = false;
+    this.page_data_has_changed = data_has_changed;
+    this.on_change_call();
+  }
+
+  set_data(data) {
+    this.set_data_internal(data, false);
   }
 
   get_data() {
@@ -2572,9 +2758,9 @@ function set_data() {
       var data_obj = JSON.parse(data);
 
       if (data_obj.success) {
-        $("#button_publish").removeClass("btn-danger").addClass("btn-success");
+        $("#button_publish").addClass("btn-success");
         setTimeout(function() { $("#header_publish").hide(500); }, 2000)
-        setTimeout(function() { $("#button_publish").addClass("btn-danger").removeClass("btn-success")}, 2600);
+        setTimeout(function() { $("#button_publish").removeClass("btn-success")}, 2600);
       }
       else {
         alert("set_data() failed. See console");
@@ -2606,6 +2792,12 @@ $(document).ready(function () {
     get_data();
   });
 
+  $("#button_cancel").click(function () {
+    if (confirm("Are you sure you want to discard your changes?")) {
+      get_data();
+    }
+  });
+
   $("#button_publish").click(function () {
     set_data();
   });
@@ -2630,7 +2822,10 @@ $(document).ready(function () {
 <body>
   <header id="header_publish">
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-      <input type="button" value="Publish changes" id="button_publish" class="btn btn-primary btn-danger">
+      <div class="navbar-nav navbar-nav-center">
+        <input type="button" value="Publish changes" id="button_publish" class="btn btn-primary">
+        <input type="button" value="Cancel" id="button_cancel" class="btn btn-primary btn-secondary">
+      </div>
     </nav>
   </header>
 
@@ -2669,14 +2864,17 @@ $(document).ready(function () {
 
 <?php
 
+include_once("global_functions.php");
+
 class ShowPage {
   private $version = "";
 
-  function __construct($version, $datafile) {
+  function __construct($version, $datapath) {
     $this->version = $version;
+    $datafile = $datapath."/content.json";
 
     if (is_readable($datafile)) {
-      $page = new PageContent($datafile);
+      $page = new PageContent($datafile, $datapath);
 
       $this->render_header($page);
       $this->render_content($page);
@@ -2719,6 +2917,10 @@ class ShowPage {
     $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:title" content="###" />', $page->get_page_value('title')));
     $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:description" content="###" />', $page->get_page_value('description')));
 
+    if (strlen($page->get_page_value('image')) > 0) {
+      $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:image" content="###" />', get_my_url().$page->get_page_value('image')));
+    }
+
     ?>
     <!DOCTYPE html>
     <html>
@@ -2726,6 +2928,7 @@ class ShowPage {
       <?php echo(join("\n", $head_tags)."\n"); ?>
       <style>
         table { margin: 0 auto; }
+        img { max-width: 100%; }
       </style>
     </head>
     <body style="margin:0; padding: 0;

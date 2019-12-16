@@ -1,6 +1,6 @@
 <?php
 
-$VERSION = "Dummylander 0.2";
+$VERSION = "Dummylander 0.3";
 $DATAPATH = "data/";
 $ADMIN_PASSWORD = "secret";
 

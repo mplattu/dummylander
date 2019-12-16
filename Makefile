@@ -44,6 +44,9 @@ serve:
 	php -S 0.0.0.0:8080 -t dist/
 
 update-docs:
-	wget -O docs/index.html http://localhost:8080/index.php
-	if [ -d docs/data/ ]; then rm -fR docs/data/; fi
-	cp -r dist/data/ docs/
+	mkdir temp
+	cd temp; wget --mirror --convert-links http://localhost:8080/
+	rm -fR docs/*
+	mv temp/localhost:8080/* docs/
+	sed -i -- 's/http:\/\/localhost:8080\//http:\/\/dummylander.net\//g' docs/index.html
+	rm -fR temp/

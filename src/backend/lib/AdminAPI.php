@@ -5,8 +5,8 @@ class AdminAPI {
   private $function = null;
   private $data = null;
 
-  function __construct($data_file, $function, $data) {
-    $this->page_storage = new PageStorage($data_file);
+  function __construct($data_path, $function, $data) {
+    $this->page_storage = new PageStorage($data_path."/content.json");
     $this->function = $function;
     $this->data = $data;
   }

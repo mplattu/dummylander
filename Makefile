@@ -1,14 +1,25 @@
 .PHONY: update-libs
 
+PHPUNIT_PARAMS = --include-path src/backend/lib --verbose -d display_errors=On -d error_reporting=E_ALL
+
 update-libs:
+	mkdir -p src/backend/ext/
 	wget -O src/backend/ext/Parsedown.php https://raw.githubusercontent.com/erusev/parsedown/master/Parsedown.php
+
 	mkdir -p src/ui/ext/
 	wget -O src/ui/ext/jquery.min.js https://code.jquery.com/jquery-3.4.1.min.js
+
 	mkdir temp
 	wget -O temp/bootstrap-colorpicker.zip https://github.com/itsjavi/bootstrap-colorpicker/releases/download/3.1.2/bootstrap-colorpicker-v3.1.2-dist.zip
 	cd temp; unzip bootstrap-colorpicker.zip
 	cp temp/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js src/ui/ext/
 	cp temp/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css src/ui/ext/
+	rm -fR temp/
+
+	mkdir temp
+	wget -O temp/bootstrap-icons.zip https://github.com/twbs/icons/archive/v1.0.0-alpha.zip
+	cd temp; unzip bootstrap-icons.zip
+	mv temp/icons-1.0.0-alpha/icons/ src/ui/ext/
 	rm -fR temp/
 
 lint:
@@ -19,7 +30,11 @@ lint:
 	php -l src/backend/lib/ShowPage.php
 	php -l src/backend/index.php
 
-build: lint
+test:
+	phpunit $(PHPUNIT_PARAMS) src/backend/test/global_functions_test.php
+	phpunit $(PHPUNIT_PARAMS) src/backend/test/PageContent_test.php
+
+build: lint test
 	if [ ! -d dist/data/ ]; then mkdir -p dist/data/; fi
 	perl include.pl root.php >dist/index.php
 	php -l dist/index.php
@@ -27,3 +42,8 @@ build: lint
 
 serve:
 	php -S 0.0.0.0:8080 -t dist/
+
+update-docs:
+	wget -O docs/index.html http://localhost:8080/index.php
+	if [ -d docs/data/ ]; then rm -fR docs/data/; fi
+	cp -r dist/data/ docs/

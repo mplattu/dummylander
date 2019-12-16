@@ -1,8 +1,9 @@
 {
   "page_values": {
     "title": "Page Title",
-    "favicon-ico": "data/favicon.ico",
+    "favicon-ico": "favicon.ico",
     "description": "Description text which may appear in search engines etc.",
+    "image": "favicon.ico",
     "style-css": "a:link {color:inherit} a:visited {color:inherit} a:hover { text-decoration-color: red }"
   },
   "parts": [
@@ -11,7 +12,7 @@
       "padding": "40px",
       "height": "400px",
       "color": "#FFFFFF",
-      "background-image": "data/sample.jpg",
+      "background-image": "sample.jpg",
       "text": "# Dummylander Sample Page"
     },
     {
@@ -28,6 +29,9 @@
     {
       "font-family-google": "Rajdhani",
       "text": "## Tables\n\nTables are particulary easy to create with markdown syntax:\n\n| Service | Price |\n| ------- | ------- |\n| Some Service | 25 € |\n| Some other service | 35 € |\n| A third service | 55 € | \n"
+    },
+    {
+      "text": "## Images\n\nMarkdown syntax allows you to add images:\n\n![Alternative text!](favicon.ico)"
     },
     {
       "text": "## HTML\n\nYou are not limited to the quick and easy markdown syntax. [The syntax](https://www.markdownguide.org/cheat-sheet) allows you to embed HTML tags. Here we have a clickable image:\n\n[<img src='data/DuckDuckGo-DaxSolo.svg' width=\"50px\" height=\"50px\">](https://duckduckgo.com/)"

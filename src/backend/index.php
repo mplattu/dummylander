@@ -1,7 +1,7 @@
 <?php
 
-$VERSION = "Dummylander 0.2";
-$DATAFILE = "data/content.json";
+$VERSION = "Dummylander 0.3";
+$DATAPATH = "data/";
 $ADMIN_PASSWORD = "secret";
 
 // Log levels:
@@ -15,34 +15,18 @@ if (@$_SERVER['QUERY_STRING'] == "admin") {
   $admin_ui = new ShowAdminUI();
 }
 elseif (@$_POST['password'] != "" and $_POST['password'] == $ADMIN_PASSWORD) {
-  $admin_api = new AdminAPI($DATAFILE, @$_POST['function'], @$_POST['data']);
+  $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), @$_POST['function'], @$_POST['data']);
   echo($admin_api->execute());
 }
 elseif (@$_POST['password'] != "") {
-  $admin_api = new AdminAPI($DATAFILE, 'loginfailed', null);
+  $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'loginfailed', null);
   echo($admin_api->execute());
 }
 else {
-  $show_page = new ShowPage($VERSION, $DATAFILE);
+  $show_page = new ShowPage($VERSION, remove_trailing_slash($DATAPATH));
 }
 
 // Normal termination
 exit(0);
-
-
-function log_message ($message, $exit_level = null, $log_level=null) {
-  global $LOG_LEVEL;
-
-  // Write log message to server log
-  if ($log_level <= $LOG_LEVEL) {
-    error_log($message, 4);
-  }
-
-  if (!is_null($exit_level)) {
-    exit($exit_level);
-  }
-}
-
-
 
 ?>

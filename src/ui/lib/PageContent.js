@@ -1,3 +1,5 @@
+<!-- include:src/ui/lib/BootstrapIconWrapper.js -->
+
 class PageContent {
   constructor(page_content_id) {
     this.page_data = null;
@@ -17,6 +19,7 @@ class PageContent {
       'title': 'Title',
       'favicon-ico': 'Favicon (URL)',
       'description': 'Description',
+      'image': 'Sharing Image',
       'keywords': 'Keywords',
       'style-css': 'Custom CSS'
     };
@@ -76,6 +79,7 @@ class PageContent {
 
   render_editor_fields_section(n) {
     var html = [];
+    var biw = new BootstrapIconWrapper();
 
     var name_advanced = "section_advanced section_advanced_"+n;
 
@@ -83,7 +87,13 @@ class PageContent {
 
     var name='section_'+n+'_text';
     html.push('<div class="row"><div class="col-12"><label for="'+name+'" class="label_text">Text</label>'+this.render_editor_input('text', name)+'</div></div>');
-    html.push('<div class="row"><div class="col-12"><button type="button" class="btn btn-secondary btn-sm button_advanced" data-groupnumber="'+n+'">Show more</a></div></div>')
+    html.push('<div class="row"><div class="col-12">');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_advanced" data-partnumber="'+n+'">'+biw.chevron_down+'</button>');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_move_down" data-partnumber="'+n+'">'+biw.arrow_down+'</button>');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_move_up" data-partnumber="'+n+'">'+biw.arrow_up+'</button>');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_add_part" data-partnumber="'+n+'">'+biw.plus+'</button>');
+    html.push('<button type="button" class="btn btn-danger btn-sm button_part button_delete_part" data-partnumber="'+n+'">'+biw.trash+'</button>');
+    html.push('</div></div>');
 
     for (var field in this.fields.section_values) {
       var name = 'section_'+n+'_'+field;
@@ -130,23 +140,77 @@ class PageContent {
     $(".page_field").on('keyup', {obj: this}, this.update_object_value);
     $(".section_field").on('keyup', {obj: this}, this.update_object_value);
 
-    $(".button_advanced").on("click", {obj: this}, this.advanced_toggle);
+    $(".button_advanced").on("click", {obj: this}, this.button_advanced_toggle);
+    $(".button_move_down").on("click", {obj: this}, this.button_move_down);
+    $(".button_move_up").on("click", {obj: this}, this.button_move_up);
+    $(".button_add_part").on("click", {obj: this}, this.button_add_part);
+    $(".button_delete_part").on("click", {obj: this}, this.button_delete_part);
+
+
+    $(".button_move_up[data-partnumber=0]").attr("disabled", true);
+    $(".button_move_down[data-partnumber="+(this.get_parts_count()-1)+"]").attr("disabled", true);
   }
 
   advanced_hide() {
+    var biw = new BootstrapIconWrapper();
     $(".section_advanced").css('display', 'none');
+    $(".button_advanced").html(biw.chevron_down);
   }
 
-  advanced_toggle(event) {
-    var group = $(this).attr('data-groupnumber');
+  button_advanced_toggle(event) {
+    var biw = new BootstrapIconWrapper();
+    var part = $(this).attr('data-partnumber');
 
-    if ($(".section_advanced_"+group).css('display') == 'none') {
+    if ($(".section_advanced_"+part).css('display') == 'none') {
       event.data.obj.advanced_hide();
-      $(".section_advanced_"+group).css('display', 'flex');
+      $(".section_advanced_"+part).css('display', 'flex');
+      $(this).html(biw.chevron_up);
     }
     else {
-      $(".section_advanced_"+group).css('display', 'none');
+      $(".section_advanced_"+part).css('display', 'none');
+      $(this).html(biw.chevron_down);
     }
+  }
+
+  button_add_part(event) {
+    var part = parseInt($(this).attr('data-partnumber'));
+    event.data.obj.part_insert(part+1);
+  }
+
+  part_insert(part) {
+    var new_page_data = this.page_data;
+    new_page_data.parts.splice(part, 0, {});
+    this.set_data_internal(new_page_data, true);
+  }
+
+  button_move_up(event) {
+    var part = parseInt($(this).attr('data-partnumber'));
+    event.data.obj.part_move(part, part-1);
+  }
+
+  button_move_down(event) {
+    var part = parseInt($(this).attr('data-partnumber'));
+    event.data.obj.part_move(part, part+1);
+  }
+
+  part_move(part_from, part_to) {
+    console.log("move from "+part_from+" to "+part_to);
+    var tmp = this.page_data.parts[part_to];
+    this.page_data.parts[part_to] = this.page_data.parts[part_from];
+    this.page_data.parts[part_from] = tmp;
+    var new_page_data = this.page_data;
+    this.set_data_internal(new_page_data, true);
+  }
+
+  button_delete_part(event) {
+    var part = parseInt($(this).attr('data-partnumber'));
+    event.data.obj.part_delete(part);
+  }
+
+  part_delete(part) {
+    var new_page_data = this.page_data;
+    new_page_data.parts.splice(part, 1);
+    this.set_data_internal(new_page_data, true);
   }
 
   get_luma(hex_color) {
@@ -212,9 +276,7 @@ class PageContent {
 
     if (changed) {
       event.data.obj.page_data_has_changed = true;
-      if (event.data.obj.on_change_func != null) {
-        event.data.obj.on_change_func();
-      }
+      event.data.obj.on_change_call();
     }
   }
 
@@ -257,18 +319,41 @@ class PageContent {
     });
   }
 
+  activate_textarea_autoheight() {
+    $('textarea').off('input');
+
+    $('textarea').each(function () {
+      this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
+    }).on('input', function () {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+    });
+  }
+
   on_change(func) {
     this.on_change_func = func;
   }
 
-  set_data(data) {
+  on_change_call() {
+    if (this.on_change_func != null) {
+      this.on_change_func();
+    }
+  }
+
+  set_data_internal(data, data_has_changed) {
     this.page_data = data;
 
     this.render_editor();
     this.update_editor_values();
     this.activate_colorpicker();
+    this.activate_textarea_autoheight();
 
-    this.page_data_has_changed = false;
+    this.page_data_has_changed = data_has_changed;
+    this.on_change_call();
+  }
+
+  set_data(data) {
+    this.set_data_internal(data, false);
   }
 
   get_data() {

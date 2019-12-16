@@ -1,13 +1,16 @@
 <?php
 
+include_once("global_functions.php");
+
 class ShowPage {
   private $version = "";
 
-  function __construct($version, $datafile) {
+  function __construct($version, $datapath) {
     $this->version = $version;
+    $datafile = $datapath."/content.json";
 
     if (is_readable($datafile)) {
-      $page = new PageContent($datafile);
+      $page = new PageContent($datafile, $datapath);
 
       $this->render_header($page);
       $this->render_content($page);
@@ -50,6 +53,10 @@ class ShowPage {
     $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:title" content="###" />', $page->get_page_value('title')));
     $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:description" content="###" />', $page->get_page_value('description')));
 
+    if (strlen($page->get_page_value('image')) > 0) {
+      $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:image" content="###" />', get_my_url().$page->get_page_value('image')));
+    }
+
     ?>
     <!DOCTYPE html>
     <html>
@@ -57,6 +64,7 @@ class ShowPage {
       <?php echo(join("\n", $head_tags)."\n"); ?>
       <style>
         table { margin: 0 auto; }
+        img { max-width: 100%; }
       </style>
     </head>
     <body style="margin:0; padding: 0;

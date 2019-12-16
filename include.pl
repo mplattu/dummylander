@@ -38,6 +38,14 @@ sub read_file {
     $raw =~ s/$inc_tag/$new_content/;
   }
 
+  while ($raw =~ /(\<!\-\- include-jsesc\:([^ ]+) \-\-\>)/) {
+    my $inc_filename = $2;
+    my $inc_tag = $1;
+    my $new_content = read_file($inc_filename);
+    $new_content =~ s/\n/ \\\n/g;
+    $raw =~ s/$inc_tag/$new_content/;
+  }
+
   return $raw;
 }
 

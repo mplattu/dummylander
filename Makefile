@@ -42,3 +42,8 @@ build: lint test
 
 serve:
 	php -S 0.0.0.0:8080 -t dist/
+
+update-docs:
+	wget -O docs/index.html http://localhost:8080/index.php
+	if [ -d docs/data/ ]; then rm -fR docs/data/; fi
+	cp -r dist/data/ docs/

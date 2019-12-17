@@ -2,6 +2,7 @@
 
 class PageContent {
   constructor(page_content_id) {
+    this.TEXTAREA_MAX_HEIGHT = 400;
     this.page_data = null;
     this.page_content_id = page_content_id;
     this.on_change_func = null;
@@ -322,8 +323,14 @@ class PageContent {
   activate_textarea_autoheight() {
     $('textarea').off('input');
 
+    var obj = this;
+
     $('textarea').each(function () {
-      this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
+      var new_height = this.scrollHeight;
+      if (new_height > obj.TEXTAREA_MAX_HEIGHT) {
+        new_height = obj.TEXTAREA_MAX_HEIGHT;
+      }
+      this.setAttribute('style', 'height:' + (new_height) + 'px;overflow-y:hidden;');
     }).on('input', function () {
       this.style.height = 'auto';
       this.style.height = (this.scrollHeight) + 'px';

@@ -27,6 +27,9 @@ function get_data() {
         $("#password").val('');
         setTimeout(function () { $("#password").focus(); }, 1);
         console.error("get_data() failed. Retrieved data:", data_obj);
+        if (data_obj.message != "") {
+          alert(data_obj.message);
+        }
       }
     })
     .fail(function(data) {

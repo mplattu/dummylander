@@ -11,13 +11,18 @@ class AdminAPI {
     $this->data = $data;
   }
 
-  private function get_return_data($success, $data = null) {
+  private function get_return_data($success, $data = null, $message = null) {
     $return_data = Array(
-      'success' => $success
+      'success' => $success,
+      'message' => ''
     );
 
     if (!is_null($data)) {
       $return_data['data'] = $data;
+    }
+
+    if (!is_null($message)) {
+      $return_data['message'] = $message;
     }
 
     return json_encode($return_data);
@@ -43,7 +48,7 @@ class AdminAPI {
     }
 
     if ($this->function == "loginfailed") {
-      return $this->get_return_data(false);
+      return $this->get_return_data(false, null, $this->data);
     }
   }
 }

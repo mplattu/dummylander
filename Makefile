@@ -31,10 +31,18 @@ lint:
 	php -l src/backend/index.php
 
 test:
+	php -l src/backend/test/global_functions_test.php
 	phpunit $(PHPUNIT_PARAMS) src/backend/test/global_functions_test.php
+	php -l src/backend/test/PageContent_test.php
 	phpunit $(PHPUNIT_PARAMS) src/backend/test/PageContent_test.php
+	php -l src/backend/test/AdminAuth_test.php
+	phpunit $(PHPUNIT_PARAMS) src/backend/test/AdminAuth_test.php
 
-build: lint test
+localpassword:
+	if [ ! -f dist/localpassword.php ]; then cp src/backend/localpassword.php dist/; fi
+	php -l dist/localpassword.php
+
+build: lint test localpassword
 	if [ ! -d dist/data/ ]; then mkdir -p dist/data/; fi
 	perl include.pl root.php >dist/index.php
 	php -l dist/index.php

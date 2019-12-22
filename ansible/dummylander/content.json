@@ -4,5 +4,9 @@
     "description": "Description text which may appear in search engines etc.",
     "style-css": "a:link {color:inherit} a:visited {color:inherit} a:hover { text-decoration-color: red }"
   },
-  "parts": []
+  "parts": [
+    {
+      "text": "# Dummylander Hello World!"
+    }
+  ]
 }

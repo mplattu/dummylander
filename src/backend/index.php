@@ -1,7 +1,7 @@
 <?php
 
 $AUTH_METHODS = Array(
-  'file' => 'localpassword.php'
+  'file' => 'settings.php'
 );
 
 $VERSION = "Dummylander 0.3";

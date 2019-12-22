@@ -38,11 +38,11 @@ test:
 	php -l src/backend/test/AdminAuth_test.php
 	phpunit $(PHPUNIT_PARAMS) src/backend/test/AdminAuth_test.php
 
-localpassword:
-	if [ ! -f dist/localpassword.php ]; then cp src/backend/localpassword.php dist/; fi
-	php -l dist/localpassword.php
+settings:
+	if [ ! -f dist/settings.php ]; then cp src/backend/settings.php dist/; fi
+	php -l dist/settings.php
 
-build: lint test localpassword
+build: lint test settings
 	if [ ! -d dist/data/ ]; then mkdir -p dist/data/; fi
 	perl include.pl root.php >dist/index.php
 	php -l dist/index.php

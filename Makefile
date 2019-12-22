@@ -31,10 +31,18 @@ lint:
 	php -l src/backend/index.php
 
 test:
+	php -l src/backend/test/global_functions_test.php
 	phpunit $(PHPUNIT_PARAMS) src/backend/test/global_functions_test.php
+	php -l src/backend/test/PageContent_test.php
 	phpunit $(PHPUNIT_PARAMS) src/backend/test/PageContent_test.php
+	php -l src/backend/test/AdminAuth_test.php
+	phpunit $(PHPUNIT_PARAMS) src/backend/test/AdminAuth_test.php
 
-build: lint test
+settings:
+	if [ ! -f dist/settings.php ]; then cp src/backend/settings.php dist/; fi
+	php -l dist/settings.php
+
+build: lint test settings
 	if [ ! -d dist/data/ ]; then mkdir -p dist/data/; fi
 	perl include.pl root.php >dist/index.php
 	php -l dist/index.php
@@ -44,6 +52,10 @@ serve:
 	php -S 0.0.0.0:8080 -t dist/
 
 update-docs:
-	wget -O docs/index.html http://localhost:8080/index.php
-	if [ -d docs/data/ ]; then rm -fR docs/data/; fi
-	cp -r dist/data/ docs/
+	mkdir temp
+	cd temp; wget --mirror --convert-links http://localhost:8080/
+	rm docs/index.html
+	rm -fR docs/data/
+	mv temp/localhost:8080/* docs/
+	sed -i -- 's/http:\/\/localhost:8080\//http:\/\/dummylander.net\//g' docs/index.html
+	rm -fR temp/

@@ -1,0 +1,29 @@
+  - name: install certbot
+    apt:
+      name: certbot
+      state: present
+      update_cache: yes
+
+  - name: stop nginx to release ports 80 and 443 to certbot
+    service:
+      name: nginx
+      state: stopped
+    when: certbot_email is defined
+    notify:
+    - restart nginx
+
+  - name: obtain letsencrypt certificate
+    shell: "certbot certonly --standalone -n -m {{ certbot_email }} --agree-tos -d {{ domains | join(' -d ') }}"
+    args:
+      creates: /etc/letsencrypt/live/{{ domains[0] }}/fullchain.pem
+    when: certbot_email is defined
+
+  - name: install renew cronjob script
+    copy:
+      src: certbot/certbot
+      dest: /etc/cron.daily/certbot
+      mode: 0755
+      owner: root
+      group: root
+      force: no
+    when: certbot_email is defined

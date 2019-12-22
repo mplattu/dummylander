@@ -1,0 +1,19 @@
+  - name: install openssl
+    apt:
+      name: openssl
+      update_cache: yes
+  - name: install python-openssl
+    apt:
+      name: python-openssl
+      update_cache: yes
+  - name: create common ssl files directory
+    file:
+      path: "{{ dummypath }}ssl/"
+      state: directory
+  - name: create dhparam
+    openssl_dhparam:
+      path: "{{ dummypath }}ssl/dhparam.pem"
+  - name: create session ticket key
+    shell: openssl rand 48 >{{ dummypath }}ssl/ticket.key
+    args:
+      creates: "{{ dummypath }}ssl/ticket.key"

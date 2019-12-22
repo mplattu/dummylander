@@ -1,0 +1,44 @@
+  - name: install packages required to install dummylander
+    apt:
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+        - wget
+
+  - name: "create dummylander data directory"
+    file:
+      path: "{{ dummypath }}{{ domains[0] }}/webroot/data/"
+      state: directory
+      owner: www-data
+      group: www-data
+      mode: '0755'
+
+  - name: "download latest dummylander index.php"
+    get_url:
+      url: https://raw.githubusercontent.com/mplattu/dummylander/master/dist/index.php
+      dest: "{{ dummypath }}{{ domains[0] }}/webroot/index.php"
+      owner: root
+      group: root
+      mode: '0755'
+      force: yes
+
+  - name: "copy settings.php"
+    template:
+      src: dummylander/settings.php.j2
+      dest: "{{ dummypath }}{{ domains[0] }}/webroot/settings.php"
+      owner: root
+      group: root
+      mode: '0755'
+      force: yes
+    when:
+      dummypass is defined
+
+  - name: "copy content.json"
+    template:
+      src: dummylander/content.json
+      dest: "{{ dummypath }}{{ domains[0] }}/webroot/data/content.json"
+      owner: www-data
+      group: www-data
+      mode: '0644'

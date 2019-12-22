@@ -1,0 +1,39 @@
+---
+- hosts: dummylander
+  remote_user: admin
+  become: yes
+  become_method: su
+  become_user: root
+  vars:
+    dummypath: /opt/dummylander/
+    required_variables:
+    - domains
+
+  tasks:
+  - name: check required variables
+    fail: "Required variable '{{item}}' is not defined"
+    when: item not in vars
+    with_items: "{{required_variables}}"
+
+  - name: create dummylander directory
+    file:
+      path: "{{ dummypath }}"
+      state: directory
+
+  - name: install nginx configuration
+    include: install.nginxconf.yml
+
+  - name: install ssl files
+    include: install.ssl.yml
+
+  - name: install certbot and obtain certificate
+    include: install.certbot.yml
+
+  - name: install dummylander
+    include: install.dummylander.yml
+
+  handlers:
+  - name: restart nginx
+    service:
+      name=nginx
+      state=restarted

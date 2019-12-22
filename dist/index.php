@@ -1,8 +1,11 @@
 <?php
 
-$VERSION = "Dummylander 0.3";
+$AUTH_METHODS = Array(
+  'file' => 'settings.php'
+);
+
+$VERSION = "Dummylander 0.4";
 $DATAPATH = "data/";
-$ADMIN_PASSWORD = "secret";
 
 // Log levels:
 // 0 - fatal errors
@@ -10,17 +13,36 @@ $ADMIN_PASSWORD = "secret";
 // 2 - everything
 $LOG_LEVEL = 1;
 
+$admin_auth = new AdminAuth($AUTH_METHODS);
+
 log_message("QUERY_STRING:".@$_SERVER['QUERY_STRING'], null, 2);
 if (@$_SERVER['QUERY_STRING'] == "admin") {
   $admin_ui = new ShowAdminUI();
 }
-elseif (@$_POST['password'] != "" and $_POST['password'] == $ADMIN_PASSWORD) {
-  $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), @$_POST['function'], @$_POST['data']);
-  echo($admin_api->execute());
-}
 elseif (@$_POST['password'] != "") {
-  $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'loginfailed', null);
-  echo($admin_api->execute());
+  $is_admin = false;
+  $admin_message = null;
+
+  try {
+    $is_admin = $admin_auth->is_admin($_POST['password']);
+  }
+  catch (Exception $e) {
+    $admin_message = $e->getMessage();
+    log_message("Authentication error: ".$admin_message);
+  }
+
+  if (is_null($admin_message)) {
+    $admin_message = $admin_auth->get_last_error();
+  }
+
+  if ($is_admin) {
+    $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), @$_POST['function'], @$_POST['data']);
+    echo($admin_api->execute());
+  }
+  else {
+    $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'loginfailed', $admin_message);
+    echo($admin_api->execute());
+  }
 }
 else {
   $show_page = new ShowPage($VERSION, remove_trailing_slash($DATAPATH));
@@ -2071,13 +2093,18 @@ class AdminAPI {
     $this->data = $data;
   }
 
-  private function get_return_data($success, $data = null) {
+  private function get_return_data($success, $data = null, $message = null) {
     $return_data = Array(
-      'success' => $success
+      'success' => $success,
+      'message' => ''
     );
 
     if (!is_null($data)) {
       $return_data['data'] = $data;
+    }
+
+    if (!is_null($message)) {
+      $return_data['message'] = $message;
     }
 
     return json_encode($return_data);
@@ -2103,8 +2130,102 @@ class AdminAPI {
     }
 
     if ($this->function == "loginfailed") {
-      return $this->get_return_data(false);
+      return $this->get_return_data(false, null, $this->data);
     }
+  }
+}
+
+?>
+
+<?php
+
+class AdminAuth {
+  private $methods;
+  private $last_error;
+
+  function __construct($methods) {
+    if (!is_array($methods) or sizeof($methods) < 1) {
+      $this->raise_exception("AdminAuth requires authentication methods as an array");
+      $this->methods = null;
+    }
+    else {
+      $this->methods = $methods;
+    }
+    $this->last_error = null;
+  }
+
+  private function log_message($message) {
+    log_message("AdminAuth error: ".$message);
+  }
+
+  private function set_last_error($message) {
+    $this->last_error = $message;
+    $this->log_message($message);
+  }
+
+  private function raise_exception($message) {
+    $this->set_last_error($message);
+    throw new Exception($message);
+  }
+
+  function get_last_error() {
+    $error = $this->last_error;
+    $this->last_error = null;
+    return $error;
+  }
+
+  function is_admin($password) {
+    if (is_null($this->methods)) {
+      $this->raise_exception("No authentication methods defined");
+    }
+
+    foreach ($this->methods as $method => $param) {
+      $auth_success = $this->is_admin_method($method, $param, $password);
+      if ($auth_success) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private function is_admin_method($method, $method_param, $authentication) {
+    if ($method == "file") {
+      return $this->is_admin_file($method_param, $authentication);
+    }
+
+    $this->raise_exception("Unknown authentication method: ".$method);
+  }
+
+  private function is_admin_file($filename, $password) {
+    if (!file_exists($filename)) {
+      return false;
+    }
+
+    if (!is_readable($filename)) {
+      $this->set_last_error("Authentication password file $filename is not readable");
+      return false;
+    }
+
+    $file = file_get_contents($filename);
+
+    if (preg_match('/\$ADMIN_PASSWORD\s*=\s*"(.*)"/', $file, $matches)) {
+      $file_password = $matches[1];
+
+      if ($file_password === "") {
+        $this->set_last_error("Password in $filename has not been set");
+        return false;
+      }
+
+      if ($file_password === $password) {
+        return true;
+      }
+
+      return false;
+    }
+
+    $this->set_last_error("Authentication password file $filename is not in valid format");
+    return false;
   }
 }
 
@@ -2348,6 +2469,7 @@ class BootstrapIconWrapper {
 
 class PageContent {
   constructor(page_content_id) {
+    this.TEXTAREA_MAX_HEIGHT = 400;
     this.page_data = null;
     this.page_content_id = page_content_id;
     this.on_change_func = null;
@@ -2668,8 +2790,14 @@ class PageContent {
   activate_textarea_autoheight() {
     $('textarea').off('input');
 
+    var obj = this;
+
     $('textarea').each(function () {
-      this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
+      var new_height = this.scrollHeight;
+      if (new_height > obj.TEXTAREA_MAX_HEIGHT) {
+        new_height = obj.TEXTAREA_MAX_HEIGHT;
+      }
+      this.setAttribute('style', 'height:' + (new_height) + 'px;overflow-y:hidden;');
     }).on('input', function () {
       this.style.height = 'auto';
       this.style.height = (this.scrollHeight) + 'px';
@@ -2734,6 +2862,9 @@ function get_data() {
         $("#password").val('');
         setTimeout(function () { $("#password").focus(); }, 1);
         console.error("get_data() failed. Retrieved data:", data_obj);
+        if (data_obj.message != "") {
+          alert(data_obj.message);
+        }
       }
     })
     .fail(function(data) {

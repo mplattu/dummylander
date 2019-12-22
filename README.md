@@ -48,7 +48,7 @@ returns an empty page.
 ## Installing by Ansible
 
 The Ansible install scripts are provided in `ansible/`. The scripts work for Debian 9
-with nginx and PHP-FPM 7.2 installed. The scripts are useful if you'd like i.e. to
+and 10 with nginx and PHP-FPM installed. The scripts are useful if you'd like i.e. to
 serve several Dummylander sites on one host without setting each host manually.
 
 The script does following things for you:

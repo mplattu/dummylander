@@ -1,3 +1,4 @@
+<!-- include:src/backend/lib/global_consts.php -->
 <!-- include:src/backend/index.php -->
 <!-- include:src/backend/ext/Parsedown.php -->
 ?>

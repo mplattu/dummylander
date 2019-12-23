@@ -20,6 +20,7 @@ function get_data() {
 
       if (data_obj.success) {
         $("#login_content").hide();
+        mode_edit();
         page_content.set_data(data_obj.data);
       }
       else {
@@ -56,7 +57,7 @@ function set_data() {
       if (data_obj.success) {
         $("#button_publish").addClass("btn-success");
         setTimeout(function() { $("#header_publish").hide(500); }, 2000)
-        setTimeout(function() { $("#button_publish").removeClass("btn-success")}, 2600);
+        setTimeout(function() { $("#button_publish").removeClass("btn-success"); mode_edit(); }, 2600);
       }
       else {
         alert("set_data() failed. See console");
@@ -67,6 +68,56 @@ function set_data() {
       alert("set_data() failed. See console");
       console.error("set_data() failed. Data:", data);
     });
+}
+
+function mode_preview() {
+  var post_data = {
+    type: "POST",
+    url: SERVER_URL,
+    data: {
+      password: $("#password").val(),
+      function: "preview",
+      data: JSON.stringify(page_content.get_data())
+    }
+  };
+
+  var jqxhr = $.post(post_data)
+    .done(function(data) {
+      var data_obj = JSON.parse(data);
+
+      if (data_obj.success) {
+        $("#page_content_preview").html(data_obj.data.html);
+
+        // Handle Google font CSS links
+        $("[href*='https://fonts.googleapis.com/css?family='][rel='stylesheet']").remove();
+        $("head").append(data_obj.data.head);
+
+        $("#page_content_preview").show();
+        $("#page_content_edit").hide();
+
+        $("#button_preview_mode").addClass("btn-success");
+        setTimeout(function() {
+          $("#button_preview_mode").removeClass("btn-success").hide();
+          $("#button_edit_mode").show();
+        }, 2600);
+      }
+      else {
+        alert("update_preview() failed. See console");
+        console.error("update_preview() failed. Data:", data_obj);
+      }
+    })
+    .fail(function(data) {
+      alert("update_preview() failed. See console");
+      console.error("update_preview() failed. Data:", data);
+    });
+}
+
+function mode_edit() {
+  $("#button_edit_mode").hide();
+  $("#button_preview_mode").show();
+
+  $("#page_content_preview").hide();
+  $("#page_content_edit").show();
 }
 
 function update_header_publish() {
@@ -81,11 +132,20 @@ function update_header_publish() {
 $(document).ready(function () {
   console.log("AdminUI.js is ready!");
   $("#header_publish").hide();
+  mode_edit();
 
-  page_content = new PageContent("#page_content");
+  page_content = new PageContent("#page_content_edit");
 
   $("#button_login").click(function () {
     get_data();
+  });
+
+  $("#button_edit_mode").click(function() {
+    mode_edit();
+  });
+
+  $("#button_preview_mode").click(function () {
+    mode_preview();
   });
 
   $("#button_cancel").click(function () {

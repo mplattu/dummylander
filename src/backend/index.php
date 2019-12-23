@@ -1,12 +1,5 @@
 <?php
 
-$AUTH_METHODS = Array(
-  'file' => 'settings.php'
-);
-
-$VERSION = "Dummylander 0.4";
-$DATAPATH = "data/";
-
 // Log levels:
 // 0 - fatal errors
 // 1 - some messages
@@ -46,6 +39,7 @@ elseif (@$_POST['password'] != "") {
 }
 else {
   $show_page = new ShowPage($VERSION, remove_trailing_slash($DATAPATH));
+  echo($show_page->get_html_page());
 }
 
 // Normal termination

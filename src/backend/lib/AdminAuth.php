@@ -4,7 +4,7 @@ class AdminAuth {
   private $methods;
   private $last_error;
 
-  function __construct($methods) {
+  function __construct($methods=null) {
     if (!is_array($methods) or sizeof($methods) < 1) {
       $this->raise_exception("AdminAuth requires authentication methods as an array");
       $this->methods = null;

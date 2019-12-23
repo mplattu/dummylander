@@ -37,6 +37,8 @@ test:
 	phpunit $(PHPUNIT_PARAMS) src/backend/test/PageContent_test.php
 	php -l src/backend/test/AdminAuth_test.php
 	phpunit $(PHPUNIT_PARAMS) src/backend/test/AdminAuth_test.php
+	php -l src/backend/test/AdminAPI_test.php
+	cd dist; TEST_MY_URL=http://localhost:8080/ phpunit $(PHPUNIT_PARAMS) ../src/backend/test/AdminAPI_test.php
 
 settings:
 	if [ ! -f dist/settings.php ]; then cp src/backend/settings.php dist/; fi

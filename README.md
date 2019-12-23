@@ -15,6 +15,7 @@ Superdupersimple landing page administration tool.
  * The most essential page properties (title, description, keywords, og:image, custom CSS) can be edited.
  * The most essential page part properties (MD-formatted text, images, fonts, font colors) can be edited.
  * You can add, remove and move page parts.
+ * You can see page preview before publishing.
 
 ## This does not work yet
 
@@ -44,6 +45,15 @@ returns an empty page.
  * If you get error 404 (Not found) make sure you entered the URL correctly and
    you really have uploaded the `settings.php` to your server.
  * If you see the file content the PHP settings of the server are not correctly set.
+
+## Building
+
+To build Dummylander you need to have:
+ * PHP (7 or above, Debian packages `php-cli php-mbstring`)
+ * phpunit (6 or above, Debian package `phpunit`)
+ * Perl modules JSON::XS (Debian package `libjson-xs-perl`)
+ * `make update-libs`
+ * `make build`
 
 ## Installing by Ansible
 

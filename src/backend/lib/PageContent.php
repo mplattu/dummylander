@@ -16,9 +16,18 @@ class PageContent {
     )
   );
 
-  public function __construct($data_file, $data_path = "") {
-    $json = file_get_contents($data_file);
-    $this->page_data = json_decode($json, true);
+  public function __construct($page_data, $data_path = "") {
+    // By default the $page_data is a JSON-encoded string
+    $page_data_obj = json_decode($page_data, true);
+    if (is_null($page_data_obj)) {
+      // $page_data was not a JSON-formatted string, treat it as a filename
+      $json = file_get_contents($page_data);
+      $this->page_data = json_decode($json, true);
+    }
+    else {
+      // $page_data was a JSON-formatted string
+      $this->page_data = $page_data_obj;
+    }
     $this->data_path = $data_path;
   }
 

@@ -20,6 +20,7 @@ function get_data() {
 
       if (data_obj.success) {
         $("#login_content").hide();
+        $("#header_publish").show();
         mode_edit();
         page_content.set_data(data_obj.data);
       }
@@ -56,8 +57,7 @@ function set_data() {
 
       if (data_obj.success) {
         $("#button_publish").addClass("btn-success");
-        setTimeout(function() { $("#header_publish").hide(500); }, 2000)
-        setTimeout(function() { $("#button_publish").removeClass("btn-success"); mode_edit(); }, 2600);
+        setTimeout(function() { $("#button_publish").removeClass("btn-success"); mode_edit(); }, 1000);
       }
       else {
         alert("set_data() failed. See console");
@@ -95,11 +95,8 @@ function mode_preview() {
         $("#page_content_preview").show();
         $("#page_content_edit").hide();
 
-        $("#button_preview_mode").addClass("btn-success");
-        setTimeout(function() {
-          $("#button_preview_mode").removeClass("btn-success").hide();
-          $("#button_edit_mode").show();
-        }, 2600);
+        $("#button_preview_mode").hide();
+        $("#button_edit_mode").show();
       }
       else {
         alert("update_preview() failed. See console");
@@ -118,20 +115,27 @@ function mode_edit() {
 
   $("#page_content_preview").hide();
   $("#page_content_edit").show();
+
+  $(".container").css('padding-top',$("#header_publish_inner").height()+50);
 }
 
 function update_header_publish() {
   if (page_content.page_data_has_changed) {
-    $("#header_publish").show();
+    $("#button_publish").prop("disabled", false);
+    $("#button_cancel").prop("disabled", false);
   }
   else {
-    $("#header_publish").hide();
+    $("#button_publish").prop("disabled", true);
+    $("#button_cancel").prop("disabled", true);
   }
 }
 
 $(document).ready(function () {
   console.log("AdminUI.js is ready!");
+
+  // Header is show after successful login
   $("#header_publish").hide();
+
   mode_edit();
 
   page_content = new PageContent("#page_content_edit");

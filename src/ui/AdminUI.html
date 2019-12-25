@@ -10,7 +10,6 @@
   <style>
     <!-- include:src/ui/ext/bootstrap-colorpicker.min.css -->
 
-    .container { padding-top: 50px; }
     #message_loginfailed { display: none; }
     .navbar-nav-center { margin: auto; }
     .navbar-nav-center .btn { margin-left: 5px; margin-right: 5px; }
@@ -30,19 +29,17 @@
 </head>
 <body>
   <header id="header_publish">
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <nav id="header_publish_inner" class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
       <div class="navbar-nav navbar-nav-center">
         <input type="button" value="Preview" id="button_preview_mode" class="btn btn-primary">
         <input type="button" value="Edit" id="button_edit_mode" class="btn btn-primary">
         <input type="button" value="Publish changes" id="button_publish" class="btn btn-primary">
-        <input type="button" value="Cancel" id="button_cancel" class="btn btn-primary btn-secondary">
+        <input type="button" value="Cancel" id="button_cancel" class="btn btn-primary">
       </div>
     </nav>
   </header>
 
   <div class="container">
-    <h1>AdminUI</h1>
-
     <form onsubmit="return false">
       <div id="login_content">
         <div class="form-group">
@@ -57,7 +54,6 @@
         <div class="form-group">
           <div id="message_loginfailed" class="alert alert-warning" role="alert">Please check your password</div>
         </div>
-
       </div>
 
       <div id="page_content_edit">

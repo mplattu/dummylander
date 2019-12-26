@@ -130,12 +130,22 @@ function update_header_publish() {
   }
 }
 
+function update_header_buttons() {
+  var biw = new BootstrapIconWrapper();
+
+  $("#button_preview_mode").html(biw.book);
+  $("#button_edit_mode").html(biw.pencil);
+  $("#button_publish").html(biw.cloud_upload);
+  $("#button_cancel").html(biw.x_circle);
+}
+
 $(document).ready(function () {
   console.log("AdminUI.js is ready!");
 
   // Header is show after successful login
   $("#header_publish").hide();
-
+  update_header_buttons();
+  
   mode_edit();
 
   page_content = new PageContent("#page_content_edit");

@@ -17,9 +17,9 @@ update-libs:
 	rm -fR temp/
 
 	mkdir temp
-	wget -O temp/bootstrap-icons.zip https://github.com/twbs/icons/archive/v1.0.0-alpha.zip
+	wget -O temp/bootstrap-icons.zip https://github.com/twbs/icons/archive/v1.0.0-alpha2.zip
 	cd temp; unzip bootstrap-icons.zip
-	mv temp/icons-1.0.0-alpha/icons/ src/ui/ext/
+	mv temp/icons-1.0.0-alpha2/icons/ src/ui/ext/
 	rm -fR temp/
 
 lint:

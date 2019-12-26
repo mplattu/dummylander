@@ -16,6 +16,8 @@
 
     .label_text { margin-top: 20px; font-weight: bold; }
     .button_part {margin-top: 10px; margin-bottom: 20px; margin-right: 10px; font-size: 120%; }
+
+    .button_header {font-size: 120%; }
   </style>
   <script type="text/javascript">
     <!-- include:src/ui/ext/jquery.min.js -->
@@ -31,10 +33,10 @@
   <header id="header_publish">
     <nav id="header_publish_inner" class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
       <div class="navbar-nav navbar-nav-center">
-        <input type="button" value="Preview" id="button_preview_mode" class="btn btn-primary">
-        <input type="button" value="Edit" id="button_edit_mode" class="btn btn-primary">
-        <input type="button" value="Publish changes" id="button_publish" class="btn btn-primary">
-        <input type="button" value="Cancel" id="button_cancel" class="btn btn-primary">
+        <button type="button" id="button_preview_mode" class="button_header btn btn-primary"></button>
+        <button type="button" id="button_edit_mode" class="button_header btn btn-primary"></button>
+        <button type="button" id="button_publish" class="button_header btn btn-primary"></button>
+        <button type="button" id="button_cancel" class="button_header btn btn-primary"></button>
       </div>
     </nav>
   </header>

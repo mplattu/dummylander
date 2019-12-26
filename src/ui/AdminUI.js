@@ -177,7 +177,7 @@ function upload_file() {
         }
         else {
           alert("upload_file() failed. See console.");
-          console.error("upload_file() failes. Data:", data_obj);
+          console.error("upload_file() failed. Data:", data_obj);
         }
       }
     },

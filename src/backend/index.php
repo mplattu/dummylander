@@ -8,6 +8,12 @@ $LOG_LEVEL = 1;
 
 $admin_auth = new AdminAuth($AUTH_METHODS);
 
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES) && $_SERVER['CONTENT_LENGTH'] > 0) {
+  $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'uploadlimitexceeded', "Too large file");
+  echo($admin_api->execute());
+  exit(0);
+}
+
 log_message("QUERY_STRING:".@$_SERVER['QUERY_STRING'], null, 2);
 if (@$_SERVER['QUERY_STRING'] == "admin") {
   $admin_ui = new ShowAdminUI();

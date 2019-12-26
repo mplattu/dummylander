@@ -96,6 +96,10 @@ class AdminAPI {
     if ($this->function == "loginfailed") {
       return $this->get_return_data(false, null, $this->data);
     }
+
+    if ($this->function == "uploadlimitexceeded") {
+      return $this->get_return_data(false, null, $this->data);
+    }
   }
 }
 

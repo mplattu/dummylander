@@ -57,6 +57,7 @@ function set_data() {
 
       if (data_obj.success) {
         $("#button_publish").addClass("btn-success");
+        update_header_publish();
         setTimeout(function() { $("#button_publish").removeClass("btn-success"); mode_edit(); }, 1000);
       }
       else {
@@ -95,8 +96,8 @@ function mode_preview() {
         $("#page_content_preview").show();
         $("#page_content_edit").hide();
 
-        $("#button_preview_mode").hide();
-        $("#button_edit_mode").show();
+        $("#button_preview_mode").prop("disabled", true);
+        $("#button_edit_mode").prop("disabled", false);
       }
       else {
         alert("update_preview() failed. See console");
@@ -110,8 +111,8 @@ function mode_preview() {
 }
 
 function mode_edit() {
-  $("#button_edit_mode").hide();
-  $("#button_preview_mode").show();
+  $("#button_edit_mode").prop("disabled", true);
+  $("#button_preview_mode").prop("disabled", false);
 
   $("#page_content_preview").hide();
   $("#page_content_edit").show();
@@ -145,7 +146,7 @@ $(document).ready(function () {
   // Header is show after successful login
   $("#header_publish").hide();
   update_header_buttons();
-  
+
   mode_edit();
 
   page_content = new PageContent("#page_content_edit");

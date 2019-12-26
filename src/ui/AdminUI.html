@@ -12,7 +12,7 @@
 
     #message_loginfailed { display: none; }
     .navbar-nav-center { margin: auto; }
-    .navbar-nav-center .btn { margin-left: 5px; margin-right: 5px; }
+    .navbar-nav-center .button_single { margin-left: 5px; margin-right: 5px; margin-top: 2px; }
 
     .label_text { margin-top: 20px; font-weight: bold; }
     .button_part {margin-top: 10px; margin-bottom: 20px; margin-right: 10px; font-size: 120%; }
@@ -33,10 +33,12 @@
   <header id="header_publish">
     <nav id="header_publish_inner" class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
       <div class="navbar-nav navbar-nav-center">
-        <button type="button" id="button_preview_mode" class="button_header btn btn-primary"></button>
-        <button type="button" id="button_edit_mode" class="button_header btn btn-primary"></button>
-        <button type="button" id="button_publish" class="button_header btn btn-primary"></button>
-        <button type="button" id="button_cancel" class="button_header btn btn-primary"></button>
+        <div class="btn-group button_single" role="group">
+          <button type="button" id="button_edit_mode" class="button_header btn btn-primary"></button>
+          <button type="button" id="button_preview_mode" class="button_header btn btn-primary"></button>
+        </div>
+        <button type="button" id="button_publish" class="button_header button_single btn btn-primary"></button>
+        <button type="button" id="button_cancel" class="button_header button_single btn btn-primary"></button>
       </div>
     </nav>
   </header>

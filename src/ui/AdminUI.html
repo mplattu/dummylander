@@ -34,8 +34,9 @@
     <nav id="header_publish_inner" class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
       <div class="navbar-nav navbar-nav-center">
         <div class="btn-group button_single" role="group">
-          <button type="button" id="button_edit_mode" class="button_header btn btn-primary"></button>
-          <button type="button" id="button_preview_mode" class="button_header btn btn-primary"></button>
+          <button type="button" id="button_edit_mode" class="button_header button_mode btn btn-primary"></button>
+          <button type="button" id="button_preview_mode" class="button_header button_mode btn btn-primary"></button>
+          <button type="button" id="button_file_mode" class="button_header button_mode btn btn-primary"></button>
         </div>
         <button type="button" id="button_publish" class="button_header button_single btn btn-primary"></button>
         <button type="button" id="button_cancel" class="button_header button_single btn btn-primary"></button>
@@ -59,13 +60,25 @@
           <div id="message_loginfailed" class="alert alert-warning" role="alert">Please check your password</div>
         </div>
       </div>
-
-      <div id="page_content_edit">
-      </div>
-
-      <div id="page_content_preview">
-      </div>
     </form>
+
+    <div id="page_content_edit" class="page_content">
+    </div>
+
+    <div id="page_content_preview" class="page_content">
+    </div>
+
+    <div id="page_content_file" class="page_content">
+      <div id="page_content_file_inner">
+      </div>
+
+      <form onsubmit="return false">
+        <div class="form-group">
+          <input id="file_upload" name="file_upload" type="file" />
+          <input type="button" id="button_file_upload" value="Upload" class="btn btn-primary">
+        </div>
+      </form>
+    </div>
   </div>
 </body>
 </html>

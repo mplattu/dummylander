@@ -1,10 +1,12 @@
 var SERVER_URL="index.php";
 
 <!-- include:src/ui/lib/PageContent.js -->
+<!-- include:src/ui/lib/FileContent.js -->
 
 var page_content = null;
+var file_content = null;
 
-function get_data() {
+function update_edit() {
   var post_data = {
     type:"POST",
     url: SERVER_URL,
@@ -21,22 +23,22 @@ function get_data() {
       if (data_obj.success) {
         $("#login_content").hide();
         $("#header_publish").show();
-        mode_edit();
+        mode_set('edit');
         page_content.set_data(data_obj.data);
       }
       else {
         $("#message_loginfailed").show();
         $("#password").val('');
         setTimeout(function () { $("#password").focus(); }, 1);
-        console.error("get_data() failed. Retrieved data:", data_obj);
+        console.error("update_edit() failed. Retrieved data:", data_obj);
         if (data_obj.message != "") {
           alert(data_obj.message);
         }
       }
     })
     .fail(function(data) {
-      alert("get_data() failed. See console");
-      console.error("get_data() failed. Retrieved data:", data);
+      alert("update_edit() failed. See console");
+      console.error("update_edit() failed. Retrieved data:", data);
     });
 }
 
@@ -58,7 +60,7 @@ function set_data() {
       if (data_obj.success) {
         $("#button_publish").addClass("btn-success");
         update_header_publish();
-        setTimeout(function() { $("#button_publish").removeClass("btn-success"); mode_edit(); }, 1000);
+        setTimeout(function() { $("#button_publish").removeClass("btn-success"); mode_set('edit'); }, 1000);
       }
       else {
         alert("set_data() failed. See console");
@@ -71,7 +73,7 @@ function set_data() {
     });
 }
 
-function mode_preview() {
+function update_preview() {
   var post_data = {
     type: "POST",
     url: SERVER_URL,
@@ -93,11 +95,7 @@ function mode_preview() {
         $("[href*='https://fonts.googleapis.com/css?family='][rel='stylesheet']").remove();
         $("head").append(data_obj.data.head);
 
-        $("#page_content_preview").show();
-        $("#page_content_edit").hide();
-
-        $("#button_preview_mode").prop("disabled", true);
-        $("#button_edit_mode").prop("disabled", false);
+        mode_set('preview');
       }
       else {
         alert("update_preview() failed. See console");
@@ -110,12 +108,92 @@ function mode_preview() {
     });
 }
 
-function mode_edit() {
-  $("#button_edit_mode").prop("disabled", true);
-  $("#button_preview_mode").prop("disabled", false);
+function update_file(backend_function, filename) {
+  if (backend_function == undefined) {
+    backend_function = "file_list";
+  }
 
-  $("#page_content_preview").hide();
-  $("#page_content_edit").show();
+  var post_data = {
+    type: "POST",
+    url: SERVER_URL,
+    data: {
+      password: $("#password").val(),
+      function: backend_function,
+      data: filename
+    }
+  };
+
+  var jqxhr = $.post(post_data)
+    .done(function(data) {
+      var data_obj = JSON.parse(data);
+
+      if (data_obj.success) {
+        $(".button_file_delete").off();
+
+        mode_set('file');
+        file_content.set_data(data_obj.data);
+
+        activate_file_delete_buttons();
+      }
+      else {
+        alert("update_file() failed. See console.");
+        console.error("update_file() failed. Data:", data_obj);
+      }
+    })
+    .fail(function(data) {
+      alert("update_file() failed. See console");
+      console.error("update_file() failed. Data:", data);
+    });
+}
+
+function upload_file() {
+  var data = new FormData();
+  data.append('file_upload', $('#file_upload')[0].files[0]);
+  data.append('password', $("#password").val());
+  data.append('function', 'file_upload');
+
+  $.ajax({
+    url: SERVER_URL,
+    data: data,
+    cache: false,
+    contentType: false,
+    processData: false,
+    method: 'POST',
+    success: function(data) {
+      var data_obj = JSON.parse(data);
+
+      if (data_obj.success) {
+        $("#file_upload").val("");
+        $(".button_file_delete").off();
+
+        mode_set('file');
+        file_content.set_data(data_obj.data);
+
+        activate_file_delete_buttons();
+      }
+      else {
+        if (data_obj.message != "") {
+          alert("File upload failed: "+data_obj.message);
+        }
+        else {
+          alert("upload_file() failed. See console.");
+          console.error("upload_file() failes. Data:", data_obj);
+        }
+      }
+    },
+    error: function(data, error) {
+      alert("upload_file() failed. See console.");
+      console.error("upload_file() failes. Data:", data, error);
+    }
+  });
+}
+
+function mode_set(mode) {
+  $(".button_mode").prop("disabled", false);
+  $("#button_"+mode+"_mode").prop("disabled", true);
+
+  $(".page_content").hide();
+  $("#page_content_"+mode).show();
 
   $(".container").css('padding-top',$("#header_publish_inner").height()+50);
 }
@@ -136,8 +214,15 @@ function update_header_buttons() {
 
   $("#button_preview_mode").html(biw.book);
   $("#button_edit_mode").html(biw.pencil);
+  $("#button_file_mode").html(biw.folder);
   $("#button_publish").html(biw.cloud_upload);
   $("#button_cancel").html(biw.x_circle);
+}
+
+function activate_file_delete_buttons() {
+  $(".button_file_delete").click(function () {
+    update_file("file_delete", $(this).attr('data-filename'));
+  });
 }
 
 $(document).ready(function () {
@@ -147,25 +232,30 @@ $(document).ready(function () {
   $("#header_publish").hide();
   update_header_buttons();
 
-  mode_edit();
+  mode_set('edit');
 
   page_content = new PageContent("#page_content_edit");
+  file_content = new FileContent("#page_content_file_inner");
 
   $("#button_login").click(function () {
-    get_data();
+    update_edit();
   });
 
   $("#button_edit_mode").click(function() {
-    mode_edit();
+    mode_set('edit');
   });
 
   $("#button_preview_mode").click(function () {
-    mode_preview();
+    update_preview();
+  });
+
+  $("#button_file_mode").click(function () {
+    update_file();
   });
 
   $("#button_cancel").click(function () {
     if (confirm("Are you sure you want to discard your changes?")) {
-      get_data();
+      update_edit();
     }
   });
 
@@ -173,10 +263,14 @@ $(document).ready(function () {
     set_data();
   });
 
+  $("#button_file_upload").click(function () {
+    upload_file();
+  });
+
   // Login when enter pressed
   $("#password").on("keypress", function (e) {
     if (e.which == 13) {
-      get_data();
+      update_edit();
     }
     $("#message_loginfailed").hide();
   });

@@ -7,5 +7,6 @@
 <!-- include:src/backend/lib/AdminAuth.php -->
 <!-- include:src/backend/lib/PageContent.php -->
 <!-- include:src/backend/lib/PageStorage.php -->
+<!-- include:src/backend/lib/FileStorage.php -->
 <!-- include:src/backend/lib/ShowAdminUI.php -->
 <!-- include:src/backend/lib/ShowPage.php -->

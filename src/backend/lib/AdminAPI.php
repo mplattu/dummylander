@@ -2,12 +2,14 @@
 
 class AdminAPI {
   private $page_storage = null;
+  private $file_storage = null;
   private $function = null;
   private $data = null;
   private $data_path = null;
 
   function __construct($data_path, $function, $data) {
     $this->page_storage = new PageStorage($data_path."/content.json");
+    $this->file_storage = new FileStorage($data_path);
     $this->function = $function;
     $this->data = $data;
     $this->data_path = $data_path;
@@ -74,6 +76,21 @@ class AdminAPI {
 
     if ($this->function == "preview") {
       return $this->get_return_data(true, $this->get_preview_html($this->data));
+    }
+
+    if ($this->function == "file_list") {
+      return $this->get_return_data(true, $this->file_storage->get_file_list());
+    }
+
+    if ($this->function == "file_upload") {
+      log_message(print_r($_FILES['file_upload'], true));
+      $upload_success = $this->file_storage->upload_file($_FILES['file_upload']);
+      return $this->get_return_data($upload_success, $this->file_storage->get_file_list(), $this->file_storage->get_last_error());
+    }
+
+    if ($this->function == "file_delete") {
+      $delete_success = $this->file_storage->delete_file($this->data);
+      return $this->get_return_data($delete_success, $this->file_storage->get_file_list(), $this->file_storage->get_last_error());
     }
 
     if ($this->function == "loginfailed") {

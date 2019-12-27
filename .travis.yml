@@ -1,0 +1,11 @@
+language: php
+dist: trusty
+php:
+  - '7.2'
+  - '7.3'
+  - '7.4'
+before_script:
+  - make clean
+  - make update-libs
+  - make build
+script: make test

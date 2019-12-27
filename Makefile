@@ -2,6 +2,14 @@
 
 PHPUNIT_PARAMS = --include-path src/backend/lib --verbose -d display_errors=On -d error_reporting=E_ALL
 
+clean:
+	if [ -d temp/ ]; then rm-fR temp/; fi
+	if [ -d dist/ ]; then rm -fR dist/*; fi
+	if [ -d src/ui/ext/ ]; then rm -fR src/ui/ext/; fi
+	mkdir -p src/ui/ext/
+	if [ -d src/backend/ext/ ]; then rm -fR src/backend/ext/; fi
+	mkdir -p src/backend/ext/
+
 update-libs:
 	mkdir -p src/backend/ext/
 	wget -O src/backend/ext/Parsedown.php https://raw.githubusercontent.com/erusev/parsedown/master/Parsedown.php
@@ -40,15 +48,17 @@ test:
 	php -l src/backend/test/AdminAPI_test.php
 	cd dist; TEST_MY_URL=http://localhost:8080/ phpunit $(PHPUNIT_PARAMS) ../src/backend/test/AdminAPI_test.php
 
+config:
+	if [ ! -d dist/data/ ]; then mkdir -p dist/data/; fi
+	cp -r src/data-sample/* dist/data/
+	
 settings:
 	if [ ! -f dist/settings.php ]; then cp src/backend/settings.php dist/; fi
 	php -l dist/settings.php
 
-build: lint test settings
-	if [ ! -d dist/data/ ]; then mkdir -p dist/data/; fi
+build: config lint test settings
 	perl include.pl root.php >dist/index.php
 	php -l dist/index.php
-	cp -r src/data-sample/* dist/data/
 
 serve:
 	php -S 0.0.0.0:8080 -t dist/

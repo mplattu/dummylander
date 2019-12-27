@@ -147,6 +147,10 @@ function update_file(backend_function, filename) {
 }
 
 function upload_file() {
+  if ($("#file_upload").val() == "") {
+    return;
+  }
+
   var data = new FormData();
   data.append('file_upload', $('#file_upload')[0].files[0]);
   data.append('password', $("#password").val());
@@ -163,13 +167,15 @@ function upload_file() {
       var data_obj = JSON.parse(data);
 
       if (data_obj.success) {
-        $("#file_upload").val("");
         $(".button_file_delete").off();
 
         mode_set('file');
         file_content.set_data(data_obj.data);
 
         activate_file_delete_buttons();
+
+        $("#file_upload").val("");
+        update_upload_filename();
       }
       else {
         if (data_obj.message != "") {
@@ -186,6 +192,17 @@ function upload_file() {
       console.error("upload_file() failes. Data:", data, error);
     }
   });
+}
+
+function update_upload_filename() {
+  var filename = $("#file_upload").val();
+  filename = filename.split(/(\\|\/)/g).pop();
+
+  if (filename === "") {
+    filename = "Choose file";
+  }
+
+  $("#file_upload_label").text(filename);
 }
 
 function mode_set(mode) {
@@ -277,6 +294,10 @@ $(document).ready(function () {
 
   page_content.on_change(function () {
     update_header_publish();
+  });
+
+  $("#file_upload").change(function () {
+    update_upload_filename();
   });
 
   setTimeout(function () { $("#password").focus(); }, 1);

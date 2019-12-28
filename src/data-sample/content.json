@@ -31,7 +31,7 @@
       "text": "## Tables\n\nTables are particulary easy to create with markdown syntax:\n\n| Service | Price |\n| ------- | ------- |\n| Some Service | 25 € |\n| Some other service | 35 € |\n| A third service | 55 € | \n"
     },
     {
-      "text": "## Images\n\nMarkdown syntax allows you to add images:\n\n![Alternative text!](favicon.ico)"
+      "text": "## Images and Documents\n\nMarkdown syntax allows you to add images:\n\n![Alternative text!](favicon.ico)\n\nNaturally, you can share [documents](sample-document.pdf) too."
     },
     {
       "text": "## HTML\n\nYou are not limited to the quick and easy markdown syntax. [The syntax](https://www.markdownguide.org/cheat-sheet) allows you to embed HTML tags. Here we have a clickable image:\n\n[<img src='data/DuckDuckGo-DaxSolo.svg' width=\"50px\" height=\"50px\">](https://duckduckgo.com/)"

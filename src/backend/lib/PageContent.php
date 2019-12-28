@@ -48,7 +48,7 @@ class PageContent {
     $original_value = $value;
 
     do {
-      $value = preg_replace('/^([^`]*)!\[(.*)\]\(([^\/]*)\)([^`]*)$/m', '$1![$2]('.$this->data_path.'/$3)$4', $value, 1, $replacements_made);
+      $value = preg_replace('/^([^`]*)(!*)\[(.*)\]\(([^\/]*)\)([^`]*)$/m', '$1$2[$3]('.$this->data_path.'/$4)$5', $value, 1, $replacements_made);
       if ($replacements_made > 0) {
         $replacement_count++;
       }

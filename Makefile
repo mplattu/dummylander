@@ -1,4 +1,4 @@
-.PHONY: update-libs
+.PHONY: clean update-libs test
 
 PHPUNIT_PARAMS = --include-path src/backend/lib --verbose -d display_errors=On -d error_reporting=E_ALL
 

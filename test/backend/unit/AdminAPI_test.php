@@ -62,9 +62,10 @@ class AdminAPI_test extends TestCase {
 <td>55 €</td>
 </tr>
 </tbody>
-</table></section><section id="sec5" style="margin:10px; padding:0; color:#000000; text-align:center;"><h2>Images</h2>
+</table></section><section id="sec5" style="margin:10px; padding:0; color:#000000; text-align:center;"><h2>Images and Documents</h2>
 <p>Markdown syntax allows you to add images:</p>
-<p><img src="data/favicon.ico" alt="Alternative text!" /></p></section><section id="sec6" style="margin:10px; padding:0; color:#000000; text-align:center;"><h2>HTML</h2>
+<p><img src="data/favicon.ico" alt="Alternative text!" /></p>
+<p>Naturally, you can share <a href="data/sample-document.pdf">documents</a> too.</p></section><section id="sec6" style="margin:10px; padding:0; color:#000000; text-align:center;"><h2>HTML</h2>
 <p>You are not limited to the quick and easy markdown syntax. <a href="https://www.markdownguide.org/cheat-sheet">The syntax</a> allows you to embed HTML tags. Here we have a clickable image:</p>
 <p><a href="https://duckduckgo.com/"><img src='data/DuckDuckGo-DaxSolo.svg' width="50px" height="50px"></a></p></section></div></body></html>
 

@@ -39,19 +39,19 @@ lint:
 	php -l src/backend/index.php
 
 test:
-	php -l src/backend/test/global_functions_test.php
-	phpunit $(PHPUNIT_PARAMS) src/backend/test/global_functions_test.php
-	php -l src/backend/test/PageContent_test.php
-	phpunit $(PHPUNIT_PARAMS) src/backend/test/PageContent_test.php
-	php -l src/backend/test/AdminAuth_test.php
-	phpunit $(PHPUNIT_PARAMS) src/backend/test/AdminAuth_test.php
-	php -l src/backend/test/AdminAPI_test.php
-	cd dist; TEST_MY_URL=http://localhost:8080/ phpunit $(PHPUNIT_PARAMS) ../src/backend/test/AdminAPI_test.php
+	php -l test/backend/unit/global_functions_test.php
+	phpunit $(PHPUNIT_PARAMS) test/backend/unit/global_functions_test.php
+	php -l test/backend/unit/PageContent_test.php
+	phpunit $(PHPUNIT_PARAMS) test/backend/unit/PageContent_test.php
+	php -l test/backend/unit/AdminAuth_test.php
+	phpunit $(PHPUNIT_PARAMS) test/backend/unit/AdminAuth_test.php
+	php -l test/backend/unit/AdminAPI_test.php
+	cd dist; TEST_MY_URL=http://localhost:8080/ phpunit $(PHPUNIT_PARAMS) ../test/backend/unit/AdminAPI_test.php
 
 config:
 	if [ ! -d dist/data/ ]; then mkdir -p dist/data/; fi
 	cp -r src/data-sample/* dist/data/
-	
+
 settings:
 	if [ ! -f dist/settings.php ]; then cp src/backend/settings.php dist/; fi
 	php -l dist/settings.php

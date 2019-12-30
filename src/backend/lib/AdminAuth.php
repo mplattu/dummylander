@@ -72,6 +72,7 @@ class AdminAuth {
 
     if (preg_match('/\$ADMIN_PASSWORD\s*=\s*"(.*)"/', $file, $matches)) {
       $file_password = $matches[1];
+      $file_password = preg_replace('/\\\\"/', '"', $file_password);
 
       if ($file_password === "") {
         $this->set_last_error("Password in $filename has not been set");

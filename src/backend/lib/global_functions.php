@@ -1,6 +1,6 @@
 <?php
 
-function log_message ($message, $exit_level = null, $log_level=null) {
+function log_message ($message, $exit_level = null, $log_level=2) {
   global $LOG_LEVEL;
 
   // Write log message to server log

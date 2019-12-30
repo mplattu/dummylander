@@ -56,6 +56,8 @@ class AdminAPI {
   }
 
   function execute() {
+    log_message("Execute, function: '".$this->function."' data: ".print_r($this->data, true));
+
     if ($this->function == "get") {
       $data = $this->page_storage->get_data_json();
 

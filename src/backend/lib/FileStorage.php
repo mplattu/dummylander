@@ -40,34 +40,46 @@ class FileStorage {
   }
 
   private function valid_filename($filename) {
-    // Make sure the filename is not one of the sacred files
-    if (in_array($filename, $this->IGNORE_FILES)) {
-      return null;
-    }
+    global $FILE_UPLOAD_ALLOWED_CHARS_REGEX;
 
     // Make sure the filename does not contain a directory separator
     if (strpos(DIRECTORY_SEPARATOR, $filename) !== false) {
       return null;
     }
 
-    return $this->data_path.DIRECTORY_SEPARATOR.basename($filename);
+    // Allow only listed characters
+    $filename = basename($filename);
+    $filename = preg_replace('/[^'.$FILE_UPLOAD_ALLOWED_CHARS_REGEX.']/', '', $filename);
+
+    // Make sure the filename is not one of the forbidden files
+    if (in_array($filename, $this->IGNORE_FILES)) {
+      return null;
+    }
+
+    return $this->data_path.DIRECTORY_SEPARATOR.$filename;
   }
 
   public function upload_file($upload_file_data) {
     if ($upload_file_data['error']) {
-      unlink($upload_file_data['tmp_name']);
+      if (is_file($upload_file_data['tmp_name'])) {
+        unlink($upload_file_data['tmp_name']);
+      }
       return false;
     }
 
     $valid_filename = $this->valid_filename($upload_file_data['name']);
     if (is_null($valid_filename)) {
-      unlink($upload_file_data['tmp_name']);
+      if (is_file($upload_file_data['tmp_name'])) {
+        unlink($upload_file_data['tmp_name']);
+      }
       return false;
     }
 
     if (file_exists($valid_filename)) {
-      unlink($upload_file_data['tmp_name']);
-      $this->set_last_error($upload_file_data['name']." already exists");
+      if (is_file($upload_file_data['tmp_name'])) {
+        unlink($upload_file_data['tmp_name']);
+      }
+      $this->set_last_error("'".$upload_file_data['name']."' already exists");
       return false;
     }
 
@@ -84,7 +96,7 @@ class FileStorage {
       return true;
     }
 
-    $this->set_last_error("Unable to remove file ".$filename);
+    $this->set_last_error("Unable to remove file '".$filename."'");
 
     return false;
   }

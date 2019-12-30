@@ -1,6 +1,4 @@
-<!-- include:src/backend/lib/global_consts.php -->
-<!-- include:src/backend/index.php -->
-<!-- include:src/backend/ext/Parsedown.php -->
+<!-- include:src/backend/lib/global_consts.php --><!-- include:src/backend/index.php --><!-- include:src/backend/ext/Parsedown.php -->
 ?>
 <!-- include:src/backend/lib/global_functions.php -->
 <!-- include:src/backend/lib/AdminAPI.php -->

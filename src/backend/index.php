@@ -36,12 +36,14 @@ elseif (@$_POST['password'] != "") {
 
   if ($is_admin) {
     $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), @$_POST['function'], @$_POST['data']);
-    echo($admin_api->execute());
+    $response = $admin_api->execute();
   }
   else {
     $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'loginfailed', $admin_message);
-    echo($admin_api->execute());
+    $response = $admin_api->execute();
   }
+
+  log_message("Admin response: ".print_r($response, true));
 }
 else {
   $show_page = new ShowPage($VERSION, remove_trailing_slash($DATAPATH));

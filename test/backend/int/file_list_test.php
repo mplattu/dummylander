@@ -25,11 +25,11 @@ class integration_test extends TestCase {
     // Upload files
     for ($n=0; $n < $files; $n++) {
       $upload_files[$n] = $th->random_str(random_int(5,15), $keyspace);
-      $status = $th->write_random_file($upload_files[$n], random_int(10240, 40960));
+      $status = $th->write_random_file($this->get_filename_from_temp($upload_files[$n]), random_int(10240, 40960));
 
       $final_files[$n] = $this->get_filename_final($upload_files[$n]);
 
-      $this->file_upload($upload_files[$n], $final_files[$n]);
+      $this->file_upload($this->get_filename_from_temp($upload_files[$n]), $final_files[$n]);
     }
 
     // Reset password
@@ -94,6 +94,10 @@ class integration_test extends TestCase {
     return tempnam(sys_get_temp_dir(), "TestUpload_");
   }
 
+  private function get_filename_from_temp($filename) {
+    return sys_get_temp_dir()."/".$filename;
+  }
+
   private function get_filename_final($filename) {
     return "dist/data/".basename($filename);
   }
@@ -112,7 +116,7 @@ class integration_test extends TestCase {
       "json"
     );
 
-    $this->assertTrue($data['success'], "Failed to upload '$upload_filename', message: '".$data['message']."'");
+    $this->assertTrue($data['success'], "Failed to upload '$upload_filename', response: ".print_r($data, true));
 
     // Make sure the files have same MD5sum
     $md5_og = md5_file($upload_filename);

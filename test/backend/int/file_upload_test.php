@@ -116,7 +116,7 @@ class integration_test extends TestCase {
       "json"
     );
 
-    $this->assertTrue($data['success'], "Failed to upload '$upload_filename', message: '".$data['message']."'");
+    $this->assertTrue($data['success'], "Failed to upload '$upload_filename', response: ".print_r($data, true));
 
     // Make sure the files have same MD5sum
     $md5_og = md5_file($upload_filename);

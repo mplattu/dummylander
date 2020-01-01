@@ -44,6 +44,7 @@ elseif (@$_POST['password'] != "") {
   }
 
   log_message("Admin response: ".print_r($response, true));
+  echo($response);
 }
 else {
   $show_page = new ShowPage($VERSION, remove_trailing_slash($DATAPATH));

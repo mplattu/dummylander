@@ -36,19 +36,27 @@ class TestHelpers {
     return implode('', $pieces);
   }
 
+  function get_temp_filename() {
+    return tempnam(sys_get_temp_dir(), "DummylanderTestHelpers_");
+  }
+
   function write_password_file($password, $filename=null) {
-    $wspace1 = str_pad('', rand(0,5));
-    $wspace2 = str_pad('', rand(0,5));
-    $wspace3 = str_pad('', rand(0,5));
+    // Writes a settings file with some randomity in spaces
 
     if (is_null($filename)) {
-      $filename = tempnam(sys_get_temp_dir(), "DummylanderTestHelpers_");
+      $filename = $this->get_temp_filename();
     }
 
-    // Escape "
-    $password = preg_replace('/"/', '\"', $password);
+    $settings = Array('ADMIN_PASSWORD'=>$password);
 
-    $file_content = "<?php\n\n\$ADMIN_PASSWORD".$wspace1."=".$wspace2."\"".$password."\"".$wspace3.";\n\n?>\n";
+    $c = Array();
+    array_push($c, "<?php");
+    array_push($c, "/*");
+    array_push($c, json_encode($settings));
+    array_push($c, "*/");
+    array_push($c, "?>\n");
+
+    $file_content = implode("\n", $c)."\n";
     $bytes_written = file_put_contents($filename, $file_content);
 
     return $filename;

@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 include_once("global_functions.php");
 include_once("AdminAuth.php");
+include_once("Settings.php");
 include_once(__DIR__."/../lib/TestHelpers.php");
 
 class AdminAuth_test extends TestCase {

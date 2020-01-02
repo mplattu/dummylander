@@ -1,7 +1,7 @@
 <?php
 
 $AUTH_METHODS = Array(
-  'file' => 'settings.php'
+  'file' => null  // Uses the default file path "settings.php"
 );
 
 $VERSION = "Dummylander 0.4";

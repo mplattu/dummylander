@@ -5,6 +5,11 @@
 // 1 - some messages
 // 2 - everything
 $LOG_LEVEL = 1;
+$s = new Settings();
+$s_log_level = $s->get_value('LOG_LEVEL');
+if (!is_null($s_log_level)) {
+  $LOG_LEVEL = $s_log_level;
+}
 
 $admin_auth = new AdminAuth($AUTH_METHODS);
 

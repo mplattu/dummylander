@@ -53,6 +53,7 @@ lint:
 	php -l src/backend/lib/AdminAPI.php
 	php -l src/backend/lib/PageContent.php
 	php -l src/backend/lib/PageStorage.php
+	php -l src/backend/lib/Settings.php
 	php -l src/backend/lib/ShowAdminUI.php
 	php -l src/backend/lib/ShowPage.php
 	php -l src/backend/index.php
@@ -66,6 +67,8 @@ test-unit:
 	phpunit $(PHPUNIT_PARAMS) test/backend/unit/AdminAuth_test.php
 	php -l test/backend/unit/AdminAPI_test.php
 	cd dist; TEST_MY_URL=http://localhost:8080/ phpunit $(PHPUNIT_PARAMS) ../test/backend/unit/AdminAPI_test.php
+	php -l test/backend/unit/Settings_test.php
+	phpunit $(PHPUNIT_PARAMS) test/backend/unit/Settings_test.php
 
 test-integration: build
 	php -l test/backend/int/file_list_test.php

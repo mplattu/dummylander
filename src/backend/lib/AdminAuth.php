@@ -68,26 +68,20 @@ class AdminAuth {
       return false;
     }
 
-    $file = file_get_contents($filename);
+    $s = new Settings($filename);
+    $file_password = $s->get_value('ADMIN_PASSWORD');
 
-    if (preg_match('/\$ADMIN_PASSWORD\s*=\s*"(.*)"/', $file, $matches)) {
-      $file_password = $matches[1];
-      $file_password = preg_replace('/\\\\"/', '"', $file_password);
-
-      if ($file_password === "") {
-        $this->set_last_error("Password in $filename has not been set");
-        return false;
-      }
-
-      if ($file_password === $password) {
-        return true;
-      }
-
+    if (is_null($file_password) or $file_password === "") {
+      $this->set_last_error("Password in $filename has not been set");
       return false;
     }
 
-    $this->set_last_error("Authentication password file $filename is not in valid format");
+    if ($file_password === $password) {
+      return true;
+    }
+
     return false;
+
   }
 }
 

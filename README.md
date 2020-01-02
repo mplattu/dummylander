@@ -34,9 +34,9 @@ the `https` connection at least  whenever editing your site (`https://yourcomain
 The cleartext admin password is stored in `settings.php`. Here is a sample content for the file:
 ```
 <?php
-
-$ADMIN_PASSWORD="verysecret";
-
+/*
+{"ADMIN_PASSWORD":"verysecret"}
+*/
 ?>
 ```
 

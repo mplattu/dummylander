@@ -3,8 +3,12 @@
 function log_message ($message, $exit_level = null, $log_level=2) {
   global $LOG_LEVEL;
 
-  // Write log message to server log
-  if ($log_level <= $LOG_LEVEL) {
+  if (defined('STDIN')) {
+    // Executed from CLI (tests?)
+    echo("LOG: ".$message."\n");
+  }
+  elseif ($log_level <= $LOG_LEVEL) {
+    // Write to server log
     error_log($message, 4);
   }
 

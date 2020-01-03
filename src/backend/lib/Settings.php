@@ -5,7 +5,7 @@ class Settings {
   private $rules = null;
 
   function __construct($filename=null) {
-    if (is_null($filename)) {
+    if (is_null($filename) or ($filename === "")) {
       $this->filename = "settings.php";
     }
     else {

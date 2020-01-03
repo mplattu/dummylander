@@ -59,20 +59,11 @@ class AdminAuth {
   }
 
   private function is_admin_file($filename, $password) {
-    if (!file_exists($filename)) {
-      return false;
-    }
-
-    if (!is_readable($filename)) {
-      $this->set_last_error("Authentication password file $filename is not readable");
-      return false;
-    }
-
     $s = new Settings($filename);
     $file_password = $s->get_value('ADMIN_PASSWORD');
 
     if (is_null($file_password) or $file_password === "") {
-      $this->set_last_error("Password in $filename has not been set");
+      $this->set_last_error("Password in ".$s->get_filename()." has not been set");
       return false;
     }
 

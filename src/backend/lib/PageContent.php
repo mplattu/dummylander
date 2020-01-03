@@ -32,7 +32,7 @@ class PageContent {
   }
 
   private function add_datapath_prefix_one($value) {
-    if (!filter_var($value, FILTER_VALIDATE_URL, Array('flags'=>FILTER_FLAG_SCHEME_REQUIRED)) and !preg_match('/[\/]/', $value)) {
+    if (!filter_var($value, FILTER_VALIDATE_URL) and !preg_match('/[\/]/', $value)) {
       log_message("add_datapath_prefix returning value with prefix: ".$this->data_path.'/'.$value, null, 2);
       return $this->data_path.'/'.$value;
     }

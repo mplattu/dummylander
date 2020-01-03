@@ -10,4 +10,4 @@ before_script:
   - make clean
   - make update-libs
   - make build
-script: make test
+script: make test-integration

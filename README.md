@@ -1,10 +1,12 @@
 # Dummylander
 
+[![Build Status](https://travis-ci.com/mplattu/dummylander.svg?branch=master)](https://travis-ci.com/mplattu/dummylander)
+
 Superdupersimple landing page administration tool.
 
 ## HOWTO
 
- 1. Copy `dist/*` to your PHP-enabled web server. Make sure you copy also the `admin/` subdirectory and its contents.
+ 1. Copy `dist/*` to your PHP-enabled web server. Dummylander has been tested with PHP versions 7.2, 7.3 and 7.4. Make sure you copy also the `admin/` subdirectory and its contents.
  1. Set admin password by editing `settings.php` (see *Authentication* for details).
  1. Make sure the URL `http(s)://yourdomain.com/settings.php` returns an empty page.
  1. Log in to admin UI: `http(s)://yourdomain.com/?admin`
@@ -16,12 +18,13 @@ Superdupersimple landing page administration tool.
  * The most essential page part properties (MD-formatted text, images, fonts, font colors) can be edited.
  * You can add, remove and move page parts.
  * You can see page preview before publishing.
+ * You can upload and remove files.
 
 ## This does not work yet
 
- * You cannot upload or remove files.
  * There must be a tons of page or part attributes missing.
  * The authentication requires too much IT skills to set up.
+ * Easy way to add images and links to files.
 
 ## Authentication
 
@@ -49,11 +52,11 @@ returns an empty page.
 ## Building
 
 To build Dummylander you need to have:
- * PHP (7 or above, Debian packages `php-cli php-mbstring`)
+ * PHP (7.2 or above, Debian packages `php-cli php-mbstring`)
  * phpunit (6 or above, Debian package `phpunit`)
  * Perl modules JSON::XS (Debian package `libjson-xs-perl`)
  * `make update-libs`
- * `make build`
+ * `make build` or `make test-integration`
 
 ## Installing by Ansible
 
@@ -91,7 +94,7 @@ The server `test.yourdomain.com` has to be in group `dummylander` in `/etc/ansib
 
 ```
 [dummylander]
-test.cupdom.com
+test.yourdomain.com
 ```
 
 ## License and Acknowledgement

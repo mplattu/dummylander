@@ -122,3 +122,4 @@ update-docs:
 	mv temp/localhost:8080/* docs/
 	sed -i -- 's/http:\/\/localhost:8080\//http:\/\/dummylander.net\//g' docs/index.html
 	rm -fR temp/
+	cp dist/data/content.json docs/data/

@@ -4,7 +4,7 @@ class AdminAuth {
   private $methods;
   private $last_error;
 
-  function __construct($methods) {
+  function __construct($methods=null) {
     if (!is_array($methods) or sizeof($methods) < 1) {
       $this->raise_exception("AdminAuth requires authentication methods as an array");
       $this->methods = null;
@@ -59,34 +59,20 @@ class AdminAuth {
   }
 
   private function is_admin_file($filename, $password) {
-    if (!file_exists($filename)) {
+    $s = new Settings($filename);
+    $file_password = $s->get_value('ADMIN_PASSWORD');
+
+    if (is_null($file_password) or $file_password === "") {
+      $this->set_last_error("Password in ".$s->get_filename()." has not been set");
       return false;
     }
 
-    if (!is_readable($filename)) {
-      $this->set_last_error("Authentication password file $filename is not readable");
-      return false;
+    if ($file_password === $password) {
+      return true;
     }
 
-    $file = file_get_contents($filename);
-
-    if (preg_match('/\$ADMIN_PASSWORD\s*=\s*"(.*)"/', $file, $matches)) {
-      $file_password = $matches[1];
-
-      if ($file_password === "") {
-        $this->set_last_error("Password in $filename has not been set");
-        return false;
-      }
-
-      if ($file_password === $password) {
-        return true;
-      }
-
-      return false;
-    }
-
-    $this->set_last_error("Authentication password file $filename is not in valid format");
     return false;
+
   }
 }
 

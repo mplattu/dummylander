@@ -9,7 +9,7 @@ include_once("PageContent.php");
 
 class PageContent_test extends TestCase {
 
-  function test_add_datapath_prefix() {
+  function test_add_datapath_prefix_images() {
     $pc = new PageContent("data/content.json", "data");
 
     $this->assertEquals('https://example.com/data/some.file', $pc->add_datapath_prefix('page', 'favicon-ico', 'https://example.com/data/some.file'));
@@ -74,6 +74,34 @@ class PageContent_test extends TestCase {
     //  '![alt text!](data/some.file) `Markdown image with ![alt text!](some.file) and text.`',
     //  $pc->add_datapath_prefix('part', 'text', '![alt text!](some.file) `Markdown image with ![alt text!](some.file) and text.`')
     // );
+  }
+
+  function test_add_datapath_prefix_link() {
+    $pc = new PageContent("data/content.json", "data");
+
+    // These should not change
+    $this->assertEquals(
+      'Markdown text with [link](https://example.com/data/some.file) and text',
+      $pc->add_datapath_prefix('part', 'text', 'Markdown text with [link](https://example.com/data/some.file) and text')
+    );
+    $this->assertEquals(
+      'Markdown text with [link](data/some.file) and text',
+      $pc->add_datapath_prefix('part', 'text', 'Markdown text with [link](data/some.file) and text')
+    );
+    $this->assertEquals(
+      'Markdown text with [link](/data/some.file) and text',
+      $pc->add_datapath_prefix('part', 'text', 'Markdown text with [link](/data/some.file) and text')
+    );
+    $this->assertEquals(
+      'Markdown text with [link](data/some.file) and text',
+      $pc->add_datapath_prefix('part', 'text', 'Markdown text with [link](some.file) and text')
+    );
+
+    // This should change
+    $this->assertEquals(
+      'Markdown text with [link](data/some.file) and text',
+      $pc->add_datapath_prefix('part', 'text', 'Markdown text with [link](some.file) and text')
+    );
   }
 }
 

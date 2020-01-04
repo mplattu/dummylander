@@ -1,5 +1,5 @@
 <?php
-
-$ADMIN_PASSWORD = "";
-
+/*
+{"ADMIN_PASSWORD":""}
+*/
 ?>

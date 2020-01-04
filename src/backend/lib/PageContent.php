@@ -16,14 +16,23 @@ class PageContent {
     )
   );
 
-  public function __construct($data_file, $data_path = "") {
-    $json = file_get_contents($data_file);
-    $this->page_data = json_decode($json, true);
+  public function __construct($page_data, $data_path = "") {
+    // By default the $page_data is a JSON-encoded string
+    $page_data_obj = json_decode($page_data, true);
+    if (is_null($page_data_obj)) {
+      // $page_data was not a JSON-formatted string, treat it as a filename
+      $json = file_get_contents($page_data);
+      $this->page_data = json_decode($json, true);
+    }
+    else {
+      // $page_data was a JSON-formatted string
+      $this->page_data = $page_data_obj;
+    }
     $this->data_path = $data_path;
   }
 
   private function add_datapath_prefix_one($value) {
-    if (!filter_var($value, FILTER_VALIDATE_URL, Array('flags'=>FILTER_FLAG_SCHEME_REQUIRED)) and !preg_match('/[\/]/', $value)) {
+    if (!filter_var($value, FILTER_VALIDATE_URL) and !preg_match('/[\/]/', $value)) {
       log_message("add_datapath_prefix returning value with prefix: ".$this->data_path.'/'.$value, null, 2);
       return $this->data_path.'/'.$value;
     }
@@ -39,7 +48,7 @@ class PageContent {
     $original_value = $value;
 
     do {
-      $value = preg_replace('/^([^`]*)!\[(.*)\]\(([^\/]*)\)([^`]*)$/m', '$1![$2]('.$this->data_path.'/$3)$4', $value, 1, $replacements_made);
+      $value = preg_replace('/^([^`]*)(!*)\[(.*)\]\(([^\/]*)\)([^`]*)$/m', '$1$2[$3]('.$this->data_path.'/$4)$5', $value, 1, $replacements_made);
       if ($replacements_made > 0) {
         $replacement_count++;
       }

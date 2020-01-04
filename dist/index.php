@@ -1,19 +1,54 @@
 <?php
 
 $AUTH_METHODS = Array(
-  'file' => 'settings.php'
+  'file' => null  // Uses the default file path "settings.php"
 );
 
-$VERSION = "Dummylander 0.4";
+$VERSION = "Dummylander 0.5";
 $DATAPATH = "data/";
+
+$PAGE_PROPERTIES = Array(
+  'title',
+  'favicon-ico',
+  'description',
+  'image',
+  'keywords',
+  'style-css'
+);
+
+$SECTION_PROPERTIES = Array(
+  'margin',
+  'padding',
+  'height',
+  'color',
+  'background-image',
+  'font-family-google'
+);
+
+// Characters allowed in filenames. See FileStorage class.
+$FILE_UPLOAD_ALLOWED_CHARS_REGEX = 'a-zA-Z01234567890\-_.';
+
+?>
+<?php
 
 // Log levels:
 // 0 - fatal errors
 // 1 - some messages
 // 2 - everything
 $LOG_LEVEL = 1;
+$s = new Settings();
+$s_log_level = $s->get_value('LOG_LEVEL');
+if (!is_null($s_log_level)) {
+  $LOG_LEVEL = $s_log_level;
+}
 
 $admin_auth = new AdminAuth($AUTH_METHODS);
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES) && $_SERVER['CONTENT_LENGTH'] > 0) {
+  $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'uploadlimitexceeded', "Too large file");
+  echo($admin_api->execute());
+  exit(0);
+}
 
 log_message("QUERY_STRING:".@$_SERVER['QUERY_STRING'], null, 2);
 if (@$_SERVER['QUERY_STRING'] == "admin") {
@@ -37,22 +72,25 @@ elseif (@$_POST['password'] != "") {
 
   if ($is_admin) {
     $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), @$_POST['function'], @$_POST['data']);
-    echo($admin_api->execute());
+    $response = $admin_api->execute();
   }
   else {
     $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'loginfailed', $admin_message);
-    echo($admin_api->execute());
+    $response = $admin_api->execute();
   }
+
+  log_message("Admin response: ".print_r($response, true));
+  echo($response);
 }
 else {
   $show_page = new ShowPage($VERSION, remove_trailing_slash($DATAPATH));
+  echo($show_page->get_html_page());
 }
 
 // Normal termination
 exit(0);
 
 ?>
-
 <?php
 
 #
@@ -2051,11 +2089,15 @@ class Parsedown
 ?>
 <?php
 
-function log_message ($message, $exit_level = null, $log_level=null) {
+function log_message ($message, $exit_level = null, $log_level=2) {
   global $LOG_LEVEL;
 
-  // Write log message to server log
-  if ($log_level <= $LOG_LEVEL) {
+  if (defined('STDIN')) {
+    // Executed from CLI (tests?)
+    echo("LOG: ".$message."\n");
+  }
+  elseif ($log_level <= $LOG_LEVEL) {
+    // Write to server log
     error_log($message, 4);
   }
 
@@ -2070,7 +2112,12 @@ function remove_trailing_slash($path) {
 
 function get_my_url($url = null) {
   if (is_null($url)) {
-    $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]";
+    if (@$_SERVER['TEST_MY_URL'] != "") {
+      $url = $_SERVER['TEST_MY_URL'];
+    }
+    else {
+      $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]";
+    }
   }
 
   $url = preg_replace('/[^\/]*?$/', '', $url);
@@ -2084,13 +2131,17 @@ function get_my_url($url = null) {
 
 class AdminAPI {
   private $page_storage = null;
+  private $file_storage = null;
   private $function = null;
   private $data = null;
+  private $data_path = null;
 
   function __construct($data_path, $function, $data) {
     $this->page_storage = new PageStorage($data_path."/content.json");
+    $this->file_storage = new FileStorage($data_path);
     $this->function = $function;
     $this->data = $data;
+    $this->data_path = $data_path;
   }
 
   private function get_return_data($success, $data = null, $message = null) {
@@ -2110,7 +2161,32 @@ class AdminAPI {
     return json_encode($return_data);
   }
 
+  private function is_json($str) {
+    $obj = json_decode($str);
+    if (is_null($obj)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private function get_preview_html($page_data) {
+
+    if ($this->is_json($page_data)) {
+      $show_page = new ShowPage("0", $this->data_path, $page_data);
+      return Array(
+        'html' => $show_page->get_html_preview(),
+        'head' => $show_page->get_html_googlefonts()
+      );
+    }
+    else {
+      return "<p>Given parameter is not a JSON-formatted object</p>";
+    }
+  }
+
   function execute() {
+    log_message("Execute, function: '".$this->function."' data: ".print_r($this->data, true));
+
     if ($this->function == "get") {
       $data = $this->page_storage->get_data_json();
 
@@ -2129,7 +2205,30 @@ class AdminAPI {
       return $this->get_return_data(true);
     }
 
+    if ($this->function == "preview") {
+      return $this->get_return_data(true, $this->get_preview_html($this->data));
+    }
+
+    if ($this->function == "file_list") {
+      return $this->get_return_data(true, $this->file_storage->get_file_list());
+    }
+
+    if ($this->function == "file_upload") {
+      log_message(print_r($_FILES['file_upload'], true));
+      $upload_success = $this->file_storage->upload_file($_FILES['file_upload']);
+      return $this->get_return_data($upload_success, $this->file_storage->get_file_list(), $this->file_storage->get_last_error());
+    }
+
+    if ($this->function == "file_delete") {
+      $delete_success = $this->file_storage->delete_file($this->data);
+      return $this->get_return_data($delete_success, $this->file_storage->get_file_list(), $this->file_storage->get_last_error());
+    }
+
     if ($this->function == "loginfailed") {
+      return $this->get_return_data(false, null, $this->data);
+    }
+
+    if ($this->function == "uploadlimitexceeded") {
       return $this->get_return_data(false, null, $this->data);
     }
   }
@@ -2143,7 +2242,7 @@ class AdminAuth {
   private $methods;
   private $last_error;
 
-  function __construct($methods) {
+  function __construct($methods=null) {
     if (!is_array($methods) or sizeof($methods) < 1) {
       $this->raise_exception("AdminAuth requires authentication methods as an array");
       $this->methods = null;
@@ -2198,33 +2297,125 @@ class AdminAuth {
   }
 
   private function is_admin_file($filename, $password) {
-    if (!file_exists($filename)) {
+    $s = new Settings($filename);
+    $file_password = $s->get_value('ADMIN_PASSWORD');
+
+    if (is_null($file_password) or $file_password === "") {
+      $this->set_last_error("Password in ".$s->get_filename()." has not been set");
       return false;
     }
 
-    if (!is_readable($filename)) {
-      $this->set_last_error("Authentication password file $filename is not readable");
-      return false;
+    if ($file_password === $password) {
+      return true;
     }
 
-    $file = file_get_contents($filename);
+    return false;
 
-    if (preg_match('/\$ADMIN_PASSWORD\s*=\s*"(.*)"/', $file, $matches)) {
-      $file_password = $matches[1];
+  }
+}
 
-      if ($file_password === "") {
-        $this->set_last_error("Password in $filename has not been set");
-        return false;
+?>
+
+<?php
+
+class FileStorage {
+  private $IGNORE_FILES = null;
+  private $data_path = null;
+  private $last_error = "";
+
+  public function __construct($data_path) {
+    $this->data_path = $data_path;
+
+    $this->IGNORE_FILES = Array('', '.', '..', 'content.json');
+  }
+
+  public function get_last_error() {
+    $last_error = $this->last_error;
+    $this->last_error = "";
+    return $last_error;
+  }
+
+  private function set_last_error($error) {
+    $this->last_error = $error;
+  }
+
+  public function get_file_list() {
+    $file_list = Array();
+
+    if ($handle = opendir($this->data_path)) {
+      while (false !== ($entry = readdir($handle))) {
+        if (!in_array($entry, $this->IGNORE_FILES)) {
+          $entry_data = Array(
+            'name' => $entry,
+            'size' => filesize($this->data_path.DIRECTORY_SEPARATOR.$entry)
+          );
+          array_push($file_list, $entry_data);
+        }
       }
+    }
 
-      if ($file_password === $password) {
-        return true;
+    return $file_list;
+  }
+
+  private function valid_filename($filename) {
+    global $FILE_UPLOAD_ALLOWED_CHARS_REGEX;
+
+    // Make sure the filename does not contain a directory separator
+    if (strpos(DIRECTORY_SEPARATOR, $filename) !== false) {
+      return null;
+    }
+
+    // Allow only listed characters
+    $filename = basename($filename);
+    $filename = preg_replace('/[^'.$FILE_UPLOAD_ALLOWED_CHARS_REGEX.']/', '', $filename);
+
+    // Make sure the filename is not one of the forbidden files
+    if (in_array($filename, $this->IGNORE_FILES)) {
+      return null;
+    }
+
+    return $this->data_path.DIRECTORY_SEPARATOR.$filename;
+  }
+
+  public function upload_file($upload_file_data) {
+    if ($upload_file_data['error']) {
+      if (is_file($upload_file_data['tmp_name'])) {
+        unlink($upload_file_data['tmp_name']);
       }
-
       return false;
     }
 
-    $this->set_last_error("Authentication password file $filename is not in valid format");
+    $valid_filename = $this->valid_filename($upload_file_data['name']);
+    if (is_null($valid_filename)) {
+      if (is_file($upload_file_data['tmp_name'])) {
+        unlink($upload_file_data['tmp_name']);
+      }
+      return false;
+    }
+
+    if (file_exists($valid_filename)) {
+      if (is_file($upload_file_data['tmp_name'])) {
+        unlink($upload_file_data['tmp_name']);
+      }
+      $this->set_last_error("'".$upload_file_data['name']."' already exists");
+      return false;
+    }
+
+    return move_uploaded_file($upload_file_data['tmp_name'], $valid_filename);
+  }
+
+  public function delete_file($filename) {
+    $valid_filename = $this->valid_filename($filename);
+    if (is_null($valid_filename)) {
+      return false;
+    }
+
+    if (unlink($valid_filename) > 0) {
+      return true;
+    }
+
+    $this->set_last_error("Unable to remove file '".$filename."'");
+
     return false;
   }
 }
@@ -2249,14 +2440,23 @@ class PageContent {
     )
   );
 
-  public function __construct($data_file, $data_path = "") {
-    $json = file_get_contents($data_file);
-    $this->page_data = json_decode($json, true);
+  public function __construct($page_data, $data_path = "") {
+    // By default the $page_data is a JSON-encoded string
+    $page_data_obj = json_decode($page_data, true);
+    if (is_null($page_data_obj)) {
+      // $page_data was not a JSON-formatted string, treat it as a filename
+      $json = file_get_contents($page_data);
+      $this->page_data = json_decode($json, true);
+    }
+    else {
+      // $page_data was a JSON-formatted string
+      $this->page_data = $page_data_obj;
+    }
     $this->data_path = $data_path;
   }
 
   private function add_datapath_prefix_one($value) {
-    if (!filter_var($value, FILTER_VALIDATE_URL, Array('flags'=>FILTER_FLAG_SCHEME_REQUIRED)) and !preg_match('/[\/]/', $value)) {
+    if (!filter_var($value, FILTER_VALIDATE_URL) and !preg_match('/[\/]/', $value)) {
       log_message("add_datapath_prefix returning value with prefix: ".$this->data_path.'/'.$value, null, 2);
       return $this->data_path.'/'.$value;
     }
@@ -2272,7 +2472,7 @@ class PageContent {
     $original_value = $value;
 
     do {
-      $value = preg_replace('/^([^`]*)!\[(.*)\]\(([^\/]*)\)([^`]*)$/m', '$1![$2]('.$this->data_path.'/$3)$4', $value, 1, $replacements_made);
+      $value = preg_replace('/^([^`]*)(!*)\[(.*)\]\(([^\/]*)\)([^`]*)$/m', '$1$2[$3]('.$this->data_path.'/$4)$5', $value, 1, $replacements_made);
       if ($replacements_made > 0) {
         $replacement_count++;
       }
@@ -2383,6 +2583,102 @@ class PageStorage {
 
 <?php
 
+class Settings {
+  private $filename = null;
+  private $rules = null;
+
+  function __construct($filename=null) {
+    if (is_null($filename) or ($filename === "")) {
+      $this->filename = "settings.php";
+    }
+    else {
+      $this->filename = $filename;
+    }
+
+    $this->rules = Array(
+      'ADMIN_PASSWORD' => "string",
+      'LOG_LEVEL' => "integer"
+    );
+  }
+
+  function get_filename() {
+    return $this->filename;
+  }
+
+  function set_value($field, $value) {
+    $field = strtoupper($field);
+
+    if (!array_key_exists($field, $this->rules)) {
+      log_message("Trying to set field $field which does not exist");
+      return false;
+    }
+
+    if (gettype($value) != $this->rules[$field]) {
+      log_message("Trying to set field $field to value $value, which is illegal type ".gettype($value));
+      return false;
+    }
+
+    $settings = $this->read_settings_file();
+    $settings[$field] = $value;
+    return $this->write_settings_file($settings);
+  }
+
+  function get_value($field) {
+    $field = strtoupper($field);
+
+    if (!array_key_exists($field, $this->rules)) {
+      log_message("Trying to get field $field which does not exist");
+      return false;
+    }
+
+    $settings = $this->read_settings_file();
+    return @$settings[$field];
+  }
+
+  private function read_settings_file() {
+    if (!is_readable($this->filename)) {
+      log_message("Settings file ".$this->filename." is not readable");
+      return Array();
+    }
+
+    $file = file_get_contents($this->filename);
+
+    $settings = Array();
+
+    if (preg_match('/(\{.*\})/', $file, $matches)) {
+      $settings = json_decode($matches[1], true);
+    }
+
+    return $settings;
+  }
+
+  private function write_settings_file($settings) {
+    if (!is_writable($this->filename)) {
+      log_message("Settings file ".$this->filename." is not writable");
+      return false;
+    }
+
+    $c = Array();
+    array_push($c, "<?php");
+    array_push($c, "/*");
+    array_push($c, json_encode($settings));
+    array_push($c, "*/");
+    array_push($c, "?>");
+
+    $bytes_written = file_put_contents($this->filename, join("\n", $c)."\n");
+
+    if ($bytes_written == false) {
+      return false;
+    }
+
+    return true;
+  }
+}
+
+?>
+
+<?php
+
 class ShowAdminUI {
   function __construct() {
     ?>
@@ -2410,13 +2706,16 @@ class ShowAdminUI {
 /*# sourceMappingURL=bootstrap-colorpicker.min.css.map */
 
 
-    .container { padding-top: 50px; }
     #message_loginfailed { display: none; }
     .navbar-nav-center { margin: auto; }
-    .navbar-nav-center .btn { margin-left: 5px; margin-right: 5px; }
+    .navbar-nav-center .button_single { margin-left: 5px; margin-right: 5px; margin-top: 2px; }
 
     .label_text { margin-top: 20px; font-weight: bold; }
     .button_part {margin-top: 10px; margin-bottom: 20px; margin-right: 10px; font-size: 120%; }
+
+    .button_header {font-size: 120%; }
+
+    #button_file_upload {cursor:pointer;}
   </style>
   <script type="text/javascript">
     /*! jQuery v3.4.1 | (c) JS Foundation and other contributors | jquery.org/license */
@@ -2440,6 +2739,34 @@ class ShowAdminUI {
 
 class BootstrapIconWrapper {
   constructor() {
+    // Top navi buttons
+    this.book = '<svg class="bi bi-book" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
+  <path fill-rule="evenodd" d="M5.214 3.072c1.599-.32 3.702-.363 5.14 1.074a.5.5 0 01.146.354v11a.5.5 0 01-.854.354c-.843-.844-2.115-1.059-3.47-.92-1.344.14-2.66.617-3.452 1.013A.5.5 0 012 15.5v-11a.5.5 0 01.276-.447L2.5 4.5l-.224-.447.002-.001.004-.002.013-.006a5.116 5.116 0 01.22-.103 12.958 12.958 0 012.7-.869zM3 4.82v9.908c.846-.343 1.944-.672 3.074-.788 1.143-.118 2.387-.023 3.426.56V4.718c-1.063-.929-2.631-.956-4.09-.664A11.958 11.958 0 003 4.82z" clip-rule="evenodd"/> \
+  <path fill-rule="evenodd" d="M14.786 3.072c-1.598-.32-3.702-.363-5.14 1.074A.5.5 0 009.5 4.5v11a.5.5 0 00.854.354c.844-.844 2.115-1.059 3.47-.92 1.344.14 2.66.617 3.452 1.013A.5.5 0 0018 15.5v-11a.5.5 0 00-.276-.447L17.5 4.5l.224-.447-.002-.001-.004-.002-.013-.006-.047-.023a12.582 12.582 0 00-.799-.34 12.96 12.96 0 00-2.073-.609zM17 4.82v9.908c-.846-.343-1.944-.672-3.074-.788-1.143-.118-2.386-.023-3.426.56V4.718c1.063-.929 2.631-.956 4.09-.664A11.956 11.956 0 0117 4.82z" clip-rule="evenodd"/> \
+</svg>';
+    this.pencil = '<svg class="bi bi-pencil" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
+  <path fill-rule="evenodd" d="M13.293 3.293a1 1 0 011.414 0l2 2a1 1 0 010 1.414l-9 9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.266-1.265l1-3a1 1 0 01.242-.391l9-9zM14 4l2 2-9 9-3 1 1-3 9-9z" clip-rule="evenodd"/> \
+  <path fill-rule="evenodd" d="M14.146 8.354l-2.5-2.5.708-.708 2.5 2.5-.708.708zM5 12v.5a.5.5 0 00.5.5H6v.5a.5.5 0 00.5.5H7v.5a.5.5 0 00.5.5H8v-1.5a.5.5 0 00-.5-.5H7v-.5a.5.5 0 00-.5-.5H5z" clip-rule="evenodd"/> \
+</svg>';
+    this.folder = '<svg class="bi bi-folder" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
+  <path d="M11.828 6a3 3 0 01-2.12-.879l-.83-.828A1 1 0 008.173 4H4.5a1 1 0 00-1 .981L3.546 6h-1L2.5 5a2 2 0 012-2h3.672a2 2 0 011.414.586l.828.828A2 2 0 0011.828 5v1z"/> \
+  <path fill-rule="evenodd" d="M15.81 6H4.19a1 1 0 00-.996 1.09l.637 7a1 1 0 00.995.91h10.348a1 1 0 00.995-.91l.637-7A1 1 0 0015.81 6zM4.19 5a2 2 0 00-1.992 2.181l.637 7A2 2 0 004.826 16h10.348a2 2 0 001.991-1.819l.637-7A2 2 0 0015.81 5H4.19z" clip-rule="evenodd"/> \
+</svg>';
+    this.cloud_upload = '<svg class="bi bi-cloud-upload" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
+  <path d="M6.887 8.2l-.964-.165A2.5 2.5 0 105.5 13H8v1H5.5a3.5 3.5 0 11.59-6.95 5.002 5.002 0 119.804 1.98A2.501 2.501 0 0115.5 14H12v-1h3.5a1.5 1.5 0 00.237-2.982L14.7 9.854l.216-1.028a4 4 0 10-7.843-1.587l-.185.96z"/> \
+  <path fill-rule="evenodd" d="M7 10.854a.5.5 0 00.707 0L10 8.56l2.293 2.293a.5.5 0 00.707-.707L10.354 7.5a.5.5 0 00-.708 0L7 10.146a.5.5 0 000 .708z" clip-rule="evenodd"/> \
+  <path fill-rule="evenodd" d="M10 8a.5.5 0 01.5.5v8a.5.5 0 01-1 0v-8A.5.5 0 0110 8z" clip-rule="evenodd"/> \
+</svg>';
+    this.x_circle = '<svg class="bi bi-x-circle" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
+  <path fill-rule="evenodd" d="M10 17a7 7 0 100-14 7 7 0 000 14zm0 1a8 8 0 100-16 8 8 0 000 16z" clip-rule="evenodd"/> \
+  <path fill-rule="evenodd" d="M12.646 13.354l-6-6 .708-.708 6 6-.708.708z" clip-rule="evenodd"/> \
+  <path fill-rule="evenodd" d="M7.354 13.354l6-6-.708-.708-6 6 .708.708z" clip-rule="evenodd"/> \
+</svg>';
+    this.x_circle_fill = '<svg class="bi bi-x-circle-fill" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
+  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7.354 6.646L10 9.293l2.646-2.647a.5.5 0 01.708.708L10.707 10l2.647 2.646a.5.5 0 01-.708.708L10 10.707l-2.646 2.647a.5.5 0 01-.708-.708L9.293 10 6.646 7.354a.5.5 0 11.708-.708z" clip-rule="evenodd"/> \
+</svg>';
+
+    // Parts edit buttons
     this.plus = '<svg class="bi bi-plus" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
   <path fill-rule="evenodd" d="M10 5.5a.5.5 0 01.5.5v4a.5.5 0 01-.5.5H6a.5.5 0 010-1h3.5V6a.5.5 0 01.5-.5z" clip-rule="evenodd"/> \
   <path fill-rule="evenodd" d="M9.5 10a.5.5 0 01.5-.5h4a.5.5 0 010 1h-3.5V14a.5.5 0 01-1 0v-4z" clip-rule="evenodd"/> \
@@ -2459,9 +2786,8 @@ class BootstrapIconWrapper {
   <path fill-rule="evenodd" d="M10 4.5a.5.5 0 01.5.5v9a.5.5 0 01-1 0V5a.5.5 0 01.5-.5z" clip-rule="evenodd"/> \
 </svg>';
     this.trash = '<svg class="bi bi-trash" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
-  <path fill-rule="evenodd" d="M6 6v8.5c0 .47.124.874.297 1.144.177.275.361.356.489.356h6.428c.127 0 .312-.08.489-.356.173-.27.297-.673.297-1.144V6h1v8.5c0 .634-.164 1.23-.456 1.685-.288.448-.747.815-1.33.815H6.786c-.583 0-1.042-.367-1.33-.815C5.164 15.73 5 15.134 5 14.5V6h1z" clip-rule="evenodd"/> \
-  <path fill-rule="evenodd" d="M7.5 7.5A.5.5 0 018 8v6a.5.5 0 01-1 0V8a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V8a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V8a.5.5 0 01.5-.5zm3-3.5h-11v1h11V4zm-11-1a1 1 0 00-1 1v1a1 1 0 001 1h11a1 1 0 001-1V4a1 1 0 00-1-1h-11z" clip-rule="evenodd"/> \
-  <path d="M8 3a1 1 0 011-1h2a1 1 0 011 1v1H8V3z"/> \
+  <path d="M7.5 7.5A.5.5 0 018 8v6a.5.5 0 01-1 0V8a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V8a.5.5 0 01.5-.5zm3 .5a.5.5 0 00-1 0v6a.5.5 0 001 0V8z"/> \
+  <path fill-rule="evenodd" d="M16.5 5a1 1 0 01-1 1H15v9a2 2 0 01-2 2H7a2 2 0 01-2-2V6h-.5a1 1 0 01-1-1V4a1 1 0 011-1H8a1 1 0 011-1h2a1 1 0 011 1h3.5a1 1 0 011 1v1zM6.118 6L6 6.059V15a1 1 0 001 1h6a1 1 0 001-1V6.059L13.882 6H6.118zM4.5 5V4h11v1h-11z" clip-rule="evenodd"/> \
 </svg>';
   }
 }
@@ -2836,10 +3162,55 @@ class PageContent {
   }
 }
 
+class FileContent {
+  constructor(file_content_id) {
+    this.file_data = null;
+    this.file_content_id = file_content_id;
+
+    if ($(this.file_content_id).length != 1) {
+      console.error("FileContent: Given "+this.file_content_id+" points to "+$(this.file_content_id).length+" objects");
+    }
+  }
+
+  get_files_count() {
+    if (this.file_data == null) {
+      return 0;
+    }
+
+    return this.file_data.length;
+  }
+
+  get_files_table_html() {
+    var body_rows = [];
+    var biw = new BootstrapIconWrapper();
+
+    if (this.get_files_count() == 0) {
+      return "<p>No files. Upload one:</p>";
+    }
+
+    for (var n=0; n < this.get_files_count(); n++) {
+      var html = "<tr>";
+      html += "<td>"+this.file_data[n].name+"</td>";
+      html += "<td>"+this.file_data[n].size+"</td>";
+      html += "<td><button type='button' class='btn btn-danger btn-sm button_file_delete' data-filename='"+this.file_data[n].name+"'>"+biw.x_circle_fill+"</button>";
+      html += "</tr>";
+      body_rows.push(html);
+    }
+
+    return "<table class='table'><thead><tr><th scope='col'>Filename</th><th scope='col'>Size</th><th scope='col'>Delete</th></tr></thead><tbody>"+body_rows.join('')+"</tbody></table>";
+  }
+
+  set_data(data) {
+    this.file_data = data;
+    $(this.file_content_id).html(this.get_files_table_html());
+  }
+}
+
 
 var page_content = null;
+var file_content = null;
 
-function get_data() {
+function update_edit() {
   var post_data = {
     type:"POST",
     url: SERVER_URL,
@@ -2855,21 +3226,23 @@ function get_data() {
 
       if (data_obj.success) {
         $("#login_content").hide();
+        $("#header_publish").show();
+        mode_set('edit');
         page_content.set_data(data_obj.data);
       }
       else {
         $("#message_loginfailed").show();
         $("#password").val('');
         setTimeout(function () { $("#password").focus(); }, 1);
-        console.error("get_data() failed. Retrieved data:", data_obj);
+        console.error("update_edit() failed. Retrieved data:", data_obj);
         if (data_obj.message != "") {
           alert(data_obj.message);
         }
       }
     })
     .fail(function(data) {
-      alert("get_data() failed. See console");
-      console.error("get_data() failed. Retrieved data:", data);
+      alert("update_edit() failed. See console");
+      console.error("update_edit() failed. Retrieved data:", data);
     });
 }
 
@@ -2890,8 +3263,8 @@ function set_data() {
 
       if (data_obj.success) {
         $("#button_publish").addClass("btn-success");
-        setTimeout(function() { $("#header_publish").hide(500); }, 2000)
-        setTimeout(function() { $("#button_publish").removeClass("btn-success")}, 2600);
+        update_header_publish();
+        setTimeout(function() { $("#button_publish").removeClass("btn-success"); mode_set('edit'); }, 1000);
       }
       else {
         alert("set_data() failed. See console");
@@ -2904,28 +3277,206 @@ function set_data() {
     });
 }
 
+function update_preview() {
+  var post_data = {
+    type: "POST",
+    url: SERVER_URL,
+    data: {
+      password: $("#password").val(),
+      function: "preview",
+      data: JSON.stringify(page_content.get_data())
+    }
+  };
+
+  var jqxhr = $.post(post_data)
+    .done(function(data) {
+      var data_obj = JSON.parse(data);
+
+      if (data_obj.success) {
+        $("#page_content_preview").html(data_obj.data.html);
+
+        // Handle Google font CSS links
+        $("[href*='https://fonts.googleapis.com/css?family='][rel='stylesheet']").remove();
+        $("head").append(data_obj.data.head);
+
+        mode_set('preview');
+      }
+      else {
+        alert("update_preview() failed. See console");
+        console.error("update_preview() failed. Data:", data_obj);
+      }
+    })
+    .fail(function(data) {
+      alert("update_preview() failed. See console");
+      console.error("update_preview() failed. Data:", data);
+    });
+}
+
+function update_file(backend_function, filename) {
+  if (backend_function == undefined) {
+    backend_function = "file_list";
+  }
+
+  var post_data = {
+    type: "POST",
+    url: SERVER_URL,
+    data: {
+      password: $("#password").val(),
+      function: backend_function,
+      data: filename
+    }
+  };
+
+  var jqxhr = $.post(post_data)
+    .done(function(data) {
+      var data_obj = JSON.parse(data);
+
+      if (data_obj.success) {
+        $(".button_file_delete").off();
+
+        mode_set('file');
+        file_content.set_data(data_obj.data);
+
+        activate_file_delete_buttons();
+      }
+      else {
+        alert("update_file() failed. See console.");
+        console.error("update_file() failed. Data:", data_obj);
+      }
+    })
+    .fail(function(data) {
+      alert("update_file() failed. See console");
+      console.error("update_file() failed. Data:", data);
+    });
+}
+
+function upload_file() {
+  if ($("#file_upload").val() == "") {
+    return;
+  }
+
+  var data = new FormData();
+  data.append('file_upload', $('#file_upload')[0].files[0]);
+  data.append('password', $("#password").val());
+  data.append('function', 'file_upload');
+
+  $.ajax({
+    url: SERVER_URL,
+    data: data,
+    cache: false,
+    contentType: false,
+    processData: false,
+    method: 'POST',
+    success: function(data) {
+      var data_obj = JSON.parse(data);
+
+      if (data_obj.success) {
+        $(".button_file_delete").off();
+
+        mode_set('file');
+        file_content.set_data(data_obj.data);
+
+        activate_file_delete_buttons();
+
+        $("#file_upload").val("");
+        update_upload_filename();
+      }
+      else {
+        if (data_obj.message != "") {
+          alert("File upload failed: "+data_obj.message);
+        }
+        else {
+          alert("upload_file() failed. See console.");
+          console.error("upload_file() failed. Data:", data_obj);
+        }
+      }
+    },
+    error: function(data, error) {
+      alert("upload_file() failed. See console.");
+      console.error("upload_file() failes. Data:", data, error);
+    }
+  });
+}
+
+function update_upload_filename() {
+  var filename = $("#file_upload").val();
+  filename = filename.split(/(\\|\/)/g).pop();
+
+  if (filename === "") {
+    filename = "Choose file";
+  }
+
+  $("#file_upload_label").text(filename);
+}
+
+function mode_set(mode) {
+  $(".button_mode").prop("disabled", false);
+  $("#button_"+mode+"_mode").prop("disabled", true);
+
+  $(".page_content").hide();
+  $("#page_content_"+mode).show();
+
+  $(".container").css('padding-top',$("#header_publish_inner").height()+50);
+}
+
 function update_header_publish() {
   if (page_content.page_data_has_changed) {
-    $("#header_publish").show();
+    $("#button_publish").prop("disabled", false);
+    $("#button_cancel").prop("disabled", false);
   }
   else {
-    $("#header_publish").hide();
+    $("#button_publish").prop("disabled", true);
+    $("#button_cancel").prop("disabled", true);
   }
+}
+
+function update_header_buttons() {
+  var biw = new BootstrapIconWrapper();
+
+  $("#button_preview_mode").html(biw.book);
+  $("#button_edit_mode").html(biw.pencil);
+  $("#button_file_mode").html(biw.folder);
+  $("#button_publish").html(biw.cloud_upload);
+  $("#button_cancel").html(biw.x_circle);
+}
+
+function activate_file_delete_buttons() {
+  $(".button_file_delete").click(function () {
+    update_file("file_delete", $(this).attr('data-filename'));
+  });
 }
 
 $(document).ready(function () {
   console.log("AdminUI.js is ready!");
-  $("#header_publish").hide();
 
-  page_content = new PageContent("#page_content");
+  // Header is show after successful login
+  $("#header_publish").hide();
+  update_header_buttons();
+
+  mode_set('edit');
+
+  page_content = new PageContent("#page_content_edit");
+  file_content = new FileContent("#page_content_file_inner");
 
   $("#button_login").click(function () {
-    get_data();
+    update_edit();
+  });
+
+  $("#button_edit_mode").click(function() {
+    mode_set('edit');
+  });
+
+  $("#button_preview_mode").click(function () {
+    update_preview();
+  });
+
+  $("#button_file_mode").click(function () {
+    update_file();
   });
 
   $("#button_cancel").click(function () {
     if (confirm("Are you sure you want to discard your changes?")) {
-      get_data();
+      update_edit();
     }
   });
 
@@ -2933,16 +3484,24 @@ $(document).ready(function () {
     set_data();
   });
 
+  $("#button_file_upload").click(function () {
+    upload_file();
+  });
+
   // Login when enter pressed
   $("#password").on("keypress", function (e) {
     if (e.which == 13) {
-      get_data();
+      update_edit();
     }
     $("#message_loginfailed").hide();
   });
 
   page_content.on_change(function () {
     update_header_publish();
+  });
+
+  $("#file_upload").change(function () {
+    update_upload_filename();
   });
 
   setTimeout(function () { $("#password").focus(); }, 1);
@@ -2952,17 +3511,20 @@ $(document).ready(function () {
 </head>
 <body>
   <header id="header_publish">
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <nav id="header_publish_inner" class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
       <div class="navbar-nav navbar-nav-center">
-        <input type="button" value="Publish changes" id="button_publish" class="btn btn-primary">
-        <input type="button" value="Cancel" id="button_cancel" class="btn btn-primary btn-secondary">
+        <div class="btn-group button_single" role="group">
+          <button type="button" id="button_edit_mode" class="button_header button_mode btn btn-primary"></button>
+          <button type="button" id="button_preview_mode" class="button_header button_mode btn btn-primary"></button>
+          <button type="button" id="button_file_mode" class="button_header button_mode btn btn-primary"></button>
+        </div>
+        <button type="button" id="button_publish" class="button_header button_single btn btn-primary"></button>
+        <button type="button" id="button_cancel" class="button_header button_single btn btn-primary"></button>
       </div>
     </nav>
   </header>
 
   <div class="container">
-    <h1>AdminUI</h1>
-
     <form onsubmit="return false">
       <div id="login_content">
         <div class="form-group">
@@ -2977,12 +3539,31 @@ $(document).ready(function () {
         <div class="form-group">
           <div id="message_loginfailed" class="alert alert-warning" role="alert">Please check your password</div>
         </div>
-
-      </div>
-
-      <div id="page_content">
       </div>
     </form>
+
+    <div id="page_content_edit" class="page_content">
+    </div>
+
+    <div id="page_content_preview" class="page_content">
+    </div>
+
+    <div id="page_content_file" class="page_content">
+      <div id="page_content_file_inner">
+      </div>
+
+      <form onsubmit="return false">
+        <div class="input-group">
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" id="file_upload">
+            <label class="custom-file-label" for="button_file_upload" id="file_upload_label">Choose file</label>
+          </div>
+          <div class="input-group-append">
+            <span class="input-group-text" id="button_file_upload">Upload</span>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
 </body>
 </html>
@@ -2999,20 +3580,35 @@ include_once("global_functions.php");
 
 class ShowPage {
   private $version = "";
+  private $page_content = null;
 
-  function __construct($version, $datapath) {
+  function __construct($version, $datapath, $page_json=null) {
     $this->version = $version;
-    $datafile = $datapath."/content.json";
 
-    if (is_readable($datafile)) {
-      $page = new PageContent($datafile, $datapath);
+    if (is_null($page_json)) {
+      $datafile = $datapath."/content.json";
 
-      $this->render_header($page);
-      $this->render_content($page);
-      $this->render_footer($page);
-    } else {
-      log_message("Data file $datafile is not readable", 1, 0);
+      if (is_readable($datafile)) {
+        $this->page_content = new PageContent($datafile, $datapath);
+      } else {
+        log_message("Data file $datafile is not readable", 1, 0);
+      }
     }
+    else {
+      $this->page_content = new PageContent($page_json, $datapath);
+    }
+  }
+
+  function get_html_page() {
+    return $this->render_header().$this->render_content().$this->render_footer();
+  }
+
+  function get_html_preview() {
+    return $this->get_body_style_tag().$this->render_content();
+  }
+
+  function get_html_googlefonts() {
+    return $this->get_html_tag('<link href="https://fonts.googleapis.com/css?family=###&display=swap" rel="stylesheet" />', $this->page_content->get_page_google_fonts_value());
   }
 
   private function get_html_tag($html, $value) {
@@ -3029,94 +3625,85 @@ class ShowPage {
     }
   }
 
-  function render_header($page) {
+  private function get_body_style_tag() {
+    return "<style>#page table { margin: 0 auto; } #page img { max-width: 100%; } #page { font-family: Arial,Helvetica,sans-serif; }</style>";
+  }
+
+  function render_header() {
     $head_tags = Array();
 
     $this->array_push_if_set($head_tags, $this->get_html_tag('<!-- This landing page has been created with ### -->', $this->version));
 
     $this->array_push_if_set($head_tags, '<meta charset="UTF-8"><meta http-equiv="content-type" content="text/html; charset=utf-8" />');
     $this->array_push_if_set($head_tags, '<meta name="viewport" content="width=device-width, initial-scale=1.0" />');
-    $this->array_push_if_set($head_tags, $this->get_html_tag('<title>###</title>', $page->get_page_value('title')));
-    $this->array_push_if_set($head_tags, $this->get_html_tag('<link href="https://fonts.googleapis.com/css?family=###&display=swap" rel="stylesheet" />', $page->get_page_google_fonts_value()));
-    $this->array_push_if_set($head_tags, $this->get_html_tag('<link rel="icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
-    $this->array_push_if_set($head_tags, $this->get_html_tag('<link rel="shortcut icon" href="###" type="image/x-icon" />', $page->get_page_value('favicon-ico')));
-    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta name="description" content="###" />', $page->get_page_value('description')));
-    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta name="keywords" content="###" />', $page->get_page_value('keywords')));
-    $this->array_push_if_set($head_tags, $this->get_html_tag('<style>###</style>', $page->get_page_value('style-css')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<title>###</title>', $this->page_content->get_page_value('title')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<link href="https://fonts.googleapis.com/css?family=###&display=swap" rel="stylesheet" />', $this->page_content->get_page_google_fonts_value()));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<link rel="icon" href="###" type="image/x-icon" />', $this->page_content->get_page_value('favicon-ico')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<link rel="shortcut icon" href="###" type="image/x-icon" />', $this->page_content->get_page_value('favicon-ico')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta name="description" content="###" />', $this->page_content->get_page_value('description')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta name="keywords" content="###" />', $this->page_content->get_page_value('keywords')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<style>###</style>', $this->page_content->get_page_value('style-css')));
 
-    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:site_name" content="###" />', $page->get_page_value('title')));
-    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:title" content="###" />', $page->get_page_value('title')));
-    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:description" content="###" />', $page->get_page_value('description')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:site_name" content="###" />', $this->page_content->get_page_value('title')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:title" content="###" />', $this->page_content->get_page_value('title')));
+    $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:description" content="###" />', $this->page_content->get_page_value('description')));
 
-    if (strlen($page->get_page_value('image')) > 0) {
-      $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:image" content="###" />', get_my_url().$page->get_page_value('image')));
+    if (strlen($this->page_content->get_page_value('image')) > 0) {
+      $this->array_push_if_set($head_tags, $this->get_html_tag('<meta property="og:image" content="###" />', get_my_url().$this->page_content->get_page_value('image')));
     }
 
-    ?>
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <?php echo(join("\n", $head_tags)."\n"); ?>
-      <style>
-        table { margin: 0 auto; }
-        img { max-width: 100%; }
-      </style>
-    </head>
-    <body style="margin:0; padding: 0;
-      font-family: <?php echo($page->get_page_value('font-family', 'Arial,Helvetica,sans-serif')); ?>
-    ">
-    <?php
+    $html = "<!DOCTYPE html>\n<html>\n<head>";
+    $html .= join("\n", $head_tags)."\n";
+    $html .= $this->get_body_style_tag()."</head>";
+    $html .= "<body style='margin:0; padding:0;'>";
+
+    return $html;
   }
 
-  function render_footer($page) {
-    ?>
-    </body>
-    </html>
-    <?php
+  function render_footer() {
+    return "</body></html>\n";
   }
 
-  function render_content($page) {
-    $part_count = $page->get_parts_count();
+  function render_content() {
+    $part_count = $this->page_content->get_parts_count();
+
+    $html = "";
 
     if (is_null($part_count)) {
       log_message("Page does not contain any parts", null, 1);
     } else {
       for ($n=0; $n < $part_count; $n++) {
-        $this->render_part($page, $n);
+        $html .= $this->render_part($n);
       }
     }
+
+    return "<div id='page'>".$html."</div>";
   }
 
-  function render_part($page, $index) {
+  function render_part($index) {
     $parsedown = new Parsedown();
 
     $style_tags = Array();
 
     $this->array_push_if_set($style_tags, $this->get_html_tag(
       "background-image:url('###'); background-position: center; background-repeat: no-repeat; background-size: cover; ",
-      $page->get_part($index, 'background-image')
+      $this->page_content->get_part($index, 'background-image')
     ));
-    $this->array_push_if_set($style_tags, $this->get_html_tag("height:###;", $page->get_part($index, 'height')));
-    $this->array_push_if_set($style_tags, $this->get_html_tag("font-family:'###', cursive;", $page->get_part($index, 'font-family-google')));
+    $this->array_push_if_set($style_tags, $this->get_html_tag("height:###;", $this->page_content->get_part($index, 'height')));
+    $this->array_push_if_set($style_tags, $this->get_html_tag("font-family:'###', cursive;", $this->page_content->get_part($index, 'font-family-google')));
 
-    $this->array_push_if_set($style_tags, $this->get_html_tag("margin:###;", $page->get_part($index, 'margin', '10px')));
-    $this->array_push_if_set($style_tags, $this->get_html_tag("padding:###;", $page->get_part($index, 'padding', '0')));
-    $this->array_push_if_set($style_tags, $this->get_html_tag("color:###;", $page->get_part($index, 'color', '#000000')));
-    $this->array_push_if_set($style_tags, $this->get_html_tag("text-align:###;", $page->get_part($index, 'text-align', 'center')));
+    $this->array_push_if_set($style_tags, $this->get_html_tag("margin:###;", $this->page_content->get_part($index, 'margin', '10px')));
+    $this->array_push_if_set($style_tags, $this->get_html_tag("padding:###;", $this->page_content->get_part($index, 'padding', '0')));
+    $this->array_push_if_set($style_tags, $this->get_html_tag("color:###;", $this->page_content->get_part($index, 'color', '#000000')));
+    $this->array_push_if_set($style_tags, $this->get_html_tag("text-align:###;", $this->page_content->get_part($index, 'text-align', 'center')));
 
-    ?>
-      <section
-        id="sec<?php echo($index); ?>"
-        style="
-          <?php echo(join("\n", $style_tags)."\n"); ?>
-          "
-      >
+    $html = "<section id=\"sec".$index."\" style=\"".join(" ", $style_tags)."\">";
 
-      <?php echo($parsedown->text($page->get_part($index, 'text'))); ?>
+    $html .= $parsedown->text($this->page_content->get_part($index, 'text'));
 
-      </section>
-    <?php
-    log_message($page->get_part($index, 'text'), null, 2);
+    $html .= '</section>';
+
+    return $html;
   }
 
 }

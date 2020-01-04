@@ -4,7 +4,7 @@ $AUTH_METHODS = Array(
   'file' => null  // Uses the default file path "settings.php"
 );
 
-$VERSION = "Dummylander 0.4";
+$VERSION = "Dummylander 0.5";
 $DATAPATH = "data/";
 
 $PAGE_PROPERTIES = Array(

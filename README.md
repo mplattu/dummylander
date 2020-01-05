@@ -1,6 +1,6 @@
 # Dummylander
 
-[![Build Status](https://travis-ci.com/mplattu/dummylander.svg?branch=master)](https://travis-ci.com/mplattu/dummylander)
+[![Build Status](https://travis-ci.org/mplattu/dummylander.svg?branch=master)](https://travis-ci.com/mplattu/dummylander)
 
 Superdupersimple landing page administration tool.
 

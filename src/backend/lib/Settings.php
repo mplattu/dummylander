@@ -83,7 +83,17 @@ class Settings {
     array_push($c, "*/");
     array_push($c, "?>");
 
-    $bytes_written = file_put_contents($this->filename, join("\n", $c)."\n");
+    set_error_handler("custom_error_handler");
+
+    try {
+      $bytes_written = file_put_contents($this->filename, join("\n", $c)."\n");
+    }
+    catch (Exception $e) {
+      log_message("Error while writing settings file ".$this->filename.": ".$e->getMessage());
+      $bytes_written = false;
+    }
+    
+    restore_error_handler();
 
     if ($bytes_written == false) {
       return false;

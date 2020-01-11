@@ -36,4 +36,8 @@ function get_my_url($url = null) {
   return $url;
 }
 
+function custom_error_handler($severity, $message, $file, $line) {
+  throw new ErrorException($message, $severity, $severity, $file, $line);
+}
+
 ?>

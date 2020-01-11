@@ -43,7 +43,7 @@ class integration_test extends TestCase {
 
     $this->assertTrue(chmod($path_settings_dir, $original_perms));
 
-    $this->assertFalse($page['success']);
+    $this->assertFalse($page['success'], "Returned value: ".print_r($page, true));
     $this->assertEquals("Failed to create new settings file", $page['message']);
   }
 }

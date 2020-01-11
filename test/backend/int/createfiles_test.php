@@ -43,7 +43,9 @@ class integration_test extends TestCase {
 
     $this->assertTrue(chmod($path_settings_dir, $original_perms));
 
+    $this->assertEquals("array", gettype($page), "Returned value: ".print_r($page, true));
+    $this->assertArrayHasKey("success", $page, "Returned value: ".print_r($page, true));
     $this->assertFalse($page['success'], "Returned value: ".print_r($page, true));
-    $this->assertEquals("Failed to create new settings file", $page['message']);
+    $this->assertEquals("Failed to create new settings file", $page['message'], "Returned value: ".print_r($page, true));
   }
 }

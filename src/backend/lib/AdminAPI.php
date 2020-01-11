@@ -102,6 +102,10 @@ class AdminAPI {
     if ($this->function == "uploadlimitexceeded") {
       return $this->get_return_data(false, null, $this->data);
     }
+
+    if ($this->function == "failedtocreatesettinsfile") {
+      return $this->get_return_data(false, null, $this->data);
+    }
   }
 }
 

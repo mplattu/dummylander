@@ -25,6 +25,11 @@ $SECTION_PROPERTIES = Array(
   'font-family-google'
 );
 
+$DEFAULT_SETTINGS = Array(
+  'ADMIN_PASSWORD' => "",
+  'LOG_LEVEL' => 1
+);
+
 // Characters allowed in filenames. See FileStorage class.
 $FILE_UPLOAD_ALLOWED_CHARS_REGEX = 'a-zA-Z01234567890\-_.';
 

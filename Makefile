@@ -71,6 +71,7 @@ test-unit:
 	phpunit $(PHPUNIT_PARAMS) test/backend/unit/Settings_test.php
 
 test-integration: build
+	php -l test/backend/int/createfiles_test.php
 	php -l test/backend/int/file_list_test.php
 	php -l test/backend/int/file_upload_test.php
 	php -l test/backend/int/getpage_test.php
@@ -88,6 +89,7 @@ test-integration: build
 	if [ "$(HTTP_PORT_USED)" = "" ]; then echo "PHP server did not start"; exit 1; fi
 
 	# Run the tests
+	phpunit $(PHPUNIT_PARAMS) test/backend/int/createfiles_test.php
 	phpunit $(PHPUNIT_PARAMS) test/backend/int/file_list_test.php
 	phpunit $(PHPUNIT_PARAMS) test/backend/int/file_upload_test.php
 	phpunit $(PHPUNIT_PARAMS) test/backend/int/getpage_test.php

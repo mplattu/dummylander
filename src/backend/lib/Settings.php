@@ -5,6 +5,8 @@ class Settings {
   private $rules = null;
 
   function __construct($filename=null) {
+    global $DEFAULT_SETTINGS;
+
     if (is_null($filename) or ($filename === "")) {
       $this->filename = "settings.php";
     }
@@ -16,6 +18,10 @@ class Settings {
       'ADMIN_PASSWORD' => "string",
       'LOG_LEVEL' => "integer"
     );
+
+    if (!$this->create_settings_file($DEFAULT_SETTINGS)) {
+      throw new Exception('Failed to create new settings file');
+    }
   }
 
   function get_filename() {
@@ -70,11 +76,6 @@ class Settings {
   }
 
   private function write_settings_file($settings) {
-    if (!is_writable($this->filename)) {
-      log_message("Settings file ".$this->filename." is not writable");
-      return false;
-    }
-
     $c = Array();
     array_push($c, "<?php");
     array_push($c, "/*");
@@ -86,6 +87,20 @@ class Settings {
 
     if ($bytes_written == false) {
       return false;
+    }
+
+    return true;
+  }
+
+  private function create_settings_file($settings) {
+    // Creates new settings file if it does not exist
+
+    if (!is_file($this->filename) or !is_readable($this->filename)) {
+      log_message("Creating new settings file ".$this->filename, null, 1);
+      if (!$this->write_settings_file($settings)) {
+        log_message("Failed to create new settings file ".$this->filename, null, 0);
+        return false;
+      }
     }
 
     return true;

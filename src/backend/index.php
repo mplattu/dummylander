@@ -5,7 +5,18 @@
 // 1 - some messages
 // 2 - everything
 $LOG_LEVEL = 1;
-$s = new Settings();
+
+try {
+  $s = new Settings();
+}
+catch (Exception $e) {
+  log_message("Failed to create settings file: ".$e->getMessage());
+
+  $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'failedtocreatesettinsfile', $e->getMessage());
+  echo($admin_api->execute());
+  exit(0);
+}
+
 $s_log_level = $s->get_value('LOG_LEVEL');
 if (!is_null($s_log_level)) {
   $LOG_LEVEL = $s_log_level;

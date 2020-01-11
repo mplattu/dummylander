@@ -25,6 +25,10 @@ class AdminAPI {
       $return_data['data'] = $data;
     }
 
+    if (is_null($return_data['success'])) {
+      $return_data['success'] = false;
+    }
+
     if (!is_null($message)) {
       $return_data['message'] = $message;
     }

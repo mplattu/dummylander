@@ -12,6 +12,15 @@ include_once(__DIR__."/../lib/TestBrowser.php");
 class integration_test extends TestCase {
   private $server_url = 'http://localhost:8080/';
 
+  public function test_initialise_backend() {
+    // Initialise backend (create possibly missing settings and data/)
+
+    $browser = new TestBrowser();
+    $page = $browser->http_get($this->server_url, Array(), null);
+
+    $this->assertTrue($page != "", "Initialising page returned following page: ".print_r($page, true));
+  }
+
   public function test_file_list_and_delete() {
     $files = 10;
 

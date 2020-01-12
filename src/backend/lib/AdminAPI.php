@@ -110,6 +110,10 @@ class AdminAPI {
     if ($this->function == "failedtocreatesettinsfile") {
       return $this->get_return_data(false, null, $this->data);
     }
+
+    if ($this->function == "failedtocreatedatadir") {
+      return $this->get_return_data(false, null, $this->data);
+    }
   }
 }
 

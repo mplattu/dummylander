@@ -64,7 +64,14 @@ elseif (@$_POST['password'] != "") {
 }
 else {
   $show_page = new ShowPage($VERSION, remove_trailing_slash($DATAPATH));
-  echo($show_page->get_html_page());
+  $page_html = $show_page->get_html_page();
+  if (is_null($page_html)) {
+    $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'failedtocreatedatadir', 'Failed to create data directory');
+    echo($admin_api->execute());
+  }
+  else {
+    echo($page_html);
+  }
 }
 
 // Normal termination

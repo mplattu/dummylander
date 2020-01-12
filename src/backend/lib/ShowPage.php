@@ -12,9 +12,8 @@ class ShowPage {
     if (is_null($page_json)) {
       $datafile = $datapath."/content.json";
 
-      if (is_readable($datafile)) {
-        $this->page_content = new PageContent($datafile, $datapath);
-      } else {
+      $this->page_content = new PageContent($datafile, $datapath);
+      if (is_null($this->page_content)) {
         log_message("Data file $datafile is not readable", 1, 0);
       }
     }
@@ -24,10 +23,20 @@ class ShowPage {
   }
 
   function get_html_page() {
+    if (is_null($this->page_content->get_parts_count())) {
+      // The page has no content
+      return null;
+    }
+
     return $this->render_header().$this->render_content().$this->render_footer();
   }
 
   function get_html_preview() {
+    if (is_null($this->page_content->get_parts_count())) {
+      // The page has no content
+      return null;
+    }
+
     return $this->get_body_style_tag().$this->render_content();
   }
 

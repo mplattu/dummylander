@@ -5,6 +5,7 @@ class_alias('\PHPUnit_Framework_TestCase', 'PHPUnit\Framework\TestCase');
 use PHPUnit\Framework\TestCase;
 
 include_once("global_functions.php");
+include_once("PageStorage.php");
 include_once("PageContent.php");
 
 class PageContent_test extends TestCase {

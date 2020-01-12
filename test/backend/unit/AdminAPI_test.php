@@ -17,6 +17,7 @@ include_once("global_consts.php");
 include_once("global_functions.php");
 include_once("TestHelpers.php");
 include_once("AdminAPI.php");
+include_once("PageStorage.php");
 include_once("ShowPage.php");
 include_once("PageContent.php");
 

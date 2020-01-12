@@ -21,8 +21,11 @@ class PageContent {
     $page_data_obj = json_decode($page_data, true);
     if (is_null($page_data_obj)) {
       // $page_data was not a JSON-formatted string, treat it as a filename
-      $json = file_get_contents($page_data);
-      $this->page_data = json_decode($json, true);
+      $page_storage = new PageStorage($page_data);
+      $json = $page_storage->get_data_json();
+      if (! is_null($json)) {
+        $this->page_data = json_decode($json, true);
+      }
     }
     else {
       // $page_data was a JSON-formatted string
@@ -115,6 +118,10 @@ class PageContent {
   }
 
   public function get_part($index, $field, $default=null) {
+    if (is_null($this->page_data)) {
+      return null;
+    }
+
     if (!array_key_exists('parts', $this->page_data)) {
       log_message("The page content has no field 'parts'", null, 2);
       return $default;

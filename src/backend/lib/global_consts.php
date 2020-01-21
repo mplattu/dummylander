@@ -4,7 +4,7 @@ $AUTH_METHODS = Array(
   'file' => null  // Uses the default file path "settings.php"
 );
 
-$VERSION = "Dummylander 0.5";
+$VERSION = "Dummylander 0.6";
 $DATAPATH = "data/";
 
 $PAGE_PROPERTIES = Array(
@@ -36,7 +36,7 @@ $DEFAULT_SETTINGS = Array(
 
 // Default permissions for data folder
 // See https://www.php.net/manual/en/function.mkdir.php for format
-// Value "null" copies permissions from the current folder 
+// Value "null" copies permissions from the current folder
 $DEFAULT_PERMISSIONS = null;
 
 // This array is used when creating content.json

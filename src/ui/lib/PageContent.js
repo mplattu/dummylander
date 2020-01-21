@@ -150,6 +150,10 @@ class PageContent {
 
     $(".button_move_up[data-partnumber=0]").attr("disabled", true);
     $(".button_move_down[data-partnumber="+(this.get_parts_count()-1)+"]").attr("disabled", true);
+
+    if (this.get_parts_count() < 2) {
+      $(".button_delete_part").attr("disabled", true);
+    }
   }
 
   advanced_hide() {

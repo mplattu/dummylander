@@ -21,6 +21,41 @@ class Settings_test extends TestCase {
     unlink($settings_filename);
   }
 
+  function test_create_settings() {
+    // Make sure an unexisting settings file gets created
+    global $DEFAULT_SETTINGS;
+
+    $th = new TestHelpers();
+    $settings_filename = $th->get_temp_filename();
+    unlink($settings_filename);
+    $s = new Settings($settings_filename);
+    $this->assertFalse(is_null($s));
+    
+    foreach ($DEFAULT_SETTINGS as $this_key=>$expected_value) {
+      $this->assertEquals($expected_value, $s->get_value($this_key));
+    }
+
+    unlink($settings_filename);
+  }
+
+  function test_create_settings_fails() {
+    // Make sure we handle if we cannot create settings file to given path
+    $ro_filename = '/root/DummyLanderTest_settings.php';
+    $this->assertFalse(file_put_contents($ro_filename, "This file should not got written."));
+    $this->assertFalse(is_file($ro_filename));
+
+    try {
+      $s_fail = new Settings($ro_filename);
+    }
+    catch (Exception $e) {
+      $this->assertNull($s_fail);
+      $this->assertEquals('Failed to create new settings file', $e->getMessage());
+      return;
+    }
+
+    $this->fail('Did not get the expected exception');
+  }
+
   function test_set_and_get_values() {
     // Create settings file, write and read values
 

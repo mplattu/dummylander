@@ -5,7 +5,18 @@
 // 1 - some messages
 // 2 - everything
 $LOG_LEVEL = 1;
-$s = new Settings();
+
+try {
+  $s = new Settings();
+}
+catch (Exception $e) {
+  log_message("Failed to create settings file: ".$e->getMessage());
+
+  $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'failedtocreatesettinsfile', $e->getMessage());
+  echo($admin_api->execute());
+  exit(0);
+}
+
 $s_log_level = $s->get_value('LOG_LEVEL');
 if (!is_null($s_log_level)) {
   $LOG_LEVEL = $s_log_level;
@@ -53,7 +64,14 @@ elseif (@$_POST['password'] != "") {
 }
 else {
   $show_page = new ShowPage($VERSION, remove_trailing_slash($DATAPATH));
-  echo($show_page->get_html_page());
+  $page_html = $show_page->get_html_page();
+  if (is_null($page_html)) {
+    $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'failedtocreatedatadir', 'Failed to create data directory');
+    echo($admin_api->execute());
+  }
+  else {
+    echo($page_html);
+  }
 }
 
 // Normal termination

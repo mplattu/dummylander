@@ -1,7 +1,7 @@
 .PHONY: clean update-libs test
 
 PHPUNIT_PARAMS = --include-path src/backend/lib --verbose -d display_errors=On -d error_reporting=E_ALL
-HTTP_PORT_USED = `lsof -P -i | grep "(LISTEN)" | grep -i 8080`
+HTTP_PORT_USED = `lsof -P -i -n | grep "(LISTEN)" | grep -i 8080`
 HTTP_SERVER_PID = `wget -q -O - http://localhost:8080/getpid.php`
 
 clean-settings:
@@ -9,7 +9,6 @@ clean-settings:
 
 clean-config:
 	if [ -d dist/data/ ]; then rm -fR dist/data/; fi
-	mkdir -p dist/data/
 
 clean: clean-settings clean-config
 	if [ -d temp/ ]; then rm -fR temp/; fi
@@ -51,6 +50,10 @@ src/ui/ext/: src/ui/ext/jquery.min.js src/ui/ext/bootstrap-colorpicker.min.js sr
 
 lint:
 	php -l src/backend/lib/AdminAPI.php
+	php -l src/backend/lib/AdminAuth.php
+	php -l src/backend/lib/FileStorage.php
+	php -l src/backend/lib/global_consts.php
+	php -l src/backend/lib/global_functions.php
 	php -l src/backend/lib/PageContent.php
 	php -l src/backend/lib/PageStorage.php
 	php -l src/backend/lib/Settings.php
@@ -71,6 +74,7 @@ test-unit:
 	phpunit $(PHPUNIT_PARAMS) test/backend/unit/Settings_test.php
 
 test-integration: build
+	php -l test/backend/int/createfiles_test.php
 	php -l test/backend/int/file_list_test.php
 	php -l test/backend/int/file_upload_test.php
 	php -l test/backend/int/getpage_test.php
@@ -88,6 +92,7 @@ test-integration: build
 	if [ "$(HTTP_PORT_USED)" = "" ]; then echo "PHP server did not start"; exit 1; fi
 
 	# Run the tests
+	phpunit $(PHPUNIT_PARAMS) test/backend/int/createfiles_test.php
 	phpunit $(PHPUNIT_PARAMS) test/backend/int/file_list_test.php
 	phpunit $(PHPUNIT_PARAMS) test/backend/int/file_upload_test.php
 	phpunit $(PHPUNIT_PARAMS) test/backend/int/getpage_test.php
@@ -98,15 +103,11 @@ test-integration: build
 	kill -TERM $(HTTP_SERVER_PID)
 	rm dist/getpid.php
 
-config:
-	if [ ! -d dist/data/ ]; then mkdir -p dist/data/; fi
-	cp -r src/data-sample/* dist/data/
-
 settings:
 	if [ ! -f dist/settings.php ]; then cp src/backend/settings.php dist/; fi
 	php -l dist/settings.php
 
-build: src/backend/ext/ src/ui/ext/ config lint test-unit settings
+build: src/backend/ext/ src/ui/ext/ lint clean-config test-unit settings
 	if [ -f dist/getpid.php ]; then rm dist/getpid.php; fi
 	perl include.pl root.php >dist/index.php
 	php -l dist/index.php

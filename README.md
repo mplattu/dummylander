@@ -6,11 +6,15 @@ Superdupersimple landing page administration tool.
 
 ## HOWTO
 
- 1. Copy `dist/*` to your PHP-enabled web server. Dummylander has been tested with PHP versions 7.2, 7.3 and 7.4. Make sure you copy also the `admin/` subdirectory and its contents.
- 1. Set admin password by editing `settings.php` (see *Authentication* for details).
+ 1. Copy `dist/index.php` to your PHP-enabled web server. Dummylander has been tested with PHP versions 7.2, 7.3 and 7.4.
+ 1. Browse you homepage by opening your URL (e.g. `http(s)://yourdomain.com`) with a browser.
+    It should show you a nice default page. If not, please open an [issue](https://github.com/mplattu/dummylander/issues).
+ 1. The initial page load has created default files to your server. Set admin password by editing `settings.php`
+    (see *Authentication* for details).
  1. Make sure the URL `http(s)://yourdomain.com/settings.php` returns an empty page.
+    You don't want anyone to see your settings, do you?
  1. Log in to admin UI: `http(s)://yourdomain.com/?admin`
- 1. Enter the password and profit!
+ 1. Enter the password you set above and profit!
 
 ## This works
 

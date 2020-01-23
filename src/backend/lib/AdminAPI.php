@@ -25,6 +25,10 @@ class AdminAPI {
       $return_data['data'] = $data;
     }
 
+    if (is_null($return_data['success'])) {
+      $return_data['success'] = false;
+    }
+
     if (!is_null($message)) {
       $return_data['message'] = $message;
     }
@@ -100,6 +104,14 @@ class AdminAPI {
     }
 
     if ($this->function == "uploadlimitexceeded") {
+      return $this->get_return_data(false, null, $this->data);
+    }
+
+    if ($this->function == "failedtocreatesettinsfile") {
+      return $this->get_return_data(false, null, $this->data);
+    }
+
+    if ($this->function == "failedtocreatedatadir") {
       return $this->get_return_data(false, null, $this->data);
     }
   }

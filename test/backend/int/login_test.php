@@ -68,21 +68,21 @@ class integration_test extends TestCase {
       $filename = $th->write_password_file($pass_correct, 'dist/settings.php');
 
       $browser = new TestBrowser();
-      $data = $browser->http_post(
+      $data1 = $browser->http_post(
         $this->server_url,
         Array('password'=>$pass_correct, 'function'=>'get'),
         "json"
       );
 
-      $this->assertTrue($data['success'], "Could not log in with correct password: ".$pass_correct);
+      $this->assertTrue($data1['success'], "Could not log in with correct password: ".$pass_correct." Data: ".print_r($data1, true));
 
-      $data = $browser->http_post(
+      $data2 = $browser->http_post(
         $this->server_url,
-        Array('password'=>$pass_false, 'function'=>'get'),
+        Array('password'=>$pass_incorrect, 'function'=>'get'),
         "json"
       );
 
-      $this->assertNull($data['success'], "Could log in with incorrect password: ".$pass_incorrect);
+      $this->assertFalse($data2['success'], "Could log in with incorrect password: ".$pass_incorrect." Data: ".print_r($data2, true));
     }
   }
 }

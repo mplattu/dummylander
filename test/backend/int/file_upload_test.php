@@ -103,8 +103,10 @@ class integration_test extends TestCase {
   }
 
   private function file_upload($upload_filename, $final_filename, $postname=null) {
+    global $MAX_PASSWORD_LENGTH;
+    
     $th = new TestHelpers();
-    $this_pass = $th->random_str(rand(1, 128), $th->RANDOM_KEYSPACE);
+    $this_pass = $th->random_str(rand(1, $MAX_PASSWORD_LENGTH), $th->RANDOM_KEYSPACE);
     $pass_filename = $th->write_password_file($this_pass, 'dist/settings.php');
 
     $curlfile = new CURLFile($upload_filename, "application/octet-stream", $postname);

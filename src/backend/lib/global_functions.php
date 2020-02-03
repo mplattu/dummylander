@@ -40,4 +40,18 @@ function custom_error_handler($severity, $message, $file, $line) {
   throw new ErrorException($message, $severity, $severity, $file, $line);
 }
 
+function global_password_hash($password) {
+  global $MAX_PASSWORD_LENGTH;
+
+  if (gettype($password) != "string") {
+    throw new Exception("global_password_hash() requires a string as a password");
+  }
+
+  if (mb_strlen($password, "UTF-8") > $MAX_PASSWORD_LENGTH) {
+    throw new Exception("global_password_hash() got too long password");
+  }
+
+  return password_hash($password, PASSWORD_BCRYPT);
+}
+
 ?>

@@ -50,6 +50,33 @@ class integration_test extends TestCase {
     $this->assertEquals("Failed to create new settings file", $page['message'], "Returned value: ".print_r($page, true));
   }
 
+  public function test_settings_setpassword_fails() {
+    global $MAX_PASSWORD_LENGTH;
+
+    // Create a read-only settings file with an empty password
+    // Make sure you get an error message when trying to get front page
+
+    unlink($this->path_settings);
+    $this->assertFalse(is_file($this->path_settings));
+
+    $th = new TestHelpers();
+    $filename = $th->write_password_file_emptypass($this->path_settings);
+
+    $this->assertTrue(is_file($this->path_settings));
+    $this->assertTrue(chmod($this->path_settings, 0500));
+
+    $browser = new TestBrowser();
+    $page = $browser->http_get($this->server_url, Array(), "json");
+
+    $this->assertEquals("array", gettype($page), "Returned value: ".print_r($page, true));
+    $this->assertArrayHasKey("success", $page, "Returned value: ".print_r($page, true));
+    $this->assertFalse($page['success'], "Returned value: ".print_r($page, true));
+    $this->assertEquals('Failed to set initial password', $page['message'], "Returned value: ".print_r($page, true));
+
+    $this->assertTrue(chmod($this->path_settings, 0700));
+    $this->assertTrue(unlink($this->path_settings));
+  }
+
   public function test_contentjson_gets_created() {
     // Make sure the data/content.json and all sample files get created
 
@@ -58,6 +85,9 @@ class integration_test extends TestCase {
       $this->assertTrue(unlink($this_file), "Could not delete ".$this_file);
     }
     $this->assertTrue(rmdir($this->path_datadir), "Could not remove ".$this->path_datadir);
+    if (is_file($this->path_settings)) {
+      $this->assertTrue(unlink($this->path_settings), "Could not delete ".$this->path_settings);
+    }
 
     $browser = new TestBrowser();
     $page = $browser->http_get($this->server_url, Array(), null);
@@ -92,6 +122,9 @@ class integration_test extends TestCase {
     }
     if (is_dir($this->path_datadir)) {
       $this->assertTrue(rmdir($this->path_datadir), "Could not remove ".$this->path_datadir);
+    }
+    if (is_file($this->path_settings)) {
+      $this->assertTrue(unlink($this->path_settings), "Could not delete ".$this->path_settings);
     }
 
     // Make the data/ dir as set perms to read only

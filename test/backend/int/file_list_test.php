@@ -22,6 +22,7 @@ class integration_test extends TestCase {
   }
 
   public function test_file_list_and_delete() {
+    global $MAX_PASSWORD_LENGTH;
     $files = 10;
 
     $upload_files = Array();
@@ -42,7 +43,7 @@ class integration_test extends TestCase {
     }
 
     // Reset password
-    $this_pass = $th->random_str(rand(1, 128), $th->RANDOM_KEYSPACE);
+    $this_pass = $th->random_str(rand(1, $MAX_PASSWORD_LENGTH), $th->RANDOM_KEYSPACE);
     $pass_filename = $th->write_password_file($this_pass, 'dist/settings.php');
 
     // Get file list
@@ -112,8 +113,10 @@ class integration_test extends TestCase {
   }
 
   private function file_upload($upload_filename, $final_filename, $postname=null) {
+    global $MAX_PASSWORD_LENGTH;
+
     $th = new TestHelpers();
-    $this_pass = $th->random_str(rand(1, 128), $th->RANDOM_KEYSPACE);
+    $this_pass = $th->random_str(rand(1, $MAX_PASSWORD_LENGTH), $th->RANDOM_KEYSPACE);
     $pass_filename = $th->write_password_file($this_pass, 'dist/settings.php');
 
     $curlfile = new CURLFile($upload_filename, "application/octet-stream", $postname);

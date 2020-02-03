@@ -89,13 +89,13 @@ class Settings {
       $bytes_written = file_put_contents($this->filename, join("\n", $c)."\n");
     }
     catch (Exception $e) {
-      log_message("Error while writing settings file ".$this->filename.": ".$e->getMessage());
-      $bytes_written = false;
+      log_message("Error while writing settings file ".$this->filename.": ".$e->getMessage(), null, 0);
+      $bytes_written = null;
     }
-    
+
     restore_error_handler();
 
-    if ($bytes_written == false) {
+    if (is_null($bytes_written)) {
       return false;
     }
 

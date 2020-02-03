@@ -40,14 +40,19 @@ class TestHelpers {
     return tempnam(sys_get_temp_dir(), "DummylanderTestHelpers_");
   }
 
-  function write_password_file($password, $filename=null) {
-    // Writes a settings file with some randomity in spaces
+  private function write_settings_file($final_pass, $filename=null) {
+    global $DEFAULT_SETTINGS;
+
+    if (is_null($DEFAULT_SETTINGS)) {
+      throw new Exception("You have to include global_consts.php for this test");
+    }
+
+    $settings = $DEFAULT_SETTINGS;
+    $settings['ADMIN_PASSWORD'] = $final_pass;
 
     if (is_null($filename)) {
       $filename = $this->get_temp_filename();
     }
-
-    $settings = Array('ADMIN_PASSWORD'=>$password);
 
     $c = Array();
     array_push($c, "<?php");
@@ -60,6 +65,14 @@ class TestHelpers {
     $bytes_written = file_put_contents($filename, $file_content);
 
     return $filename;
+  }
+
+  function write_password_file_emptypass($filename=null) {
+    return $this->write_settings_file("", $filename);
+  }
+
+  function write_password_file($password, $filename=null) {
+    return $this->write_settings_file(global_password_hash($password), $filename);
   }
 
   function get_expected_index_html() {

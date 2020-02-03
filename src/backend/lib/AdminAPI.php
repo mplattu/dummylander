@@ -99,6 +99,14 @@ class AdminAPI {
       return $this->get_return_data($delete_success, $this->file_storage->get_file_list(), $this->file_storage->get_last_error());
     }
 
+    if ($this->function == "message_success") {
+      return $this->get_return_data(true, null, $this->data);
+    }
+
+    if ($this->function == "message_fail") {
+      return $this->get_return_data(false, null, $this->data);
+    }
+
     if ($this->function == "loginfailed") {
       return $this->get_return_data(false, null, $this->data);
     }
@@ -108,10 +116,6 @@ class AdminAPI {
     }
 
     if ($this->function == "failedtocreatesettinsfile") {
-      return $this->get_return_data(false, null, $this->data);
-    }
-
-    if ($this->function == "failedtocreatedatadir") {
       return $this->get_return_data(false, null, $this->data);
     }
   }

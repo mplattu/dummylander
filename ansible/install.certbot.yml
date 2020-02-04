@@ -8,7 +8,6 @@
     service:
       name: nginx
       state: stopped
-    when: certbot_email is defined
     notify:
     - restart nginx
 
@@ -16,7 +15,6 @@
     shell: "certbot certonly --standalone -n -m {{ certbot_email }} --agree-tos -d {{ domains | join(' -d ') }}"
     args:
       creates: /etc/letsencrypt/live/{{ domains[0] }}/fullchain.pem
-    when: certbot_email is defined
 
   - name: install renew cronjob script
     copy:
@@ -26,4 +24,3 @@
       owner: root
       group: root
       force: no
-    when: certbot_email is defined

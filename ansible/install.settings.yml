@@ -1,0 +1,17 @@
+
+  - name: "get encrypted password"
+    local_action: command php tools/encrypt_password.php -p "{{ dummypass }}"
+    become: no
+    register: encrypt_password
+
+  - set_fact:
+      encrypted_dummypass: "{{ encrypt_password.stdout }}"
+
+  - name: "copy settings.php"
+    template:
+      src: dummylander/settings.php.j2
+      dest: "{{ dummypath }}{{ domains[0] }}/webroot/settings.php"
+      owner: root
+      group: root
+      mode: '0755'
+      force: yes

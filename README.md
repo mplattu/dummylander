@@ -56,8 +56,19 @@ To build Dummylander you need to have:
 ## Installing by Ansible
 
 The Ansible install scripts are provided in `ansible/`. The scripts work for Debian 9
-and 10 with nginx and PHP-FPM installed. The scripts are useful if you'd like i.e. to
-serve several Dummylander sites on one host without setting each host manually.
+and 10 with `nginx` and `PHP-FPM` installed. The scripts are useful if you'd like i.e. to
+serve several Dummylander sites on one host without setting up each host manually.
+
+The following examples expect that the DNS configuration is already carried out. For exampe you have configured `test.dummylander.net` to point to your existing server `test.yourdomain.com`.
+
+The server `test.yourdomain.com` has to be in group `dummylander` in `/etc/ansible/hosts`:
+
+```
+[dummylander]
+test.yourdomain.com
+```
+
+### Install Everything From the Scratch
 
 The script does following things for you:
  * Prepare shared SSL files (session ticket key and Diffie-Hellman parameter file)
@@ -67,32 +78,38 @@ The script does following things for you:
  * Enable the site (make it effective)
  * Install the latest master build of Dummylander
  * Set the site password (if parameter `dummypass` is set)
- * Create a empty configuration
-
-To make the setup at `test.yourdomain.com` to host a new Dummylander site
-`test.dummylander.net`:
- 1. Create a DNS record `test.dummylander.net` to point to `test.yourdomain.com`
- 1. To make everything:
- ```
- ansible-playbook -l test.yourdomain.com -K install.yml \
- --extra-vars '{"domains": ["test1.dummylander.net", "test2.dummylander.net"], "certbot_email": "office@sivuduuni.biz", "dummypass": "yournewsecrectpass"}'
- ```
-
-Just to set (change) a password (i.e. re-create `settings.php`):
+ * Does not create a sample page as it gets created when page is loaded for the first time
 
 ```
 ansible-playbook -l test.yourdomain.com -K install.yml \
---extra-vars '{"domains": ["test1.dummylander.net", "test2.dummylander.net"], "dummypass": "yournewsecrectpass"}'
+--extra-vars '{"domains": ["test.dummylander.net"], "certbot_email": "office@sivuduuni.biz", "dummypass": "yournewsecrectpass"}'
 ```
 
-The server `test.yourdomain.com` has to be in group `dummylander` in `/etc/ansible/hosts`:
+In case you want to create site with multiple domain names (e.g. `test1.dummylander.net` and `test2.dummylander.net`):
 
 ```
-[dummylander]
-test.yourdomain.com
+ansible-playbook -l test.yourdomain.com -K install.yml \
+--extra-vars '{"domains": ["test1.dummylander.net", "test2.dummylander.net"], "certbot_email": "office@sivuduuni.biz", "dummypass": "yournewsecrectpass"}'
+```
+
+### Update Dummylander
+Just to update the code (i.e. install the latest `index.php`) define only the `domains` variable:
+
+```
+ansible-playbook -l test.yourdomain.com -K install.yml \
+--extra-vars '{"domains": ["test.dummylander.net"]}'
+```
+
+### Change Password
+
+Just to set (change) a password (i.e. re-create `settings.php`) define variables `domains` and `dummypass`:
+
+```
+ansible-playbook -l test.yourdomain.com -K install.yml \
+--extra-vars '{"domains": ["test.dummylander.net"], "dummypass": "yournewsecrectpass"}'
 ```
 
 ## License and Acknowledgement
 
  * License: MIT, see `LICENSE`
- * Please note that the `src/data-sample/DuckDuckGo-DaxSolo.svg` is &copy; DuckDuckGo and not covered by Dummylander license.
+ * Please note that the `DuckDuckGo-DaxSolo.svg` used in the sample page is &copy; DuckDuckGo and not covered by Dummylander license.

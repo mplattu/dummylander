@@ -7,14 +7,13 @@ Superdupersimple landing page administration tool.
 ## HOWTO
 
  1. Copy `dist/index.php` to your PHP-enabled web server. Dummylander has been tested with PHP versions 7.2, 7.3 and 7.4.
- 1. Browse you homepage by opening your URL (e.g. `http(s)://yourdomain.com`) with a browser.
-    It should show you a nice default page. If not, please open an [issue](https://github.com/mplattu/dummylander/issues).
- 1. The initial page load has created default files to your server. Set admin password by editing `settings.php`
-    (see *Authentication* for details).
- 1. Make sure the URL `http(s)://yourdomain.com/settings.php` returns an empty page.
-    You don't want anyone to see your settings, do you?
+ 1. Browse you homepage by opening your URL (e.g. `http(s)://yourdomain.com`) with a browser. On the first
+    page load it creates a password for the administration page. Please save this random string as you
+    need it to update the page content. If you did not get the password please open an
+    [issue](https://github.com/mplattu/dummylander/issues).
+ 1. Reload the URL (`http(s)://yourdomain.com`). This time you should get a nice default page.
  1. Log in to admin UI: `http(s)://yourdomain.com/?admin`
- 1. Enter the password you set above and profit!
+ 1. Enter the password you was given above and profit!
 
 ## This works
 
@@ -27,8 +26,8 @@ Superdupersimple landing page administration tool.
 ## This does not work yet
 
  * There must be a tons of page or part attributes missing.
- * The authentication requires too much IT skills to set up.
  * Easy way to add images and links to files.
+ * Changing administrator password.
 
 ## Authentication
 
@@ -38,19 +37,11 @@ it is essential for security reasons to *secure all your connections with SSL*.
 In other words do not serve your site at all through `http` but preferably only `https`. Use
 the `https` connection at least  whenever editing your site (`https://yourcomain.com/?admin`).
 
-The cleartext admin password is stored in `settings.php`. Here is a sample content for the file:
-```
-<?php
-/*
-{"ADMIN_PASSWORD":"verysecret"}
-*/
-?>
-```
-
-Don't forget to double-check that the URL `http(s)://youdromain.com/settings.php`
+The encrypted admin password is stored in `settings.php`. Although the password is crypted
+don't forget to double-check that the URL `http(s)://youdromain.com/settings.php`
 returns an empty page.
  * If you get error 404 (Not found) make sure you entered the URL correctly and
-   you really have uploaded the `settings.php` to your server.
+   you have retrieved the page (`http(s)://yourdomain.com`) at least once.
  * If you see the file content the PHP settings of the server are not correctly set.
 
 ## Building

@@ -68,6 +68,8 @@ The server `test.yourdomain.com` has to be in group `dummylander` in `/etc/ansib
 test.yourdomain.com
 ```
 
+Also, your local commanding machine has to have `php-cli` installed as the password is encrypted locally.
+
 ### Install Everything From the Scratch
 
 The script does following things for you:

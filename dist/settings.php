@@ -1,5 +1,0 @@
-<?php
-/*
-{"ADMIN_PASSWORD":""}
-*/
-?>

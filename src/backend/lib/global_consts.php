@@ -1,6 +1,6 @@
 <?php
 
-$VERSION = "Dummylander 0.6";
+$VERSION = "Dummylander 0.7";
 $DATAPATH = "data/";
 
 // Maximum length of password

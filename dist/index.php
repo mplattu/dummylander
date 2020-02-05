@@ -1,11 +1,11 @@
 <?php
 
-$AUTH_METHODS = Array(
-  'file' => null  // Uses the default file path "settings.php"
-);
-
-$VERSION = "Dummylander 0.6";
+$VERSION = "Dummylander 0.7";
 $DATAPATH = "data/";
+
+// Maximum length of password
+// See global_password_hash()
+$MAX_PASSWORD_LENGTH = 72;
 
 $PAGE_PROPERTIES = Array(
   'title',
@@ -90,6 +90,16 @@ $DEFAULT_FILES = Array(
   'sample-document.pdf' => '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NDQzIDUwMCA3MjIgNTAwIDUwMCA1MDAgNDQzIDUwMCA3NzcgNDQzCjI3NyAyNTAgXQovRm9udERlc2NyaXB0b3IgNyAwIFIKL1RvVW5pY29kZSA4IDAgUgo+PgplbmRvYmoKCjEwIDAgb2JqCjw8L0YxIDkgMCBSCj4+CmVuZG9iagoKMTEgMCBvYmoKPDwvRm9udCAxMCAwIFIKL1Byb2NTZXRbL1BERi9UZXh0XQo+PgplbmRvYmoKCjEgMCBvYmoKPDwvVHlwZS9QYWdlL1BhcmVudCA0IDAgUi9SZXNvdXJjZXMgMTEgMCBSL01lZGlhQm94WzAgMCA1OTUgODQyXS9Hcm91cDw8L1MvVHJhbnNwYXJlbmN5L0NTL0RldmljZVJHQi9JIHRydWU+Pi9Db250ZW50cyAyIDAgUj4+CmVuZG9iagoKNCAwIG9iago8PC9UeXBlL1BhZ2VzCi9SZXNvdXJjZXMgMTEgMCBSCi9NZWRpYUJveFsgMCAwIDU5NSA4NDIgXQovS2lkc1sgMSAwIFIgXQovQ291bnQgMT4+CmVuZG9iagoKMTIgMCBvYmoKPDwvVHlwZS9DYXRhbG9nL1BhZ2VzIDQgMCBSCi9PcGVuQWN0aW9uWzEgMCBSIC9YWVogbnVsbCBudWxsIDBdCi9MYW5nKGVuLVVTKQo+PgplbmRvYmoKCjEzIDAgb2JqCjw8L0NyZWF0b3I8RkVGRjAwNTcwMDcyMDA2OTAwNzQwMDY1MDA3Mj4KL1Byb2R1Y2VyPEZFRkYwMDRDMDA2OTAwNjIwMDcyMDA2NTAwNEYwMDY2MDA2NjAwNjkwMDYzMDA2NTAwMjAwMDM1MDAyRTAwMzE+Ci9DcmVhdGlvbkRhdGUoRDoyMDE5MTIyODA3MTM0MSswMicwMCcpPj4KZW5kb2JqCgp4cmVmCjAgMTQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDA4Mjg3IDAwMDAwIG4gCjAwMDAwMDAwMTkgMDAwMDAgbiAKMDAwMDAwMDIyNiAwMDAwMCBuIAowMDAwMDA4NDMwIDAwMDAwIG4gCjAwMDAwMDAyNDYgMDAwMDAgbiAKMDAwMDAwNzM4NyAwMDAwMCBuIAowMDAwMDA3NDA4IDAwMDAwIG4gCjAwMDAwMDc2MDMgMDAwMDAgbiAKMDAwMDAwNzk3MiAwMDAwMCBuIAowMDAwMDA4MjAwIDAwMDAwIG4gCjAwMDAwMDgyMzIgMDAwMDAgbiAKMDAwMDAwODUyOSAwMDAwMCBuIAowMDAwMDA4NjI2IDAwMDAwIG4gCnRyYWlsZXIKPDwvU2l6ZSAxNC9Sb290IDEyIDAgUgovSW5mbyAxMyAwIFIKL0lEIFsgPDAzNTA0MjBFN0I3MDdCRTA2NUJFQTExQ0Q3MjM2MEVCPgo8MDM1MDQyMEU3QjcwN0JFMDY1QkVBMTFDRDcyMzYwRUI+IF0KL0RvY0NoZWNrc3VtIC9GMUIzREM2MjhGMDI3Rjg0NjhEM0UwOUYwQzBBQ0Q4QQo+PgpzdGFydHhyZWYKODgwMQolJUVPRgo='
 );
 
+function consts_random_string($ascii_min, $ascii_max) {
+  $string_length = random_int(22,30);
+  $string_random = "";
+
+  for ($n=0; $n < $string_length; $n++) {
+    $string_random .= chr(random_int($ascii_min, $ascii_max));
+  }
+
+  return $string_random;
+}
 ?>
 <?php
 
@@ -110,12 +120,17 @@ catch (Exception $e) {
   exit(0);
 }
 
+if ($s->get_value('ADMIN_PASSWORD') == "") {
+  echo(create_admin_password_and_default_page());
+  exit(0);
+}
+
 $s_log_level = $s->get_value('LOG_LEVEL');
 if (!is_null($s_log_level)) {
   $LOG_LEVEL = $s_log_level;
 }
 
-$admin_auth = new AdminAuth($AUTH_METHODS);
+$admin_auth = new AdminAuth();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES) && $_SERVER['CONTENT_LENGTH'] > 0) {
   $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'uploadlimitexceeded', "Too large file");
@@ -157,18 +172,38 @@ elseif (@$_POST['password'] != "") {
 }
 else {
   $show_page = new ShowPage($VERSION, remove_trailing_slash($DATAPATH));
-  $page_html = $show_page->get_html_page();
-  if (is_null($page_html)) {
-    $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'failedtocreatedatadir', 'Failed to create data directory');
-    echo($admin_api->execute());
-  }
-  else {
-    echo($page_html);
-  }
+  echo($show_page->get_html_page());
 }
 
 // Normal termination
 exit(0);
+
+function create_admin_password_and_default_page() {
+  global $DATAPATH, $VERSION;
+
+  $settings = new Settings();
+
+  // Set initial password
+  $new_admin_password = consts_random_string(97, 122);
+
+  if (! $settings->set_value('ADMIN_PASSWORD', global_password_hash($new_admin_password))) {
+    $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'message_fail', 'Failed to set initial password');
+    return $admin_api->execute();
+  }
+
+  $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'message_success', 'Your admin password is: '.$new_admin_password);
+  $status_message = $admin_api->execute();
+
+  // Create default page
+  $show_page = new ShowPage($VERSION, remove_trailing_slash($DATAPATH));
+  $page_html = $show_page->get_html_page();
+  if (is_null($page_html)) {
+    $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'message_fail', 'Failed to create data directory');
+    $status_message = $admin_api->execute();
+  }
+
+  return $status_message;
+}
 
 ?>
 <?php
@@ -2209,6 +2244,20 @@ function custom_error_handler($severity, $message, $file, $line) {
   throw new ErrorException($message, $severity, $severity, $file, $line);
 }
 
+function global_password_hash($password) {
+  global $MAX_PASSWORD_LENGTH;
+
+  if (gettype($password) != "string") {
+    throw new Exception("global_password_hash() requires a string as a password");
+  }
+
+  if (mb_strlen($password, "UTF-8") > $MAX_PASSWORD_LENGTH) {
+    throw new Exception("global_password_hash() got too long password");
+  }
+
+  return password_hash($password, PASSWORD_BCRYPT);
+}
+
 ?>
 
 <?php
@@ -2223,6 +2272,15 @@ class AdminAPI {
   function __construct($data_path, $function, $data) {
     $this->page_storage = new PageStorage($data_path."/content.json");
     $this->file_storage = new FileStorage($data_path);
+    $this->admin_auth = new AdminAuth();
+    try {
+      $this->settings = new Settings();
+    }
+    catch (Exception $e) {
+      // Failed to create settings file - try to continue without the object
+      $this->settings = null;
+    }
+
     $this->function = $function;
     $this->data = $data;
     $this->data_path = $data_path;
@@ -2312,6 +2370,29 @@ class AdminAPI {
       return $this->get_return_data($delete_success, $this->file_storage->get_file_list(), $this->file_storage->get_last_error());
     }
 
+    if ($this->function == "change_password") {
+      if (is_null($this->settings)) {
+        // We don't have settings class - probably the file or the directory containing the file is in
+        // unwriteable mode
+        return $this->get_return_data(false, null, "Backend error - check file permissions");
+      }
+
+      if ($this->admin_auth->is_admin($this->data['old_password'])) {
+        $change_password = $this->settings->set_value('ADMIN_PASSWORD', global_password_hash($this->data['new_password']));
+        return $this->get_return_data($change_password, null, "");
+      }
+
+      return $this->get_return_data(false, null, "Check old password");
+    }
+
+    if ($this->function == "message_success") {
+      return $this->get_return_data(true, null, $this->data);
+    }
+
+    if ($this->function == "message_fail") {
+      return $this->get_return_data(false, null, $this->data);
+    }
+
     if ($this->function == "loginfailed") {
       return $this->get_return_data(false, null, $this->data);
     }
@@ -2323,10 +2404,6 @@ class AdminAPI {
     if ($this->function == "failedtocreatesettinsfile") {
       return $this->get_return_data(false, null, $this->data);
     }
-
-    if ($this->function == "failedtocreatedatadir") {
-      return $this->get_return_data(false, null, $this->data);
-    }
   }
 }
 
@@ -2335,18 +2412,16 @@ class AdminAPI {
 <?php
 
 class AdminAuth {
-  private $methods;
   private $last_error;
+  private $settings_filename;
 
-  function __construct($methods=null) {
-    if (!is_array($methods) or sizeof($methods) < 1) {
-      $this->raise_exception("AdminAuth requires authentication methods as an array");
-      $this->methods = null;
-    }
-    else {
-      $this->methods = $methods;
-    }
+  function __construct($settings_filename=null) {
     $this->last_error = null;
+
+    if (!is_null($settings_filename) and gettype($settings_filename) != "string") {
+      $this->raise_exception("Parameter must be a filename to settings file");
+    }
+    $this->settings_filename = $settings_filename;
   }
 
   private function log_message($message) {
@@ -2370,30 +2445,8 @@ class AdminAuth {
   }
 
   function is_admin($password) {
-    if (is_null($this->methods)) {
-      $this->raise_exception("No authentication methods defined");
-    }
+    $s = new Settings($this->settings_filename);
 
-    foreach ($this->methods as $method => $param) {
-      $auth_success = $this->is_admin_method($method, $param, $password);
-      if ($auth_success) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  private function is_admin_method($method, $method_param, $authentication) {
-    if ($method == "file") {
-      return $this->is_admin_file($method_param, $authentication);
-    }
-
-    $this->raise_exception("Unknown authentication method: ".$method);
-  }
-
-  private function is_admin_file($filename, $password) {
-    $s = new Settings($filename);
     $file_password = $s->get_value('ADMIN_PASSWORD');
 
     if (is_null($file_password) or $file_password === "") {
@@ -2401,12 +2454,7 @@ class AdminAuth {
       return false;
     }
 
-    if ($file_password === $password) {
-      return true;
-    }
-
-    return false;
-
+    return password_verify($password, $file_password);
   }
 }
 
@@ -2834,13 +2882,13 @@ class Settings {
       $bytes_written = file_put_contents($this->filename, join("\n", $c)."\n");
     }
     catch (Exception $e) {
-      log_message("Error while writing settings file ".$this->filename.": ".$e->getMessage());
-      $bytes_written = false;
+      log_message("Error while writing settings file ".$this->filename.": ".$e->getMessage(), null, 0);
+      $bytes_written = null;
     }
-    
+
     restore_error_handler();
 
-    if ($bytes_written == false) {
+    if (is_null($bytes_written)) {
       return false;
     }
 
@@ -2951,6 +2999,10 @@ class BootstrapIconWrapper {
 </svg>';
     this.x_circle_fill = '<svg class="bi bi-x-circle-fill" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7.354 6.646L10 9.293l2.646-2.647a.5.5 0 01.708.708L10.707 10l2.647 2.646a.5.5 0 01-.708.708L10 10.707l-2.646 2.647a.5.5 0 01-.708-.708L9.293 10 6.646 7.354a.5.5 0 11.708-.708z" clip-rule="evenodd"/> \
+</svg>';
+    this.command = '<svg class="bi bi-command" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> \
+  <path fill-rule="evenodd" d="M4 5.5A1.5 1.5 0 005.5 7H7V5.5a1.5 1.5 0 10-3 0zM8 8V5.5A2.5 2.5 0 105.5 8H8zm8-2.5A1.5 1.5 0 0114.5 7H13V5.5a1.5 1.5 0 013 0zM12 8V5.5A2.5 2.5 0 1114.5 8H12zm-8 6.5A1.5 1.5 0 015.5 13H7v1.5a1.5 1.5 0 01-3 0zM8 12v2.5A2.5 2.5 0 115.5 12H8zm8 2.5a1.5 1.5 0 00-1.5-1.5H13v1.5a1.5 1.5 0 003 0zM12 12v2.5a2.5 2.5 0 102.5-2.5H12z" clip-rule="evenodd"/> \
+  <path fill-rule="evenodd" d="M12 8H8v4h4V8zM7 7v6h6V7H7z" clip-rule="evenodd"/> \
 </svg>';
 
     // Parts edit buttons
@@ -3397,9 +3449,128 @@ class FileContent {
   }
 }
 
+class SettingsContent {
+  constructor(page_content_id, server_url, login_screen_function) {
+    this.page_content_id = page_content_id;
+    this.server_url = server_url;
+    this.login_screen_function = login_screen_function;
+
+    if ($(this.page_content_id).length != 1) {
+      console.error("SettingsContent: Given "+this.page_content_id+" points to "+$(this.page_content_id).length+" objects");
+    }
+  }
+
+  button_change_password(event) {
+    var old_pass = $("#old_password").val();
+    var new_pass_1 = $("#new_password_1").val();
+    var new_pass_2 = $("#new_password_2").val();
+
+    if (new_pass_1 != new_pass_2) {
+      alert("New passwords do not match");
+      return;
+    }
+
+    event.data.obj.change_password(event.data.obj, old_pass, new_pass_1);
+  }
+
+  change_password(obj, old_pass, new_pass) {
+    var post_data = {
+      type: "POST",
+      url: obj.server_url,
+      data: {
+        password: $("#password").val(),
+        data: {
+          old_password: old_pass,
+          new_password: new_pass
+        },
+        function: "change_password"
+      }
+    };
+
+    var jqxhr = $.post(post_data)
+      .done(function(data) {
+        var data_obj = JSON.parse(data);
+
+        if (data_obj.success) {
+          obj.set_status("Password was changed. Now log in with a new password.");
+          setTimeout(obj.login_screen_function, 5000);
+        }
+        else {
+          obj.set_status("Could not change password: "+data_obj.message);
+          console.error("Could not change password. Data:", data_obj);
+        }
+      })
+      .fail(function(data) {
+        obj.set_status("Could not change password.");
+        console.error("Could not change password. Data:", data);
+      });
+  }
+
+  update_controls(event) {
+    // Update status message and submit button based on the inputs
+    var old_pass = $("#old_password").val();
+    var new_pass_1 = $("#new_password_1").val();
+    var new_pass_2 = $("#new_password_2").val();
+
+    if (old_pass != "" && new_pass_1 != "" && new_pass_1 == new_pass_2) {
+      $("#button_change_password").prop("disabled", false);
+      event.data.obj.set_status("");
+      return;
+    }
+
+    if (new_pass_1 != new_pass_2) {
+      event.data.obj.set_status("Passwords do not match");
+    }
+
+    $("#button_change_password").prop("disabled", true);
+  }
+
+  set_status(message) {
+    $("#change_status").text(message);
+  }
+
+  render_settings() {
+    var html = "<h1>Settings</h1>\
+    <form onsubmit='return false'>\
+      <div class='form-group'>\
+        <label for='old_password'>Current Password</label>\
+        <input id='old_password' name='old_password' type='password' class='form-control password_field' />\
+      </div>\
+      <div class='form-group'>\
+        <label for='new_password_1'>New Password</label>\
+        <input id='new_password_1' name='new_password_1' type='password' class='form-control password_field' />\
+      </div>\
+      <div class='form-group'>\
+        <label for='new_password_2'>New Password (repeat)</label>\
+        <input id='new_password_2' name='new_password_2' type='password' class='form-control password_field' />\
+      </div>\
+      <div class='form-group'>\
+        <input type='button' id='button_change_password' value='Change Password' class='btn btn-primary'>\
+      </div>\
+      <div class='form-group'><div id='change_status'></div></div>\
+    </form>";
+
+    $(this.page_content_id).html(html);
+
+    this.activate_events();
+    this.update_controls();
+  }
+
+  activate_events() {
+    $("#button_change_password").off();
+    $(".password_field").off();
+
+    $("#button_change_password").on("click", {obj: this}, this.button_change_password);
+    $(".password_field").on("keyup", {obj: this}, this.update_controls);
+
+    setTimeout(function() { $("#old_password").focus(); }, 1);
+  }
+}
+
 
 var page_content = null;
 var file_content = null;
+var settings_content = null;
 
 function update_edit() {
   var post_data = {
@@ -3600,7 +3771,14 @@ function update_upload_filename() {
   $("#file_upload_label").text(filename);
 }
 
+function show_settings() {
+  mode_set('settings');
+  settings_content.render_settings();
+}
+
 function mode_set(mode) {
+  // Show other than login screen
+
   $(".button_mode").prop("disabled", false);
   $("#button_"+mode+"_mode").prop("disabled", true);
 
@@ -3608,6 +3786,22 @@ function mode_set(mode) {
   $("#page_content_"+mode).show();
 
   $(".container").css('padding-top',$("#header_publish_inner").height()+50);
+}
+
+function mode_set_login() {
+  // Show login screen
+
+  $(".page_content").hide();
+  $("#login_content").show();
+  $("#header_publish").hide();
+
+  setTimeout(
+    function () {
+      $(".container").css('padding-top',$("#header_publish_inner").height()+50);
+      $("#password").focus();
+    },
+    1
+  );
 }
 
 function update_header_publish() {
@@ -3629,6 +3823,7 @@ function update_header_buttons() {
   $("#button_file_mode").html(biw.folder);
   $("#button_publish").html(biw.cloud_upload);
   $("#button_cancel").html(biw.x_circle);
+  $("#button_settings").html(biw.command);
 }
 
 function activate_file_delete_buttons() {
@@ -3640,14 +3835,22 @@ function activate_file_delete_buttons() {
 $(document).ready(function () {
   console.log("AdminUI.js is ready!");
 
-  // Header is show after successful login
-  $("#header_publish").hide();
+  // Header is shown after successful login
+  mode_set_login();
   update_header_buttons();
 
   mode_set('edit');
 
   page_content = new PageContent("#page_content_edit");
   file_content = new FileContent("#page_content_file_inner");
+  settings_content = new SettingsContent(
+    "#page_content_settings",
+    SERVER_URL,
+    function() {
+      $("#password").val("");
+      mode_set_login();
+    }
+  );
 
   $("#button_login").click(function () {
     update_edit();
@@ -3679,6 +3882,10 @@ $(document).ready(function () {
     upload_file();
   });
 
+  $("#button_settings").click(function () {
+    show_settings();
+  });
+
   // Login when enter pressed
   $("#password").on("keypress", function (e) {
     if (e.which == 13) {
@@ -3694,8 +3901,6 @@ $(document).ready(function () {
   $("#file_upload").change(function () {
     update_upload_filename();
   });
-
-  setTimeout(function () { $("#password").focus(); }, 1);
 });
 
   </script>
@@ -3711,6 +3916,7 @@ $(document).ready(function () {
         </div>
         <button type="button" id="button_publish" class="button_header button_single btn btn-primary"></button>
         <button type="button" id="button_cancel" class="button_header button_single btn btn-primary"></button>
+        <button type="button" id="button_settings" class="button_header button_single btn btn-primary"></button>
       </div>
     </nav>
   </header>
@@ -3754,6 +3960,9 @@ $(document).ready(function () {
           </div>
         </div>
       </form>
+    </div>
+
+    <div id="page_content_settings" class="page_content">
     </div>
   </div>
 </body>

@@ -16,7 +16,7 @@ class integration_test extends TestCase {
     global $MAX_PASSWORD_LENGTH;
 
     $th = new TestHelpers();
-    $this_pass = $th->random_str(rand(1, $MAX_PASSWORD_LENGTH), $th->RANDOM_KEYSPACE);
+    $this_pass = $th->random_str(random_int(1, $MAX_PASSWORD_LENGTH-1), $th->RANDOM_KEYSPACE);
     $filename = $th->write_password_file($this_pass, 'dist/settings.php');
 
     $this->assertEquals("dist/settings.php", $filename);

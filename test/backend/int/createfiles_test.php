@@ -50,6 +50,33 @@ class integration_test extends TestCase {
     $this->assertEquals("Failed to create new settings file", $page['message'], "Returned value: ".print_r($page, true));
   }
 
+  public function test_settings_setpassword_fails() {
+    global $MAX_PASSWORD_LENGTH;
+
+    // Create a read-only settings file with an empty password
+    // Make sure you get an error message when trying to get front page
+
+    unlink($this->path_settings);
+    $this->assertFalse(is_file($this->path_settings));
+
+    $th = new TestHelpers();
+    $filename = $th->write_password_file_emptypass($this->path_settings);
+
+    $this->assertTrue(is_file($this->path_settings));
+    $this->assertTrue(chmod($this->path_settings, 0500));
+
+    $browser = new TestBrowser();
+    $page = $browser->http_get($this->server_url, Array(), "json");
+
+    $this->assertEquals("array", gettype($page), "Returned value: ".print_r($page, true));
+    $this->assertArrayHasKey("success", $page, "Returned value: ".print_r($page, true));
+    $this->assertFalse($page['success'], "Returned value: ".print_r($page, true));
+    $this->assertEquals('Failed to set initial password', $page['message'], "Returned value: ".print_r($page, true));
+
+    $this->assertTrue(chmod($this->path_settings, 0700));
+    $this->assertTrue(unlink($this->path_settings));
+  }
+
   public function test_contentjson_gets_created() {
     // Make sure the data/content.json and all sample files get created
 
@@ -58,6 +85,9 @@ class integration_test extends TestCase {
       $this->assertTrue(unlink($this_file), "Could not delete ".$this_file);
     }
     $this->assertTrue(rmdir($this->path_datadir), "Could not remove ".$this->path_datadir);
+    if (is_file($this->path_settings)) {
+      $this->assertTrue(unlink($this->path_settings), "Could not delete ".$this->path_settings);
+    }
 
     $browser = new TestBrowser();
     $page = $browser->http_get($this->server_url, Array(), null);
@@ -75,7 +105,7 @@ class integration_test extends TestCase {
 
     $this->assertEquals($expected_files, $existing_files, print_r($expected_files, true)."\n".print_r($existing_files, true));
 
-    $this->assertEquals('8a92b913a583e3a738da623ad59ffab6', md5_file($this->path_datadir.'content.json'));
+    $this->assertEquals('25788a60e3baef33b7108d53847f8b5e', md5_file($this->path_datadir.'content.json'));
     $this->assertEquals('5d8676c52e7f7652e0c9021269683f1b', md5_file($this->path_datadir.'DuckDuckGo-DaxSolo.svg'));
     $this->assertEquals('aeb105f05de6111e112b7744a1d59db2', md5_file($this->path_datadir.'favicon.ico'));
     $this->assertEquals('5cb6872b80a8c3594fd6c60465a8418f', md5_file($this->path_datadir.'sample-document.pdf'));
@@ -92,6 +122,9 @@ class integration_test extends TestCase {
     }
     if (is_dir($this->path_datadir)) {
       $this->assertTrue(rmdir($this->path_datadir), "Could not remove ".$this->path_datadir);
+    }
+    if (is_file($this->path_settings)) {
+      $this->assertTrue(unlink($this->path_settings), "Could not delete ".$this->path_settings);
     }
 
     // Make the data/ dir as set perms to read only

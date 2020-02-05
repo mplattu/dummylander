@@ -23,22 +23,3 @@
       group: root
       mode: '0755'
       force: yes
-
-  - name: "copy settings.php"
-    template:
-      src: dummylander/settings.php.j2
-      dest: "{{ dummypath }}{{ domains[0] }}/webroot/settings.php"
-      owner: root
-      group: root
-      mode: '0755'
-      force: yes
-    when:
-      dummypass is defined
-
-  - name: "copy content.json"
-    template:
-      src: dummylander/content.json
-      dest: "{{ dummypath }}{{ domains[0] }}/webroot/data/content.json"
-      owner: www-data
-      group: www-data
-      mode: '0644'

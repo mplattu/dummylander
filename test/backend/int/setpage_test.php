@@ -13,10 +13,10 @@ class integration_test extends TestCase {
   private $server_url = 'http://localhost:8080/';
 
   public function test_admin_set_data_page() {
-    global $PAGE_PROPERTIES;
+    global $PAGE_PROPERTIES, $MAX_PASSWORD_LENGTH;
 
     $th = new TestHelpers();
-    $this_pass = $th->random_str(rand(1, 128), $th->RANDOM_KEYSPACE);
+    $this_pass = $th->random_str(random_int(1, $MAX_PASSWORD_LENGTH), $th->RANDOM_KEYSPACE);
     $filename = $th->write_password_file($this_pass, 'dist/settings.php');
 
     $browser = new TestBrowser();
@@ -32,16 +32,16 @@ class integration_test extends TestCase {
       $this->admin_set_data($data_login, $test_property, "");
 
       // Make sure a random string is stored and others remain the same
-      $random_string = $th->random_str(rand(1, 128), $th->RANDOM_KEYSPACE);
+      $random_string = $th->random_str(random_int(1, $MAX_PASSWORD_LENGTH), $th->RANDOM_KEYSPACE);
       $this->admin_set_data($data_login, $test_property, $random_string);
     }
   }
 
   public function test_admin_set_data_section () {
-    global $SECTION_PROPERTIES;
+    global $SECTION_PROPERTIES, $MAX_PASSWORD_LENGTH;
 
     $th = new TestHelpers();
-    $this_pass = $th->random_str(rand(1, 128), $th->RANDOM_KEYSPACE);
+    $this_pass = $th->random_str(random_int(1, $MAX_PASSWORD_LENGTH), $th->RANDOM_KEYSPACE);
     $filename = $th->write_password_file($this_pass, 'dist/settings.php');
 
     $browser = new TestBrowser();
@@ -58,14 +58,14 @@ class integration_test extends TestCase {
         $this->admin_set_data($data_login, $test_property, "", $part);
 
         // Make sure a random string is stored and others remain the same
-        $random_string = $th->random_str(rand(1, 128), $th->RANDOM_KEYSPACE);
+        $random_string = $th->random_str(random_int(1, $MAX_PASSWORD_LENGTH), $th->RANDOM_KEYSPACE);
         $this->admin_set_data($data_login, $test_property, $random_string, $part);
       }
     }
   }
 
   private function admin_set_data($og_page_data, $test_property, $test_value, $part=null) {
-    global $PAGE_PROPERTIES, $SECTION_PROPERTIES;
+    global $PAGE_PROPERTIES, $SECTION_PROPERTIES, $MAX_PASSWORD_LENGTH;
 
     $cg_page_data = $og_page_data;
 
@@ -79,7 +79,7 @@ class integration_test extends TestCase {
 
     // Make a new random password
     $th = new TestHelpers();
-    $password = $th->random_str(rand(1, 128), $th->RANDOM_KEYSPACE);
+    $password = $th->random_str(random_int(1, $MAX_PASSWORD_LENGTH), $th->RANDOM_KEYSPACE);
     $filename = $th->write_password_file($password, 'dist/settings.php');
 
     $browser = new TestBrowser();

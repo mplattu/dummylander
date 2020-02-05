@@ -30,9 +30,9 @@ class Settings_test extends TestCase {
     unlink($settings_filename);
     $s = new Settings($settings_filename);
     $this->assertFalse(is_null($s));
-    
+
     foreach ($DEFAULT_SETTINGS as $this_key=>$expected_value) {
-      $this->assertEquals($expected_value, $s->get_value($this_key));
+      $this->assertEquals($expected_value, $s->get_value($this_key), "Key $this_key does not match in file $settings_filename");
     }
 
     unlink($settings_filename);

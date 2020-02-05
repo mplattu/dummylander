@@ -7,6 +7,7 @@ class BootstrapIconWrapper {
     this.cloud_upload = '<!-- include-jsesc:src/ui/ext/icons/cloud-upload.svg -->';
     this.x_circle = '<!-- include-jsesc:src/ui/ext/icons/x-circle.svg -->';
     this.x_circle_fill = '<!-- include-jsesc:src/ui/ext/icons/x-circle-fill.svg -->';
+    this.command = '<!-- include-jsesc:src/ui/ext/icons/command.svg -->';
 
     // Parts edit buttons
     this.plus = '<!-- include-jsesc:src/ui/ext/icons/plus.svg -->';

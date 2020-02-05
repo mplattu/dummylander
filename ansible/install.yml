@@ -1,6 +1,6 @@
 ---
 - hosts: dummylander
-  remote_user: admin
+#  remote_user: admin
   become: yes
   become_method: su
   become_user: root
@@ -25,12 +25,21 @@
 
   - name: install ssl files
     include: install.ssl.yml
+    when:
+      certbot_email is defined
 
   - name: install certbot and obtain certificate
     include: install.certbot.yml
+    when:
+      certbot_email is defined
 
   - name: install dummylander
     include: install.dummylander.yml
+
+  - name: install settings.php (set password)
+    include: install.settings.yml
+    when:
+      dummypass is defined
 
   handlers:
   - name: restart nginx

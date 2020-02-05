@@ -10,6 +10,15 @@ class AdminAPI {
   function __construct($data_path, $function, $data) {
     $this->page_storage = new PageStorage($data_path."/content.json");
     $this->file_storage = new FileStorage($data_path);
+    $this->admin_auth = new AdminAuth();
+    try {
+      $this->settings = new Settings();
+    }
+    catch (Exception $e) {
+      // Failed to create settings file - try to continue without the object
+      $this->settings = null;
+    }
+
     $this->function = $function;
     $this->data = $data;
     $this->data_path = $data_path;
@@ -99,6 +108,29 @@ class AdminAPI {
       return $this->get_return_data($delete_success, $this->file_storage->get_file_list(), $this->file_storage->get_last_error());
     }
 
+    if ($this->function == "change_password") {
+      if (is_null($this->settings)) {
+        // We don't have settings class - probably the file or the directory containing the file is in
+        // unwriteable mode
+        return $this->get_return_data(false, null, "Backend error - check file permissions");
+      }
+
+      if ($this->admin_auth->is_admin($this->data['old_password'])) {
+        $change_password = $this->settings->set_value('ADMIN_PASSWORD', global_password_hash($this->data['new_password']));
+        return $this->get_return_data($change_password, null, "");
+      }
+
+      return $this->get_return_data(false, null, "Check old password");
+    }
+
+    if ($this->function == "message_success") {
+      return $this->get_return_data(true, null, $this->data);
+    }
+
+    if ($this->function == "message_fail") {
+      return $this->get_return_data(false, null, $this->data);
+    }
+
     if ($this->function == "loginfailed") {
       return $this->get_return_data(false, null, $this->data);
     }
@@ -108,10 +140,6 @@ class AdminAPI {
     }
 
     if ($this->function == "failedtocreatesettinsfile") {
-      return $this->get_return_data(false, null, $this->data);
-    }
-
-    if ($this->function == "failedtocreatedatadir") {
       return $this->get_return_data(false, null, $this->data);
     }
   }

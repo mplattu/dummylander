@@ -1,18 +1,16 @@
 <?php
 
 class AdminAuth {
-  private $methods;
   private $last_error;
+  private $settings_filename;
 
-  function __construct($methods=null) {
-    if (!is_array($methods) or sizeof($methods) < 1) {
-      $this->raise_exception("AdminAuth requires authentication methods as an array");
-      $this->methods = null;
-    }
-    else {
-      $this->methods = $methods;
-    }
+  function __construct($settings_filename=null) {
     $this->last_error = null;
+
+    if (!is_null($settings_filename) and gettype($settings_filename) != "string") {
+      $this->raise_exception("Parameter must be a filename to settings file");
+    }
+    $this->settings_filename = $settings_filename;
   }
 
   private function log_message($message) {
@@ -36,30 +34,8 @@ class AdminAuth {
   }
 
   function is_admin($password) {
-    if (is_null($this->methods)) {
-      $this->raise_exception("No authentication methods defined");
-    }
+    $s = new Settings($this->settings_filename);
 
-    foreach ($this->methods as $method => $param) {
-      $auth_success = $this->is_admin_method($method, $param, $password);
-      if ($auth_success) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  private function is_admin_method($method, $method_param, $authentication) {
-    if ($method == "file") {
-      return $this->is_admin_file($method_param, $authentication);
-    }
-
-    $this->raise_exception("Unknown authentication method: ".$method);
-  }
-
-  private function is_admin_file($filename, $password) {
-    $s = new Settings($filename);
     $file_password = $s->get_value('ADMIN_PASSWORD');
 
     if (is_null($file_password) or $file_password === "") {
@@ -67,12 +43,7 @@ class AdminAuth {
       return false;
     }
 
-    if ($file_password === $password) {
-      return true;
-    }
-
-    return false;
-
+    return password_verify($password, $file_password);
   }
 }
 

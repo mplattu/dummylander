@@ -17,12 +17,17 @@ catch (Exception $e) {
   exit(0);
 }
 
+if ($s->get_value('ADMIN_PASSWORD') == "") {
+  echo(create_admin_password_and_default_page());
+  exit(0);
+}
+
 $s_log_level = $s->get_value('LOG_LEVEL');
 if (!is_null($s_log_level)) {
   $LOG_LEVEL = $s_log_level;
 }
 
-$admin_auth = new AdminAuth($AUTH_METHODS);
+$admin_auth = new AdminAuth();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES) && $_SERVER['CONTENT_LENGTH'] > 0) {
   $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'uploadlimitexceeded', "Too large file");
@@ -64,17 +69,37 @@ elseif (@$_POST['password'] != "") {
 }
 else {
   $show_page = new ShowPage($VERSION, remove_trailing_slash($DATAPATH));
-  $page_html = $show_page->get_html_page();
-  if (is_null($page_html)) {
-    $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'failedtocreatedatadir', 'Failed to create data directory');
-    echo($admin_api->execute());
-  }
-  else {
-    echo($page_html);
-  }
+  echo($show_page->get_html_page());
 }
 
 // Normal termination
 exit(0);
+
+function create_admin_password_and_default_page() {
+  global $DATAPATH, $VERSION;
+
+  $settings = new Settings();
+
+  // Set initial password
+  $new_admin_password = consts_random_string(97, 122);
+
+  if (! $settings->set_value('ADMIN_PASSWORD', global_password_hash($new_admin_password))) {
+    $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'message_fail', 'Failed to set initial password');
+    return $admin_api->execute();
+  }
+
+  $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'message_success', 'Your admin password is: '.$new_admin_password);
+  $status_message = $admin_api->execute();
+
+  // Create default page
+  $show_page = new ShowPage($VERSION, remove_trailing_slash($DATAPATH));
+  $page_html = $show_page->get_html_page();
+  if (is_null($page_html)) {
+    $admin_api = new AdminAPI(remove_trailing_slash($DATAPATH), 'message_fail', 'Failed to create data directory');
+    $status_message = $admin_api->execute();
+  }
+
+  return $status_message;
+}
 
 ?>

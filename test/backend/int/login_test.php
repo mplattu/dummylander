@@ -13,8 +13,10 @@ class integration_test extends TestCase {
   private $server_url = 'http://localhost:8080/';
 
   public function test_admin_login() {
+    global $MAX_PASSWORD_LENGTH;
+
     $th = new TestHelpers();
-    $this_pass = $th->random_str(rand(1, 128), $th->RANDOM_KEYSPACE);
+    $this_pass = $th->random_str(random_int(1, $MAX_PASSWORD_LENGTH-1), $th->RANDOM_KEYSPACE);
     $filename = $th->write_password_file($this_pass, 'dist/settings.php');
 
     $this->assertEquals("dist/settings.php", $filename);
@@ -36,10 +38,10 @@ class integration_test extends TestCase {
       "json"
     );
 
-    $this->assertFalse($data_observed2['success'], "Was able to log in with incorrect password: ".$this_pass);
+    $this->assertFalse($data_observed2['success'], "Was able to log in with incorrect password: ".$this_pass."\n".print_r($data_observed2, true));
   }
 
-  public function test_admin_login_notset() {
+  public function test_admin_login_haspasswordbeenset() {
     $th = new TestHelpers();
     $filename = $th->write_password_file("", 'dist/settings.php');
 
@@ -51,17 +53,17 @@ class integration_test extends TestCase {
     );
 
     $this->assertFalse($data_observed['success'], "Was able to log in although no password was set");
-    $this->assertEquals("Password in settings.php has not been set", $data_observed['message']);
   }
 
   public function test_admin_login_randompass() {
     // Make sure we can set & login with whatever random password
+    global $MAX_PASSWORD_LENGTH;
 
     $th = new TestHelpers();
 
-    for ($n=0; $n < 100; $n++) {
-      $pass_correct = $th->random_str(rand(1, 128), $th->RANDOM_KEYSPACE);
-      $pass_incorrect =  $th->random_str(rand(1, 128), $th->RANDOM_KEYSPACE);
+    for ($n=0; $n < 25; $n++) {
+      $pass_correct = $th->random_str(random_int(1, $MAX_PASSWORD_LENGTH), $th->RANDOM_KEYSPACE);
+      $pass_incorrect =  $th->random_str(random_int(1, $MAX_PASSWORD_LENGTH), $th->RANDOM_KEYSPACE);
 
       $this->assertTrue(($pass_correct != $pass_incorrect), "Random passwords are the same. Re-run tests.");
 

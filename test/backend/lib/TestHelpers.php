@@ -40,14 +40,19 @@ class TestHelpers {
     return tempnam(sys_get_temp_dir(), "DummylanderTestHelpers_");
   }
 
-  function write_password_file($password, $filename=null) {
-    // Writes a settings file with some randomity in spaces
+  private function write_settings_file($final_pass, $filename=null) {
+    global $DEFAULT_SETTINGS;
+
+    if (is_null($DEFAULT_SETTINGS)) {
+      throw new Exception("You have to include global_consts.php for this test");
+    }
+
+    $settings = $DEFAULT_SETTINGS;
+    $settings['ADMIN_PASSWORD'] = $final_pass;
 
     if (is_null($filename)) {
       $filename = $this->get_temp_filename();
     }
-
-    $settings = Array('ADMIN_PASSWORD'=>$password);
 
     $c = Array();
     array_push($c, "<?php");
@@ -62,27 +67,35 @@ class TestHelpers {
     return $filename;
   }
 
+  function write_password_file_emptypass($filename=null) {
+    return $this->write_settings_file("", $filename);
+  }
+
+  function write_password_file($password, $filename=null) {
+    return $this->write_settings_file(global_password_hash($password), $filename);
+  }
+
   function get_expected_index_html() {
     global $VERSION;
 
     $expected_page = <<<EOT
 <!DOCTYPE html>
 <html>
-<head><!-- This landing page has been created with Dummylander 0.6 -->
+<head><!-- This landing page has been created with Dummylander 0.7 -->
 <meta charset="UTF-8"><meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Dummylander 0.6</title>
+<title>Dummylander 0.7</title>
 <link href="https://fonts.googleapis.com/css?family=Shadows+Into+Light|Rajdhani&display=swap" rel="stylesheet" />
 <link rel="icon" href="data/favicon.ico" type="image/x-icon" />
 <link rel="shortcut icon" href="data/favicon.ico" type="image/x-icon" />
 <meta name="description" content="Description of your Dummylander site which might be shown by search engines and when sharing your www address" />
 <style>a:link {color:inherit} a:visited {color:inherit} a:hover { text-decoration-color: red }</style>
-<meta property="og:site_name" content="Dummylander 0.6" />
-<meta property="og:title" content="Dummylander 0.6" />
+<meta property="og:site_name" content="Dummylander 0.7" />
+<meta property="og:title" content="Dummylander 0.7" />
 <meta property="og:description" content="Description of your Dummylander site which might be shown by search engines and when sharing your www address" />
 <meta property="og:image" content="http://localhost:8080/data/favicon.ico" />
 <style>#page table { margin: 0 auto; } #page img { max-width: 100%; } #page { font-family: Arial,Helvetica,sans-serif; }</style></head><body style='margin:0; padding:0;'><div id='page'><section id="sec0" style="background-image:url('data/space.jpg'); background-position: center; background-repeat: no-repeat; background-size: cover;  height:400px; padding:0; color:#000000; text-align:center;"></section><section id="sec1" style="margin:10px; padding:0; color:#000000; text-align:center;"><h1>Hello World!</h1>
-<p>You have successfully installed Dummylander 0.6. Small step for you, but a giant leap to Internet!</p>
+<p>You have successfully installed Dummylander 0.7. Small step for you, but a giant leap to Internet!</p>
 <p>But hey - please doublecheck you've done all steps of the installation procedure at <a href="https://github.com/mplattu/dummylander">Dummylander GitHub site</a>.</p></section><section id="sec2" style="margin:10px; padding:0; color:#000000; text-align:center;"><h2>Page is Built from Parts</h2>
 <p>The page is built on parts which may contain text and images. The flower and a heading above is the first parts while this text is a second part.</p>
 <p>The text fields may contain <a href="https://www.markdownguide.org/cheat-sheet">markdown-formatted</a> syntax. This allows you to give <strong>structure</strong> to your text.</p></section><section id="sec3" style="font-family:'Shadows Into Light', cursive; margin:10px; padding:0; color:#000000; text-align:center;"><h2>Fonts</h2>

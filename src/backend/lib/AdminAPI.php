@@ -10,8 +10,14 @@ class AdminAPI {
   function __construct($data_path, $function, $data) {
     $this->page_storage = new PageStorage($data_path."/content.json");
     $this->file_storage = new FileStorage($data_path);
-    $this->settings = new Settings();
     $this->admin_auth = new AdminAuth();
+    try {
+      $this->settings = new Settings();
+    }
+    catch (Exception $e) {
+      // Failed to create settings file - try to continue without the object
+      $this->settings = null;
+    }
 
     $this->function = $function;
     $this->data = $data;
@@ -103,6 +109,12 @@ class AdminAPI {
     }
 
     if ($this->function == "change_password") {
+      if (is_null($this->settings)) {
+        // We don't have settings class - probably the file or the directory containing the file is in
+        // unwriteable mode
+        return $this->get_return_data(false, null, "Backend error - check file permissions");
+      }
+
       if ($this->admin_auth->is_admin($this->data['old_password'])) {
         $change_password = $this->settings->set_value('ADMIN_PASSWORD', global_password_hash($this->data['new_password']));
         return $this->get_return_data($change_password, null, "");

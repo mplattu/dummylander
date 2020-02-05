@@ -10,6 +10,9 @@ class AdminAPI {
   function __construct($data_path, $function, $data) {
     $this->page_storage = new PageStorage($data_path."/content.json");
     $this->file_storage = new FileStorage($data_path);
+    $this->settings = new Settings();
+    $this->admin_auth = new AdminAuth();
+
     $this->function = $function;
     $this->data = $data;
     $this->data_path = $data_path;
@@ -97,6 +100,15 @@ class AdminAPI {
     if ($this->function == "file_delete") {
       $delete_success = $this->file_storage->delete_file($this->data);
       return $this->get_return_data($delete_success, $this->file_storage->get_file_list(), $this->file_storage->get_last_error());
+    }
+
+    if ($this->function == "change_password") {
+      if ($this->admin_auth->is_admin($this->data['old_password'])) {
+        $change_password = $this->settings->set_value('ADMIN_PASSWORD', global_password_hash($this->data['new_password']));
+        return $this->get_return_data($change_password, null, "");
+      }
+
+      return $this->get_return_data(false, null, "Check old password");
     }
 
     if ($this->function == "message_success") {

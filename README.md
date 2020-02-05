@@ -13,7 +13,9 @@ Superdupersimple landing page administration tool.
     [issue](https://github.com/mplattu/dummylander/issues).
  1. Reload the URL (`http(s)://yourdomain.com`). This time you should get a nice default page.
  1. Log in to admin UI: `http(s)://yourdomain.com/?admin`
- 1. Enter the password you was given above and profit!
+ 1. Enter the password you was given above and log in.
+ 1. You can change the initial password in the command page (the rightmost button in the header).
+ 1. Profit!
 
 ## This works
 
@@ -22,12 +24,12 @@ Superdupersimple landing page administration tool.
  * You can add, remove and move page parts.
  * You can see page preview before publishing.
  * You can upload and remove files.
+ * The administration password is automatically set and can be changed.
 
 ## This does not work yet
 
  * There must be a tons of page or part attributes missing.
  * Easy way to add images and links to files.
- * Changing administrator password.
 
 ## Authentication
 

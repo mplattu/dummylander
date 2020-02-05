@@ -2,9 +2,11 @@ var SERVER_URL="index.php";
 
 <!-- include:src/ui/lib/PageContent.js -->
 <!-- include:src/ui/lib/FileContent.js -->
+<!-- include:src/ui/lib/SettingsContent.js -->
 
 var page_content = null;
 var file_content = null;
+var settings_content = null;
 
 function update_edit() {
   var post_data = {
@@ -205,7 +207,14 @@ function update_upload_filename() {
   $("#file_upload_label").text(filename);
 }
 
+function show_settings() {
+  mode_set('settings');
+  settings_content.render_settings();
+}
+
 function mode_set(mode) {
+  // Show other than login screen
+
   $(".button_mode").prop("disabled", false);
   $("#button_"+mode+"_mode").prop("disabled", true);
 
@@ -213,6 +222,22 @@ function mode_set(mode) {
   $("#page_content_"+mode).show();
 
   $(".container").css('padding-top',$("#header_publish_inner").height()+50);
+}
+
+function mode_set_login() {
+  // Show login screen
+
+  $(".page_content").hide();
+  $("#login_content").show();
+  $("#header_publish").hide();
+
+  setTimeout(
+    function () {
+      $(".container").css('padding-top',$("#header_publish_inner").height()+50);
+      $("#password").focus();
+    },
+    1
+  );
 }
 
 function update_header_publish() {
@@ -234,6 +259,7 @@ function update_header_buttons() {
   $("#button_file_mode").html(biw.folder);
   $("#button_publish").html(biw.cloud_upload);
   $("#button_cancel").html(biw.x_circle);
+  $("#button_settings").html(biw.command);
 }
 
 function activate_file_delete_buttons() {
@@ -245,14 +271,22 @@ function activate_file_delete_buttons() {
 $(document).ready(function () {
   console.log("AdminUI.js is ready!");
 
-  // Header is show after successful login
-  $("#header_publish").hide();
+  // Header is shown after successful login
+  mode_set_login();
   update_header_buttons();
 
   mode_set('edit');
 
   page_content = new PageContent("#page_content_edit");
   file_content = new FileContent("#page_content_file_inner");
+  settings_content = new SettingsContent(
+    "#page_content_settings",
+    SERVER_URL,
+    function() {
+      $("#password").val("");
+      mode_set_login();
+    }
+  );
 
   $("#button_login").click(function () {
     update_edit();
@@ -284,6 +318,10 @@ $(document).ready(function () {
     upload_file();
   });
 
+  $("#button_settings").click(function () {
+    show_settings();
+  });
+
   // Login when enter pressed
   $("#password").on("keypress", function (e) {
     if (e.which == 13) {
@@ -299,6 +337,4 @@ $(document).ready(function () {
   $("#file_upload").change(function () {
     update_upload_filename();
   });
-
-  setTimeout(function () { $("#password").focus(); }, 1);
 });

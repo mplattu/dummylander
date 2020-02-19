@@ -16,5 +16,12 @@ class BootstrapIconWrapper {
     this.arrow_up = '<!-- include-jsesc:src/ui/ext/icons/arrow-up.svg -->';
     this.arrow_down = '<!-- include-jsesc:src/ui/ext/icons/arrow-down.svg -->';
     this.trash = '<!-- include-jsesc:src/ui/ext/icons/trash.svg -->';
+
+    // Edit textarea buttons
+    this.reply = '<!-- include-jsesc:src/ui/ext/icons/reply.svg -->';
+    this.image = '<!-- include-jsesc:src/ui/ext/icons/image.svg -->';
+    this.type_bold = '<!-- include-jsesc:src/ui/ext/icons/type-bold.svg -->';
+    this.type_italic = '<!-- include-jsesc:src/ui/ext/icons/type-italic.svg -->';
+    this.code = '<!-- include-jsesc:src/ui/ext/icons/code.svg -->';
   }
 }

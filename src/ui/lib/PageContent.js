@@ -47,13 +47,26 @@ class PageContent {
     return this.page_data.parts.length;
   }
 
+  textarea_buttons_html(target_id) {
+    var biw = new BootstrapIconWrapper();
+
+    var html = [];
+    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="link" data-target="'+target_id+'">'+biw.reply+'</button>');
+    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="image" data-target="'+target_id+'">'+biw.image+'</button>');
+    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="bold" data-target="'+target_id+'">'+biw.type_bold+'</button>');
+    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="italic" data-target="'+target_id+'">'+biw.type_italic+'</button>');
+    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="code" data-target="'+target_id+'">'+biw.code+'</button>');
+
+    return html.join("\n");
+  }
+
   render_editor_input(field, name) {
     if (field == "color") {
       return '<input class="page_field color_field form-control" type="text" name="'+name+'" id="'+name+'">';
     }
 
     if (field == "text") {
-      return '<textarea class="section_field form-control" name="'+name+'" id="'+name+'" rows="5"></textarea>';
+      return '<span class="section_text_control" id="'+name+'_control">'+this.textarea_buttons_html(name)+'</span><textarea class="section_field form-control section_text" name="'+name+'" id="'+name+'" rows="5"></textarea>';
     }
 
     // Fallback: single-line text
@@ -87,7 +100,7 @@ class PageContent {
     html.push('<div class="section_group">');
 
     var name='section_'+n+'_text';
-    html.push('<div class="row"><div class="col-12"><label for="'+name+'" class="label_text">Text</label>'+this.render_editor_input('text', name)+'</div></div>');
+    html.push('<div class="row"><div class="col-12"><label for="'+name+'" class="label_text section_text_label">Text</label>'+this.render_editor_input('text', name)+'</div></div>');
     html.push('<div class="row"><div class="col-12">');
     html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_advanced" data-partnumber="'+n+'">'+biw.chevron_down+'</button>');
     html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_move_down" data-partnumber="'+n+'">'+biw.arrow_down+'</button>');
@@ -199,7 +212,6 @@ class PageContent {
   }
 
   part_move(part_from, part_to) {
-    console.log("move from "+part_from+" to "+part_to);
     var tmp = this.page_data.parts[part_to];
     this.page_data.parts[part_to] = this.page_data.parts[part_from];
     this.page_data.parts[part_from] = tmp;
@@ -341,6 +353,122 @@ class PageContent {
     });
   }
 
+  activate_textarea_buttons() {
+    $(".section_text_control").hide();
+
+    $(".section_text").on('focusin', {obj: this}, this.textarea_gets_focus);
+    $(".section_text").on('focusout', {obj: this}, this.textarea_loses_focus);
+  }
+
+  textarea_gets_focus(event) {
+    setTimeout(function () {
+      var controls_id = event.target.id+"_control";
+      $("#"+controls_id).show();
+
+      $("#"+controls_id).unbind();
+      $("#"+controls_id).children().unbind();
+
+      var obj = event.data.obj;
+
+      $("#"+controls_id).children().click(function(event) {
+        var action = $(this).attr('data-action');
+        var target_selector = "#"+$(this).attr('data-target');
+        $(target_selector).focus();
+
+        if (action == "link") {
+          obj.textarea_button_link(target_selector);
+        }
+
+        if (action == "image") {
+          obj.textarea_button_image(target_selector);
+        }
+
+        if (action == "bold") {
+          obj.textarea_button_bold(target_selector);
+        }
+
+        if (action == "italic") {
+          obj.textarea_button_italic(target_selector);
+        }
+
+        if (action == "code") {
+          obj.textarea_button_code(target_selector);
+        }
+      });
+    }, 100);
+  }
+
+  textarea_button_link(target_selector) {
+    var selected = getSelected(target_selector);
+    if (selected == "") {
+      selected = "[LINK TEXT](https://url)";
+    }
+    else if ((selected.indexOf('https://') == 0) && (selected.indexOf('http://') == 0)) {
+      selected = "[LINK TEXT]("+selected+")";
+    }
+    else {
+      selected = "["+selected+"](https://url)";
+    }
+
+    $(target_selector).insertAtCaret(selected);
+    $(target_selector).keyup();
+  }
+
+  textarea_button_image(target_selector) {
+    if (getSelected(target_selector) != "") {
+      return;
+    }
+
+    $(target_selector).insertAtCaret("![ALTERNATIVE TEXT](filename.ext)");
+    $(target_selector).keyup();
+  }
+
+  textarea_button_bold(target_selector) {
+    var selected = getSelected(target_selector);
+    if (selected == "") {
+      selected = "BOLD TEXT";
+    }
+    $(target_selector).insertAtCaret("**"+selected+"**");
+    $(target_selector).keyup();
+  }
+
+  textarea_button_italic(target_selector) {
+    var selected = getSelected(target_selector);
+    if (selected == "") {
+      selected = "ITALIC TEXT";
+    }
+    $(target_selector).insertAtCaret("*"+selected+"*");
+    $(target_selector).keyup();
+  }
+
+  textarea_button_code(target_selector) {
+    var selected = getSelected(target_selector);
+    if (selected == "") {
+      selected = "CODE BLOCK";
+    }
+
+    var replace = "`"+selected+"`";
+    if (selected.indexOf("\n") > -1) {
+      // Has more than one lines
+      replace = "```\n"+selected+"```\n";
+    }
+
+    $(target_selector).insertAtCaret(replace);
+    $(target_selector).keyup();
+  }
+
+  textarea_loses_focus(event) {
+    setTimeout(function () {
+      var $focused = $(":focus");
+      if ($focused.attr('data-target') != undefined) {
+        $("#"+$focused.attr('data-target')).focus();
+        return;
+      }
+
+      $(".section_text_control").hide();
+    });
+  }
+
   on_change(func) {
     this.on_change_func = func;
   }
@@ -358,6 +486,7 @@ class PageContent {
     this.update_editor_values();
     this.activate_colorpicker();
     this.activate_textarea_autoheight();
+    this.activate_textarea_buttons();
 
     this.page_data_has_changed = data_has_changed;
     this.on_change_call();

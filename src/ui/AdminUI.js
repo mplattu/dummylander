@@ -1,5 +1,6 @@
 var SERVER_URL="index.php";
 
+<!-- include:src/ui/lib/functions.js -->
 <!-- include:src/ui/lib/PageContent.js -->
 <!-- include:src/ui/lib/FileContent.js -->
 <!-- include:src/ui/lib/SettingsContent.js -->

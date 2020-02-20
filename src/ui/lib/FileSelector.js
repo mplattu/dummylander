@@ -37,7 +37,7 @@ class FileSelector {
       modal_html.push('</div>');
 
       modal_html.push('<div class="col-3">');
-      modal_html.push(this_file.size);
+      modal_html.push(humanFileSize(this_file.size));
       modal_html.push('</div>');
 
       modal_html.push('</div>');

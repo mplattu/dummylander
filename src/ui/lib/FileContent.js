@@ -27,8 +27,8 @@ class FileContent {
     for (var n=0; n < this.get_files_count(); n++) {
       var html = "<tr>";
       html += "<td>"+this.file_data[n].name+"</td>";
-      html += "<td>"+this.file_data[n].size+"</td>";
-      html += "<td><button type='button' class='btn btn-danger btn-sm button_file_delete' data-filename='"+this.file_data[n].name+"'>"+biw.x_circle_fill+"</button>";
+      html += "<td>"+humanFileSize(this.file_data[n].size)+"</td>";
+      html += "<td><button type='button' class='btn btn-outline-danger btn-sm button_file_delete' data-filename='"+this.file_data[n].name+"'>"+biw.x_circle_fill+"</button>";
       html += "</tr>";
       body_rows.push(html);
     }

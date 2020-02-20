@@ -47,3 +47,10 @@ function getSelected(selector) {
 
   return selectedText;
 }
+
+// Convert bytes to human-readable format
+// https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string#answer-20732091
+function humanFileSize(size) {
+  var i = Math.floor( Math.log(size) / Math.log(1024) );
+  return ( size / Math.pow(1024, i) ).toFixed(1) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+};

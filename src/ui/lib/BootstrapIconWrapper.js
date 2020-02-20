@@ -23,5 +23,8 @@ class BootstrapIconWrapper {
     this.type_bold = '<!-- include-jsesc:src/ui/ext/icons/type-bold.svg -->';
     this.type_italic = '<!-- include-jsesc:src/ui/ext/icons/type-italic.svg -->';
     this.code = '<!-- include-jsesc:src/ui/ext/icons/code.svg -->';
+
+    // FileSelector
+    this.check = '<!-- include-jsesc:src/ui/ext/icons/check.svg -->';
   }
 }

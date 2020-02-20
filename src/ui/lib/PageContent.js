@@ -419,8 +419,17 @@ class PageContent {
       return;
     }
 
-    $(target_selector).insertAtCaret("![ALTERNATIVE TEXT](filename.ext)");
-    $(target_selector).keyup();
+    var fs = new FileSelector(SERVER_URL, $("#password").val());
+
+    fs.get_filename()
+    .then(function (filename) {
+      if (filename && filename != "") {
+        $(target_selector).insertAtCaret("![ALTERNATIVE TEXT]("+filename+")");
+        $(target_selector).keyup();
+      }
+    })
+    .catch(error => alert(error));
+
   }
 
   textarea_button_bold(target_selector) {

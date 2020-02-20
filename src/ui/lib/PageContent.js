@@ -505,6 +505,47 @@ class PageContent {
     this.set_data_internal(data, false);
   }
 
+  update_edit() {
+    // Get latest page data from server and view it
+    var server_connect = new ServerConnect(SERVER_URL, $("#password").val());
+
+    var obj = this;
+    server_connect.get_page_data()
+      .then(function(page_data) {
+        obj.set_data(page_data);
+      })
+      .catch(error => alert(error));
+  }
+
+  publish() {
+    // Publish current page data to server
+    var server_connect = new ServerConnect(SERVER_URL, $("#password").val());
+
+    var obj = this;
+    server_connect.set_page_data(obj.get_data())
+      .then(function(page_data) {
+        $("#button_publish").addClass("btn-success");
+        obj.on_change_call();
+        setTimeout(function() { $("#button_publish").removeClass("btn-success"); mode_set('edit'); }, 1000);
+      })
+      .catch(error => alert(error));
+  }
+
+  update_preview() {
+    var server_connect = new ServerConnect(SERVER_URL, $("#password").val());
+
+    var obj = this;
+    server_connect.get_preview_html(obj.get_data())
+      .then(function(page_data) {
+        $("#page_content_preview").html(page_data.html);
+
+        // Handle Google font CSS links
+        $("[href*='https://fonts.googleapis.com/css?family='][rel='stylesheet']").remove();
+        $("head").append(page_data.head);
+      })
+      .catch(error => alert(error));
+  }
+
   get_data() {
     this.page_data_has_changed = false;
     return this.page_data;

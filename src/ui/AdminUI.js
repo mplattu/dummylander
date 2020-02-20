@@ -13,115 +13,11 @@ var page_content = null;
 var file_content = null;
 var settings_content = null;
 
-function update_edit() {
-  var post_data = {
-    type:"POST",
-    url: SERVER_URL,
-    data: {
-      password: $("#password").val(),
-      function: "get"
-    }
-  };
-
-  var jqxhr = $.post(post_data)
-    .done(function(data) {
-      var data_obj = JSON.parse(data);
-
-      if (data_obj.success) {
-        $("#login_content").hide();
-        $("#header_publish").show();
-        mode_set('edit');
-        page_content.set_data(data_obj.data);
-      }
-      else {
-        $("#message_loginfailed").show();
-        $("#password").val('');
-        setTimeout(function () { $("#password").focus(); }, 1);
-        console.error("update_edit() failed. Retrieved data:", data_obj);
-        if (data_obj.message != "") {
-          alert(data_obj.message);
-        }
-      }
-    })
-    .fail(function(data) {
-      alert("update_edit() failed. See console");
-      console.error("update_edit() failed. Retrieved data:", data);
-    });
-}
-
-function set_data() {
-  var post_data = {
-    type: "POST",
-    url: SERVER_URL,
-    data: {
-      password: $("#password").val(),
-      function: "set",
-      data: JSON.stringify(page_content.get_data())
-    }
-  };
-
-  var jqxhr = $.post(post_data)
-    .done(function(data) {
-      var data_obj = JSON.parse(data);
-
-      if (data_obj.success) {
-        $("#button_publish").addClass("btn-success");
-        update_header_publish();
-        setTimeout(function() { $("#button_publish").removeClass("btn-success"); mode_set('edit'); }, 1000);
-      }
-      else {
-        alert("set_data() failed. See console");
-        console.error("set_data() failed. Data:", data_obj);
-      }
-    })
-    .fail(function(data) {
-      alert("set_data() failed. See console");
-      console.error("set_data() failed. Data:", data);
-    });
-}
-
-function update_preview() {
-  var post_data = {
-    type: "POST",
-    url: SERVER_URL,
-    data: {
-      password: $("#password").val(),
-      function: "preview",
-      data: JSON.stringify(page_content.get_data())
-    }
-  };
-
-  var jqxhr = $.post(post_data)
-    .done(function(data) {
-      var data_obj = JSON.parse(data);
-
-      if (data_obj.success) {
-        $("#page_content_preview").html(data_obj.data.html);
-
-        // Handle Google font CSS links
-        $("[href*='https://fonts.googleapis.com/css?family='][rel='stylesheet']").remove();
-        $("head").append(data_obj.data.head);
-
-        mode_set('preview');
-      }
-      else {
-        alert("update_preview() failed. See console");
-        console.error("update_preview() failed. Data:", data_obj);
-      }
-    })
-    .fail(function(data) {
-      alert("update_preview() failed. See console");
-      console.error("update_preview() failed. Data:", data);
-    });
-}
-
-function show_settings() {
-  mode_set('settings');
-  settings_content.render_settings();
-}
-
 function mode_set(mode) {
   // Show other than login screen
+
+  $("#header_publish").show();
+  $("#login_content").hide();
 
   $(".button_mode").prop("disabled", false);
   $("#button_"+mode+"_mode").prop("disabled", true);
@@ -146,6 +42,26 @@ function mode_set_login() {
     },
     1
   );
+}
+
+function login() {
+  // Try log in with password in the password field
+
+  var server_connect = new ServerConnect(SERVER_URL, $("#password").val());
+  server_connect.check_password()
+    .then(function(correct_password) {
+      if (correct_password) {
+        page_content.update_edit();
+        mode_set('edit');
+      }
+      else {
+        $("#password").val('');
+        setTimeout(function () { $("#password").focus(); }, 1);
+
+        $("#message_loginfailed").show();
+        setTimeout(function() { $("#message_loginfailed").hide(); }, 3000);
+      }
+    });
 }
 
 function update_header_publish() {
@@ -177,8 +93,6 @@ $(document).ready(function () {
   mode_set_login();
   update_header_buttons();
 
-  mode_set('edit');
-
   page_content = new PageContent("#page_content_edit");
   file_content = new FileContent("#page_content_file_inner");
   settings_content = new SettingsContent(
@@ -191,7 +105,7 @@ $(document).ready(function () {
   );
 
   $("#button_login").click(function () {
-    update_edit();
+    login();
   });
 
   $("#button_edit_mode").click(function() {
@@ -199,7 +113,8 @@ $(document).ready(function () {
   });
 
   $("#button_preview_mode").click(function () {
-    update_preview();
+    page_content.update_preview()
+    mode_set('preview');
   });
 
   $("#button_file_mode").click(function () {
@@ -209,22 +124,24 @@ $(document).ready(function () {
 
   $("#button_cancel").click(function () {
     if (confirm("Are you sure you want to discard your changes?")) {
-      update_edit();
+      page_content.update_edit();
+      mode_set('edit');
     }
   });
 
   $("#button_publish").click(function () {
-    set_data();
+    page_content.publish();
   });
 
   $("#button_settings").click(function () {
-    show_settings();
+    settings_content.render_settings();
+    mode_set('settings');
   });
 
   // Login when enter pressed
   $("#password").on("keypress", function (e) {
     if (e.which == 13) {
-      update_edit();
+      login();
     }
     $("#message_loginfailed").hide();
   });

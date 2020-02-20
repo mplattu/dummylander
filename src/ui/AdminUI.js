@@ -115,103 +115,6 @@ function update_preview() {
     });
 }
 
-function update_file(backend_function, filename) {
-  if (backend_function == undefined) {
-    backend_function = "file_list";
-  }
-
-  var post_data = {
-    type: "POST",
-    url: SERVER_URL,
-    data: {
-      password: $("#password").val(),
-      function: backend_function,
-      data: filename
-    }
-  };
-
-  var jqxhr = $.post(post_data)
-    .done(function(data) {
-      var data_obj = JSON.parse(data);
-
-      if (data_obj.success) {
-        $(".button_file_delete").off();
-
-        mode_set('file');
-        file_content.set_data(data_obj.data);
-
-        activate_file_delete_buttons();
-      }
-      else {
-        alert("update_file() failed. See console.");
-        console.error("update_file() failed. Data:", data_obj);
-      }
-    })
-    .fail(function(data) {
-      alert("update_file() failed. See console");
-      console.error("update_file() failed. Data:", data);
-    });
-}
-
-function upload_file() {
-  if ($("#file_upload").val() == "") {
-    return;
-  }
-
-  var data = new FormData();
-  data.append('file_upload', $('#file_upload')[0].files[0]);
-  data.append('password', $("#password").val());
-  data.append('function', 'file_upload');
-
-  $.ajax({
-    url: SERVER_URL,
-    data: data,
-    cache: false,
-    contentType: false,
-    processData: false,
-    method: 'POST',
-    success: function(data) {
-      var data_obj = JSON.parse(data);
-
-      if (data_obj.success) {
-        $(".button_file_delete").off();
-
-        mode_set('file');
-        file_content.set_data(data_obj.data);
-
-        activate_file_delete_buttons();
-
-        $("#file_upload").val("");
-        update_upload_filename();
-      }
-      else {
-        if (data_obj.message != "") {
-          alert("File upload failed: "+data_obj.message);
-        }
-        else {
-          alert("upload_file() failed. See console.");
-          console.error("upload_file() failed. Data:", data_obj);
-        }
-      }
-    },
-    error: function(data, error) {
-      alert("upload_file() failed. See console.");
-      console.error("upload_file() failes. Data:", data, error);
-    }
-  });
-}
-
-function update_upload_filename() {
-  var filename = $("#file_upload").val();
-  filename = filename.split(/(\\|\/)/g).pop();
-
-  if (filename === "") {
-    filename = "Choose file";
-  }
-
-  $("#file_upload_label").text(filename);
-}
-
 function show_settings() {
   mode_set('settings');
   settings_content.render_settings();
@@ -267,12 +170,6 @@ function update_header_buttons() {
   $("#button_settings").html(biw.command);
 }
 
-function activate_file_delete_buttons() {
-  $(".button_file_delete").click(function () {
-    update_file("file_delete", $(this).attr('data-filename'));
-  });
-}
-
 $(document).ready(function () {
   console.log("AdminUI.js is ready!");
 
@@ -306,7 +203,8 @@ $(document).ready(function () {
   });
 
   $("#button_file_mode").click(function () {
-    update_file();
+    file_content.update();
+    mode_set('file');
   });
 
   $("#button_cancel").click(function () {
@@ -317,10 +215,6 @@ $(document).ready(function () {
 
   $("#button_publish").click(function () {
     set_data();
-  });
-
-  $("#button_file_upload").click(function () {
-    upload_file();
   });
 
   $("#button_settings").click(function () {
@@ -337,9 +231,5 @@ $(document).ready(function () {
 
   page_content.on_change(function () {
     update_header_publish();
-  });
-
-  $("#file_upload").change(function () {
-    update_upload_filename();
   });
 });

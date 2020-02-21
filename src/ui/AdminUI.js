@@ -6,6 +6,7 @@ var SERVER_URL="index.php";
 <!-- include:src/ui/lib/FileSelector.js -->
 
 <!-- include:src/ui/lib/PageContent.js -->
+<!-- include:src/ui/lib/PreviewContent.js -->
 <!-- include:src/ui/lib/FileContent.js -->
 <!-- include:src/ui/lib/SettingsContent.js -->
 
@@ -51,7 +52,7 @@ function login() {
   server_connect.check_password()
     .then(function(correct_password) {
       if (correct_password) {
-        page_content.update_edit();
+        page_content.update();
         mode_set('edit');
       }
       else {
@@ -94,6 +95,7 @@ $(document).ready(function () {
   update_header_buttons();
 
   page_content = new PageContent("#page_content_edit");
+  preview_content = new PreviewContent("#page_content_preview");
   file_content = new FileContent("#page_content_file_inner");
   settings_content = new SettingsContent(
     "#page_content_settings",
@@ -113,7 +115,7 @@ $(document).ready(function () {
   });
 
   $("#button_preview_mode").click(function () {
-    page_content.update_preview()
+    preview_content.update(page_content.get_data());
     mode_set('preview');
   });
 
@@ -124,7 +126,7 @@ $(document).ready(function () {
 
   $("#button_cancel").click(function () {
     if (confirm("Are you sure you want to discard your changes?")) {
-      page_content.update_edit();
+      page_content.update();
       mode_set('edit');
     }
   });

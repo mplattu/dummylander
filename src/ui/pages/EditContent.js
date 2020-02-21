@@ -417,7 +417,8 @@ class EditContent {
 
     var fs = new FileSelector(SERVER_URL, $("#password").val());
 
-    fs.get_filename()
+    // Create FileSelector showing only files with mimetype image/*
+    fs.get_filename("^image/")
     .then(function (filename) {
       if (filename && filename != "") {
         $(target_selector).insertAtCaret("![ALTERNATIVE TEXT]("+filename+")");

@@ -4,13 +4,32 @@ class FileSelector {
     this.resolve_get_filename = null;
   }
 
-  get_filename() {
+  filter_mimetypes(mime_regexp_filter, file_data) {
+    if (mime_regexp_filter == undefined) {
+      return file_data;
+    }
+
+    var new_file_data = [];
+    var re = new RegExp(mime_regexp_filter);
+
+    jQuery.each(file_data, function(n, this_file) {
+      if (re.test(this_file.mimetype)) {
+        new_file_data.push(this_file);
+      }
+    });
+
+    return new_file_data;
+  }
+
+  // Show filenames which match to given mimetype filter (e.g. "^image/")
+  get_filename(mime_regexp_filter) {
     var obj = this;
     return new Promise(function (resolve, reject) {
       obj.server_connect.get_file_data()
         .then(function (result_data) {
           obj.resolve_get_filename = resolve;
-          obj.get_filename_create_modal(result_data);
+          // Apply mime filter and create the modal
+          obj.get_filename_create_modal(obj.filter_mimetypes(mime_regexp_filter, result_data));
         })
         .catch(error => alert(error));
     });

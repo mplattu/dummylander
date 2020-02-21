@@ -21,6 +21,21 @@ class FileStorage {
     $this->last_error = $error;
   }
 
+  private function get_mimetype($filepath) {
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = finfo_file($finfo, $filepath);
+    if (! $mime) {
+      if (file_exists($filepath)) {
+        $mime = "application/octet-stream";
+      }
+      else {
+        $mime = "";
+      }
+    }
+
+    return $mime;
+  }
+
   public function get_file_list() {
     $file_list = Array();
 
@@ -29,7 +44,8 @@ class FileStorage {
         if (!in_array($entry, $this->IGNORE_FILES)) {
           $entry_data = Array(
             'name' => $entry,
-            'size' => filesize($this->data_path.DIRECTORY_SEPARATOR.$entry)
+            'size' => filesize($this->data_path.DIRECTORY_SEPARATOR.$entry),
+            'mimetype' => $this->get_mimetype($this->data_path.DIRECTORY_SEPARATOR.$entry)
           );
           array_push($file_list, $entry_data);
         }

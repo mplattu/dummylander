@@ -1,6 +1,4 @@
-<!-- include:src/ui/lib/BootstrapIconWrapper.js -->
-
-class PageContent {
+class EditContent {
   constructor(page_content_id) {
     this.TEXTAREA_MAX_HEIGHT = 400;
     this.page_data = null;
@@ -9,10 +7,8 @@ class PageContent {
     this.page_data_has_changed = false;
 
     if ($(this.page_content_id).length != 1) {
-      console.error("PageContent: Given "+this.page_content_id+" points to "+$(this.page_content_id).length+" objects");
+      console.error("EditContent: Given "+this.page_content_id+" points to "+$(this.page_content_id).length+" objects");
     }
-
-    console.log("Executed PageContent constructor");
 
     this.fields = {};
 

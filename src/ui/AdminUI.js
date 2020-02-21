@@ -4,11 +4,12 @@ var SERVER_URL="index.php";
 <!-- include:src/ui/lib/ServerConnect.js -->
 
 <!-- include:src/ui/lib/FileSelector.js -->
+<!-- include:src/ui/lib/BootstrapIconWrapper.js -->
 
-<!-- include:src/ui/lib/PageContent.js -->
-<!-- include:src/ui/lib/PreviewContent.js -->
-<!-- include:src/ui/lib/FileContent.js -->
-<!-- include:src/ui/lib/SettingsContent.js -->
+<!-- include:src/ui/pages/EditContent.js -->
+<!-- include:src/ui/pages/PreviewContent.js -->
+<!-- include:src/ui/pages/FileContent.js -->
+<!-- include:src/ui/pages/SettingsContent.js -->
 
 var page_content = null;
 var file_content = null;
@@ -94,7 +95,7 @@ $(document).ready(function () {
   mode_set_login();
   update_header_buttons();
 
-  page_content = new PageContent("#page_content_edit");
+  page_content = new EditContent("#page_content_edit");
   preview_content = new PreviewContent("#page_content_preview");
   file_content = new FileContent("#page_content_file_inner");
   settings_content = new SettingsContent(

@@ -3,7 +3,7 @@ class PreviewContent {
     this.page_content_id = page_content_id;
 
     if ($(this.page_content_id).length != 1) {
-      console.error("PageContent: Given "+this.page_content_id+" points to "+$(this.page_content_id).length+" objects");
+      console.error("PreviewContent: Given "+this.page_content_id+" points to "+$(this.page_content_id).length+" objects");
     }
   }
 

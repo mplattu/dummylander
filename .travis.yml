@@ -1,11 +1,13 @@
 language: php
-dist: trusty
+dist: bionic
 php:
   - '7.2'
   - '7.3'
   - '7.4'
 before_install:
   - sudo apt-get -y install libjson-xs-perl
+  - echo "TRAVIS_PHP_VERSION is $TRAVIS_PHP_VERSION"
+  - if [[ $TRAVIS_PHP_VERSION < '7.3' ]]; then echo "Installing PHPunit from package"; sudo apt-get -y install phpunit php-curl; export PHPUNIT=/usr/bin/phpunit; fi
 before_script:
   - make clean
   - make update-libs

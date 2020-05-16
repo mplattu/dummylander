@@ -1,5 +1,6 @@
 .PHONY: clean update-libs test
 
+PHPUNIT ?= phpunit
 PHPUNIT_PARAMS = --include-path src/backend/lib --verbose -d display_errors=On -d error_reporting=E_ALL
 HTTP_PORT_USED = `lsof -P -i -n | grep "(LISTEN)" | grep -i 8080`
 HTTP_SERVER_PID = `wget -q -O - http://localhost:8080/getpid.php`
@@ -63,15 +64,15 @@ lint:
 
 test-unit:
 	php -l test/backend/unit/global_functions_test.php
-	phpunit $(PHPUNIT_PARAMS) test/backend/unit/global_functions_test.php
+	$(PHPUNIT) $(PHPUNIT_PARAMS) test/backend/unit/global_functions_test.php
 	php -l test/backend/unit/PageContent_test.php
-	phpunit $(PHPUNIT_PARAMS) test/backend/unit/PageContent_test.php
+	$(PHPUNIT) $(PHPUNIT_PARAMS) test/backend/unit/PageContent_test.php
 	php -l test/backend/unit/AdminAuth_test.php
-	phpunit $(PHPUNIT_PARAMS) test/backend/unit/AdminAuth_test.php
+	$(PHPUNIT) $(PHPUNIT_PARAMS) test/backend/unit/AdminAuth_test.php
 	php -l test/backend/unit/AdminAPI_test.php
-	cd dist; TEST_MY_URL=http://localhost:8080/ phpunit $(PHPUNIT_PARAMS) ../test/backend/unit/AdminAPI_test.php
+	cd dist; TEST_MY_URL=http://localhost:8080/ $(PHPUNIT) $(PHPUNIT_PARAMS) ../test/backend/unit/AdminAPI_test.php
 	php -l test/backend/unit/Settings_test.php
-	phpunit $(PHPUNIT_PARAMS) test/backend/unit/Settings_test.php
+	$(PHPUNIT) $(PHPUNIT_PARAMS) test/backend/unit/Settings_test.php
 
 test-integration: build
 	php -l test/backend/int/createfiles_test.php
@@ -92,12 +93,12 @@ test-integration: build
 	if [ "$(HTTP_PORT_USED)" = "" ]; then echo "PHP server did not start"; exit 1; fi
 
 	# Run the tests
-	phpunit $(PHPUNIT_PARAMS) test/backend/int/createfiles_test.php
-	phpunit $(PHPUNIT_PARAMS) test/backend/int/file_list_test.php
-	phpunit $(PHPUNIT_PARAMS) test/backend/int/file_upload_test.php
-	phpunit $(PHPUNIT_PARAMS) test/backend/int/getpage_test.php
-	phpunit $(PHPUNIT_PARAMS) test/backend/int/login_test.php
-	phpunit $(PHPUNIT_PARAMS) test/backend/int/setpage_test.php
+	$(PHPUNIT) $(PHPUNIT_PARAMS) test/backend/int/createfiles_test.php
+	$(PHPUNIT) $(PHPUNIT_PARAMS) test/backend/int/file_list_test.php
+	$(PHPUNIT) $(PHPUNIT_PARAMS) test/backend/int/file_upload_test.php
+	$(PHPUNIT) $(PHPUNIT_PARAMS) test/backend/int/getpage_test.php
+	$(PHPUNIT) $(PHPUNIT_PARAMS) test/backend/int/login_test.php
+	$(PHPUNIT) $(PHPUNIT_PARAMS) test/backend/int/setpage_test.php
 
 	# Cleanup
 	kill -TERM $(HTTP_SERVER_PID)

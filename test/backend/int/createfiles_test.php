@@ -105,7 +105,7 @@ class integration_test extends TestCase {
 
     $this->assertEquals($expected_files, $existing_files, print_r($expected_files, true)."\n".print_r($existing_files, true));
 
-    $this->assertEquals('25788a60e3baef33b7108d53847f8b5e', md5_file($this->path_datadir.'content.json'));
+    $this->assertEquals('6ff6aaaba61de33534f8a4d9bea3b72f', md5_file($this->path_datadir.'content.json'));
     $this->assertEquals('5d8676c52e7f7652e0c9021269683f1b', md5_file($this->path_datadir.'DuckDuckGo-DaxSolo.svg'));
     $this->assertEquals('aeb105f05de6111e112b7744a1d59db2', md5_file($this->path_datadir.'favicon.ico'));
     $this->assertEquals('5cb6872b80a8c3594fd6c60465a8418f', md5_file($this->path_datadir.'sample-document.pdf'));

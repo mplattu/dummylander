@@ -15,14 +15,26 @@ var page_content = null;
 var file_content = null;
 var settings_content = null;
 
+jQuery.fn.button_enable = function () {
+  this.prop("disabled", false);
+  this.css("pointer-events", "auto");
+
+  return this;
+}
+
+jQuery.fn.button_disable = function () {
+  this.prop("disabled", true);
+  this.css("pointer-events", "none");
+}
+
 function mode_set(mode) {
   // Show other than login screen
 
   $("#header_publish").show();
   $("#login_content").hide();
 
-  $(".button_mode").prop("disabled", false);
-  $("#button_"+mode+"_mode").prop("disabled", true);
+  $(".button_mode").button_enable();
+  $("#button_"+mode+"_mode").button_disable();
 
   $(".page_content").hide();
   $("#page_content_"+mode).show();
@@ -68,12 +80,12 @@ function login() {
 
 function update_header_publish() {
   if (page_content.page_data_has_changed) {
-    $("#button_publish").prop("disabled", false);
-    $("#button_cancel").prop("disabled", false);
+    $("#button_publish").button_enable();
+    $("#button_cancel").button_enable();
   }
   else {
-    $("#button_publish").prop("disabled", true);
-    $("#button_cancel").prop("disabled", true);
+    $("#button_publish").button_disable();
+    $("#button_cancel").button_disable();
   }
 }
 
@@ -151,5 +163,14 @@ $(document).ready(function () {
 
   page_content.on_change(function () {
     update_header_publish();
+  });
+
+  // Initialise tooltips
+  $(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+  });
+
+  $('[data-toggle="tooltip"]').click(function () {
+    $('[data-toggle="tooltip"]').tooltip('hide');
   });
 });

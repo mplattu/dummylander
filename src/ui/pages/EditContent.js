@@ -47,11 +47,11 @@ class EditContent {
     var biw = new BootstrapIconWrapper();
 
     var html = [];
-    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="link" data-target="'+target_id+'">'+biw.reply+'</button>');
-    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="image" data-target="'+target_id+'">'+biw.image+'</button>');
-    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="bold" data-target="'+target_id+'">'+biw.type_bold+'</button>');
-    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="italic" data-target="'+target_id+'">'+biw.type_italic+'</button>');
-    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="code" data-target="'+target_id+'">'+biw.code+'</button>');
+    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="link" data-target="'+target_id+'" data-toggle="tooltip" data-placement="bottom" title="Add link">'+biw.reply+'</button>');
+    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="image" data-target="'+target_id+'" data-toggle="tooltip" data-placement="bottom" title="Add image">'+biw.image+'</button>');
+    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="bold" data-target="'+target_id+'" data-toggle="tooltip" data-placement="bottom" title="Bold">'+biw.type_bold+'</button>');
+    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="italic" data-target="'+target_id+'" data-toggle="tooltip" data-placement="bottom" title="Ialic">'+biw.type_italic+'</button>');
+    html.push('<button type="button" class="btn btn-outline-primary btn-sm" data-action="code" data-target="'+target_id+'" data-toggle="tooltip" data-placement="bottom" title="Code">'+biw.code+'</button>');
 
     return html.join("\n");
   }
@@ -98,11 +98,11 @@ class EditContent {
     var name='section_'+n+'_text';
     html.push('<div class="row"><div class="col-12"><label for="'+name+'" class="label_text section_text_label">Text</label>'+this.render_editor_input('text', name)+'</div></div>');
     html.push('<div class="row"><div class="col-12">');
-    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_advanced" data-partnumber="'+n+'">'+biw.chevron_down+'</button>');
-    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_move_down" data-partnumber="'+n+'">'+biw.arrow_down+'</button>');
-    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_move_up" data-partnumber="'+n+'">'+biw.arrow_up+'</button>');
-    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_add_part" data-partnumber="'+n+'">'+biw.plus+'</button>');
-    html.push('<button type="button" class="btn btn-danger btn-sm button_part button_delete_part" data-partnumber="'+n+'">'+biw.trash+'</button>');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_advanced" data-partnumber="'+n+'" data-toggle="tooltip" data-placement="top" title="Edit block properties">'+biw.chevron_down+'</button>');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_move_down" data-partnumber="'+n+'" data-toggle="tooltip" data-placement="top" title="Move down">'+biw.arrow_down+'</button>');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_move_up" data-partnumber="'+n+'" data-toggle="tooltip" data-placement="top" title="Move up">'+biw.arrow_up+'</button>');
+    html.push('<button type="button" class="btn btn-secondary btn-sm button_part button_add_part" data-partnumber="'+n+'" data-toggle="tooltip" data-placement="top" title="Add block below">'+biw.plus+'</button>');
+    html.push('<button type="button" class="btn btn-danger btn-sm button_part button_delete_part" data-partnumber="'+n+'" data-toggle="tooltip" data-placement="top" title="Delete block">'+biw.trash+'</button>');
     html.push('</div></div>');
 
     for (var field in this.fields.section_values) {

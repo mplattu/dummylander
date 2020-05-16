@@ -11,13 +11,12 @@
     <!-- include:src/ui/ext/bootstrap-colorpicker.min.css -->
 
     #message_loginfailed { display: none; }
-    .navbar-nav-center { margin: auto; }
-    .navbar-nav-center .button_single { margin-left: 5px; margin-right: 5px; margin-top: 2px; }
 
     .label_text { margin-top: 20px; font-weight: bold; }
     .button_part {margin-top: 10px; margin-bottom: 20px; margin-right: 10px; font-size: 120%; }
 
     .button_header {font-size: 120%; }
+    .navbar_flexbox { width: 100%; }
 
     #button_file_upload {cursor:pointer;}
 
@@ -39,15 +38,25 @@
 <body>
   <header id="header_publish">
     <nav id="header_publish_inner" class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-      <div class="navbar-nav navbar-nav-center">
-        <div class="btn-group button_single" role="group">
+      <div class="d-flex justify-content-center navbar_flexbox">
+        <span class="d-inline-block pr-1 navbar_tooltip" data-toggle="tooltip" data-placement="bottom" title="Edit mode">
           <button type="button" id="button_edit_mode" class="button_header button_mode btn btn-primary"></button>
+        </span>
+        <span class="d-inline-block pr-1 navbar_tooltip" data-toggle="tooltip" data-placement="bottom" title="Preview mode">
           <button type="button" id="button_preview_mode" class="button_header button_mode btn btn-primary"></button>
+        </span>
+        <span class="d-inline-block pr-3 navbar_tooltip" data-toggle="tooltip" data-placement="bottom" title="File manager">
           <button type="button" id="button_file_mode" class="button_header button_mode btn btn-primary"></button>
-        </div>
-        <button type="button" id="button_publish" class="button_header button_single btn btn-primary"></button>
-        <button type="button" id="button_cancel" class="button_header button_single btn btn-primary"></button>
-        <button type="button" id="button_settings" class="button_header button_single btn btn-primary"></button>
+        </span>
+        <span class="d-inline-block pr-1 navbar_tooltip" data-toggle="tooltip" data-placement="bottom" title="Publish changes">
+          <button type="button" id="button_publish" class="button_header button_single btn btn-primary"></button>
+        </span>
+        <span class="d-inline-block pr-3 navbar_tooltip" data-toggle="tooltip" data-placement="bottom" title="Trash changes">
+          <button type="button" id="button_cancel" class="button_header button_single btn btn-primary"></button>
+        </span>
+        <span class="d-inline-block navbar_tooltip" data-toggle="tooltip" data-placement="bottom" title="Change password">
+          <button type="button" id="button_settings" class="button_header button_single btn btn-primary"></button>
+        </span>
       </div>
     </nav>
   </header>

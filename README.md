@@ -6,7 +6,7 @@ Superdupersimple landing page administration tool.
 
 ## HOWTO
 
- 1. Copy `dist/index.php` to your PHP-enabled web server. Dummylander has been tested with PHP versions 7.2, 7.3 and 7.4.
+ 1. Copy [`dist/index.php`](https://raw.githubusercontent.com/mplattu/dummylander/master/dist/index.php) to your PHP-enabled web server. Dummylander has been tested with PHP versions 7.2, 7.3 and 7.4.
  1. Browse you homepage by opening your URL (e.g. `http(s)://yourdomain.com`) with a browser. On the first
     page load it creates a password for the administration page. Please save this random string as you
     need it to update the page content. If you did not get the password please open an
@@ -21,6 +21,7 @@ Superdupersimple landing page administration tool.
 
  * The most essential page properties (title, description, keywords, og:image, custom CSS) can be edited.
  * The most essential page part properties (MD-formatted text, images, fonts, font colors) can be edited.
+ * Buttons to add common MD-syntax: links, images etc.
  * You can add, remove and move page parts.
  * You can see page preview before publishing.
  * You can upload and remove files.
@@ -29,7 +30,6 @@ Superdupersimple landing page administration tool.
 ## This does not work yet
 
  * There must be a tons of page or part attributes missing.
- * Easy way to add images and links to files.
 
 ## Authentication
 
